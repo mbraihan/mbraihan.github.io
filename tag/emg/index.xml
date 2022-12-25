@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>EMG | μβ Raihan</title>
+    <link>https://mbraihan.github.io/tag/emg/</link>
+      <atom:link href="https://mbraihan.github.io/tag/emg/index.xml" rel="self" type="application/rss+xml" />
+    <description>EMG</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><lastBuildDate>Sun, 25 Dec 2022 15:56:48 +0600</lastBuildDate>
+    <image>
+      <url>https://mbraihan.github.io/media/icon_huee8f7e8f3e9fbb713ced500ce857c21e_103142_512x512_fill_lanczos_center_3.png</url>
+      <title>EMG</title>
+      <link>https://mbraihan.github.io/tag/emg/</link>
+    </image>
+    
+    <item>
+      <title>Effect of EMG artifacts on video category classification from EEG</title>
+      <link>https://mbraihan.github.io/publication/conference-iciev/</link>
+      <pubDate>Sun, 25 Dec 2022 15:56:48 +0600</pubDate>
+      <guid>https://mbraihan.github.io/publication/conference-iciev/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

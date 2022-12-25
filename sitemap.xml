@@ -14,6 +14,46 @@
     <lastmod>2030-06-01T13:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
   </url><url>
+    <loc>https://mbraihan.github.io/publication-type/1/</loc>
+    <lastmod>2022-12-25T15:56:48+06:00</lastmod>
+    <changefreq>weekly</changefreq>
+  </url><url>
+    <loc>https://mbraihan.github.io/tag/bci/</loc>
+    <lastmod>2022-12-25T15:56:48+06:00</lastmod>
+    <changefreq>weekly</changefreq>
+  </url><url>
+    <loc>https://mbraihan.github.io/tag/eeg/</loc>
+    <lastmod>2022-12-25T15:56:48+06:00</lastmod>
+    <changefreq>weekly</changefreq>
+  </url><url>
+    <loc>https://mbraihan.github.io/publication/conference-iciev/</loc>
+    <lastmod>2022-12-25T15:56:48+06:00</lastmod>
+    <changefreq>weekly</changefreq>
+  </url><url>
+    <loc>https://mbraihan.github.io/tag/emg/</loc>
+    <lastmod>2022-12-25T15:56:48+06:00</lastmod>
+    <changefreq>weekly</changefreq>
+  </url><url>
+    <loc>https://mbraihan.github.io/tag/hci/</loc>
+    <lastmod>2022-12-25T15:56:48+06:00</lastmod>
+    <changefreq>weekly</changefreq>
+  </url><url>
+    <loc>https://mbraihan.github.io/tag/multimedia-classification/</loc>
+    <lastmod>2022-12-25T15:56:48+06:00</lastmod>
+    <changefreq>weekly</changefreq>
+  </url><url>
+    <loc>https://mbraihan.github.io/publication_types/</loc>
+    <lastmod>2022-12-25T15:56:48+06:00</lastmod>
+    <changefreq>weekly</changefreq>
+  </url><url>
+    <loc>https://mbraihan.github.io/publication/</loc>
+    <lastmod>2022-12-25T15:56:48+06:00</lastmod>
+    <changefreq>weekly</changefreq>
+  </url><url>
+    <loc>https://mbraihan.github.io/tags/</loc>
+    <lastmod>2022-12-25T15:56:48+06:00</lastmod>
+    <changefreq>weekly</changefreq>
+  </url><url>
     <loc>https://mbraihan.github.io/tag/academic/</loc>
     <lastmod>2020-12-13T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -27,10 +67,6 @@
     <changefreq>weekly</changefreq>
   </url><url>
     <loc>https://mbraihan.github.io/post/</loc>
-    <lastmod>2020-12-13T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-  </url><url>
-    <loc>https://mbraihan.github.io/tags/</loc>
     <lastmod>2020-12-13T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
   </url><url>
@@ -74,10 +110,6 @@
     <lastmod>2020-08-06T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
   </url><url>
-    <loc>https://mbraihan.github.io/tag/eeg/</loc>
-    <lastmod>2020-08-06T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-  </url><url>
     <loc>https://mbraihan.github.io/tag/electro-encephalogram/</loc>
     <lastmod>2020-08-06T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -95,14 +127,6 @@
     <changefreq>weekly</changefreq>
   </url><url>
     <loc>https://mbraihan.github.io/tag/gru/</loc>
-    <lastmod>2020-08-06T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-  </url><url>
-    <loc>https://mbraihan.github.io/publication_types/</loc>
-    <lastmod>2020-08-06T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-  </url><url>
-    <loc>https://mbraihan.github.io/publication/</loc>
     <lastmod>2020-08-06T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
   </url><url>
@@ -146,14 +170,6 @@
     <lastmod>2019-02-05T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
   </url><url>
-    <loc>https://mbraihan.github.io/publication-type/1/</loc>
-    <lastmod>2018-08-24T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-  </url><url>
-    <loc>https://mbraihan.github.io/tag/bci/</loc>
-    <lastmod>2018-08-24T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-  </url><url>
     <loc>https://mbraihan.github.io/tag/brain-computer-interface/</loc>
     <lastmod>2018-08-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -195,10 +211,6 @@
     <changefreq>weekly</changefreq>
   </url><url>
     <loc>https://mbraihan.github.io/publication/book-chapter/</loc>
-    <lastmod>2018-05-01T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-  </url><url>
-    <loc>https://mbraihan.github.io/tag/hci/</loc>
     <lastmod>2018-05-01T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
   </url><url>
