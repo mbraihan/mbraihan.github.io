@@ -163,6 +163,14 @@ Figure 1: A fancy pie chart.
     </item>
     
     <item>
+      <title>Use of spontaneous blinking for application in human authentication</title>
+      <link>https://mbraihan.github.io/publication/journal-neuro-marketing/</link>
+      <pubDate>Thu, 06 Aug 2020 00:00:00 +0000</pubDate>
+      <guid>https://mbraihan.github.io/publication/journal-neuro-marketing/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Writing technical content in Markdown</title>
       <link>https://mbraihan.github.io/post/writing-technical-content/</link>
       <pubDate>Fri, 12 Jul 2019 00:00:00 +0000</pubDate>
@@ -266,7 +274,7 @@ data.head()
 
 
 
-&lt;div id=&#34;chart-163527849&#34; class=&#34;chart&#34;&gt;&lt;/div&gt;
+&lt;div id=&#34;chart-569821743&#34; class=&#34;chart&#34;&gt;&lt;/div&gt;
 &lt;script&gt;
   (function() {
     let a = setInterval( function() {
@@ -276,7 +284,7 @@ data.head()
       clearInterval( a );
 
       Plotly.d3.json(&#34;./line-chart.json&#34;, function(chart) {
-        Plotly.plot(&#39;chart-163527849&#39;, chart.data, chart.layout, {responsive: true});
+        Plotly.plot(&#39;chart-569821743&#39;, chart.data, chart.layout, {responsive: true});
       });
     }, 500 );
   })();
