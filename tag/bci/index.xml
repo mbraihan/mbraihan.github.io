@@ -5,12 +5,20 @@
     <link>https://mbraihan.github.io/tag/bci/</link>
       <atom:link href="https://mbraihan.github.io/tag/bci/index.xml" rel="self" type="application/rss+xml" />
     <description>BCI</description>
-    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><lastBuildDate>Tue, 01 May 2018 00:00:00 +0000</lastBuildDate>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><lastBuildDate>Fri, 24 Aug 2018 00:00:00 +0000</lastBuildDate>
     <image>
       <url>https://mbraihan.github.io/media/icon_huee8f7e8f3e9fbb713ced500ce857c21e_103142_512x512_fill_lanczos_center_3.png</url>
       <title>BCI</title>
       <link>https://mbraihan.github.io/tag/bci/</link>
     </image>
+    
+    <item>
+      <title>Effect of Artefact Removal Techniques on EEG Signals for Video Category Classification</title>
+      <link>https://mbraihan.github.io/publication/conference-icpr/</link>
+      <pubDate>Fri, 24 Aug 2018 00:00:00 +0000</pubDate>
+      <guid>https://mbraihan.github.io/publication/conference-icpr/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Computational Intelligence for Pattern Recognition in EEG Signals</title>
