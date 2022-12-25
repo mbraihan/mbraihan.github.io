@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>humanoid vision | μβ Raihan</title>
+    <link>https://mbraihan.github.io/tag/humanoid-vision/</link>
+      <atom:link href="https://mbraihan.github.io/tag/humanoid-vision/index.xml" rel="self" type="application/rss+xml" />
+    <description>humanoid vision</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><lastBuildDate>Mon, 04 Dec 2017 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>https://mbraihan.github.io/media/icon_huee8f7e8f3e9fbb713ced500ce857c21e_103142_512x512_fill_lanczos_center_3.png</url>
+      <title>humanoid vision</title>
+      <link>https://mbraihan.github.io/tag/humanoid-vision/</link>
+    </image>
+    
+    <item>
+      <title>Implementation of Low Cost Stereo Humanoid Adaptive Vision for 3D Positioning and Distance Measurement for Robotics Application with Self-Calibration</title>
+      <link>https://mbraihan.github.io/publication/conference-ams/</link>
+      <pubDate>Mon, 04 Dec 2017 00:00:00 +0000</pubDate>
+      <guid>https://mbraihan.github.io/publication/conference-ams/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
