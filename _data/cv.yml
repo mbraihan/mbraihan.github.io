@@ -2,96 +2,139 @@
   type: map
   contents:
     - name: Full Name
-      value: Albert Einstein
-    - name: Date of Birth
-      value: 14th March 1879
-    - name: Languages
-      value: English, German
+      value: Mohammad Raihanul Bashar
+    - name: Email
+      value: mohammadraihanul.bashar@mail.concordia.ca
+    - name: LinkedIn
+      value: www.linkedin.com/in/rbfahim/
+    - name: GitHub
+      value: github.com/mbraihan/
+    - name: Homepage
+      value: mbraihan.github.io
+
+- title: Research Interests
+  type: list
+  contents:
+    - Human-Computer Interaction
+    - eXtended Reality (XR)
+    - 3D User Interface
+    - Human-Centered AI
+    - Metaverse
+    - Cognitive Science
+    - Computer Vision
 
 - title: Education
   type: time_table
   contents:
-    - title: PhD
-      institution: University of Zurich, Zurich, Switzerland
-      year: 1905
+    - title: Doctor of Philosophy in Computer Science
+      institution: EXiT Lab, Concordia University
+      year: Sept 2023 - Present
       description:
-        - Description 1.
-        - Description 2.
-        - title: Description 3.
-          contents:
-            - Sub-description 1.
-            - Sub-description 2.
-    - title: Federal teaching diploma
-      institution: Eidgenössische Technische Hochschule, Zurich, Switzerland
-      year: 1900
+        - MSc to PhD (Fast-track)
+        - Major: HCI & Extended Reality
+        - Supervisor: Dr. Anil Ufuk Batmaz
+    - title: Bachelor of Science in Computer Science
+      institution: Independent University, Bangladesh
+      year: Jan 2013 - Aug 2017
       description:
-        - Description 1.
-        - Description 2.
+        - Thesis: Effect of EMG Artifacts on Video Category Classification from EEG
+        - Supervisor: Prof. M. Ashraful Amin
 
-- title: Experience
-  type: time_table
-  contents:
-    - title: Professor of Theoretical Physics
-      institution: Institute for Advanced Study, Princeton University
-      year: 1933 - 1955
-      description:
-        - Description 1.
-        - Description 2.
-        - title: Description 3.
-          contents:
-            - Sub-description 1.
-            - Sub-description 2.
-    - title: Visiting Professor
-      institution: California Institute of Technology, Pasadena, California, US
-      year: 1933
-      description:
-        - Description 1.
-        - Description 2.
-
-    - title: Director
-      institution: Kaiser Wilhelm Institute for Physics, Berlin, Germany.
-      year: 1917-1933
-
-    - title: Professor of Theoretical Physics
-      institution: Karl-Ferdinand University, Prague, Czechoslovakia
-      year: 1911 - 1917
-      description:
-
-    - title: Associate Professor of Theoretical Physics
-      institution: University of Zurich, Zurich, Switzerland
-      year: 1909 - 1911
-
-- title: Open Source Projects
-  type: time_table
-  contents:
-    - title: <a href="https://github.com/alshedivat/al-folio">al-folio</a>
-      year: 2015-now
-      description: A beautiful, simple, clean, and responsive Jekyll theme for academics.
-
-- title: Honors and Awards
-  type: time_table
-  contents:
-    - year: 1921
-      items:
-        - Nobel Prize in Physics
-        - Matteucci Medal
-    - year: 2029
-      items:
-        - Max Planck Medal
-
-- title: Academic Interests
+- title: Publications
   type: nested_list
   contents:
-    - title: Topic 1.
+    - title: Book Chapters
       items:
-        - Description 1.
-        - Description 2.
-    - title: Topic 2.
+        - Computational Intelligence for Pattern Recognition in EEG Signals, Springer-Verlag, November 2017
+    - title: Journals
       items:
-        - Description 1.
-        - Description 2.
+        - EEG-Based Preference Classification for Neuromarketing Application, Computational Intelligence and Neuroscience, 2023
+        - Use of spontaneous blinking for application in human authentication, Engineering Science and Technology, Elsevier, 2020
+    - title: Conferences
+      items:
+        - Virtual Task Environments Factors Explored in 3D Selection Studies, ACM GI, 2024
+        - Subtask-Based Virtual Hand Visualization Method for Enhanced User Accuracy, IEEE VR 2024
+        - Effect of Artefact Removal Techniques on EEG Signals, 24th ICPR
+        - Effect of EMG Artifacts on Video Category Classification from EEG, 6th ICIEV 2017
+        - Video Category Classification Using Wireless EEG, 10th BI 2017
+        - 2D Surface Mapping for Mine Detection via Wireless Networking, 2nd ICCRE 2017
+        - Implementation of Low Cost Stereo Humanoid Adaptive Vision for 3D positioning and Distance Measurement for Robotics Application with Self-calibration, 11th AMS 2017
 
-- title: Other Interests
+- title: Research Experience
+  type: time_table
+  contents:
+    - title: Graduate Research Assistant
+      institution: EXiT Lab, Concordia University
+      year: Sept 2023 - Present
+      description:
+        - Research on interaction techniques for immersive technologies applications.
+        - Design and implement user studies to evaluate usability and transferability of interaction techniques across VR/AR environments.
+        - Supervisor: Dr. Anil Ufuk Batmaz
+    - title: Research Assistant
+      institution: AGenCy Lab, IUB
+      year: July 2019 - Aug 2021
+      description:
+        - National Medicine Image Database Creation & Recognition
+    - title: Research Assistant
+      institution: Computer Vision & Cybernetics, IUB
+      year: July 2018 - Jun 2019
+      description:
+        - Bangladeshi License Plate Recognition
+
+- title: Work Experience
+  type: time_table
+  contents:
+    - title: Mitacs Accelerate Internship
+      institution: SonoNurse Inc.
+      year: Sept 2024 - Feb 2025
+    - title: Teaching Assistant
+      institution: Gina Cody School of Engineering and Computer Science
+      year: Sept 2023 - Present
+      description:
+        - Assisted in Unity Game Development and HCI courses.
+    - title: Senior Engineer, MLOps
+      institution: Quantigo AI
+      year: May 2022 - Aug 2023
+      description:
+        - Led two web applications and provided ML-assisted annotation services.
+    - title: Senior AI Engineer
+      institution: OPUS Technology Limited
+      year: July 2021 - May 2022
+      description:
+        - Trained an AI agent for CS:GO comparable to novice human level and supervised the development of an e-sports game prediction system.
+
+- title: Awards
+  type: time_table
+  contents:
+    - year: 2024
+      items:
+        - FRS Scholarship for PhD, CAD 22,000/year
+        - Concordia International Tuition Award, CAD 44,893
+    - year: 2023
+      items:
+        - FRS Scholarship for MSc, CAD 24,000/year
+        - Concordia Merit Scholarship, CAD 5,000
+    - year: 2016
+      items:
+        - SECS Award
+        - 1st Runner-Up NASA Space Apps Challenge
+
+- title: Skills
   type: list
   contents:
-    - <u>Hobbies:</u> Hobby 1, Hobby 2, etc.
+    - Programming: Python, C++, C#, Java, SQL, Julia
+    - Technologies: AWS, Docker, Kafka, Terraform, Git, TensorRT, LaTeX
+    - Databases: MongoDB, PostgreSQL, MySQL
+    - Frameworks: TensorFlow, PyTorch, Keras, OpenCV, Scikit-Learn, Unity, Unreal
+
+- title: Interests
+  type: list
+  contents:
+    - Astrophysics
+    - Philosophy
+    - Psychology
+    - Anthropology
+    - Video Games
+    - Photography
+    - Cycling
+    - Hiking

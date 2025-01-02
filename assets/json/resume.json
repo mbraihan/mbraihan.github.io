@@ -1,157 +1,202 @@
 {
   "basics": {
-    "name": "Albert Einstein",
-    "label": "Scientist",
-    "image": "",
-    "email": "albert@einstein.de",
-    "phone": "(912) 123-4567",
-    "url": "https://alshedivat.github.io/al-folio/",
-    "summary": "A German-born theoretical physicist, widely ranked among the greatest and most influential scientists of all time",
+    "name": "Mohammad Raihanul Bashar",
+    "label": "Graduate Researcher",
+    "email": "mohammadraihanul.bashar@mail.concordia.ca",
+    "url": "https://mbraihan.github.io",
+    "summary": "Graduate researcher specializing in Human-Computer Interaction (HCI), eXtended Reality (XR), and 3D User Interfaces.",
     "location": {
-      "address": "2712 Broadway St",
-      "postalCode": "CA 94115",
-      "city": "San Francisco",
-      "countryCode": "US",
-      "region": "California"
+      "address": "1455 Blvd. De Maisonneuve Ouest",
+      "postalCode": "H3G 1M8",
+      "city": "Montreal",
+      "countryCode": "CA",
+      "region": "Quebec"
     },
     "profiles": [
       {
-        "network": "Twitter",
-        "username": "AlbertEinstein",
-        "url": "https://twitter.com/AlbertEinstein"
+        "network": "LinkedIn",
+        "username": "rbfahim",
+        "url": "https://www.linkedin.com/in/rbfahim/"
+      },
+      {
+        "network": "GitHub",
+        "username": "mbraihan",
+        "url": "https://github.com/mbraihan/"
       }
     ]
   },
   "work": [
     {
-      "name": "Institute for Advanced Study, Princeton University",
-      "position": "Professor of Theoretical Physics",
-      "url": "https://example.com",
-      "startDate": "1933-01-01",
-      "endDate": "1955-01-01",
-      "summary": "Teaching at Palmer Physical Laboratory (now 302 Frist Campus Center). While not a professor at Princeton, I associated with the physics professors and continued to give lectures on campus.",
-      "highlights": ["Relativity"]
-    }
-  ],
-  "volunteer": [
+      "organization": "SonoNurse Inc.",
+      "location": "Montreal, QC",
+      "position": "Mitacs Accelerate Intern",
+      "url": "https://centech.co/en/startups/sononurse-inc/",
+      "startDate": "2024-09",
+      "endDate": "2025-02",
+      "summary": "Research and development internship focused on innovative technologies in healthcare.",
+      "highlights": ["Healthcare"]
+    },
     {
-      "organization": "People's Climate March",
-      "location": "Zurich, Switzerland",
-      "position": "Lead Organizer",
-      "url": "https://example.com",
-      "startDate": "2014-04-01",
-      "endDate": "2015-07-01",
-      "summary": "Lead organizer for the New York City branch of the People's Climate March, the largest climate march in history.",
-      "highlights": ["Awarded 'Climate Hero' award by Greenpeace for my efforts organizing the march.", "Men of the year 2014 by Time magazine"]
+      "institution": "Gina Cody School of Engineering and Computer Science",
+      "location": "Montreal, QC",
+      "position": "Teaching Assistant",
+      "url": "https://www.concordia.ca/ginacody.html",
+      "startDate": "2023-09",
+      "endDate": "Present",
+      "summary": "Supported game development and HCI courses with hands-on demonstrations and evaluations",
+      "highlights": ["Teaching"]
+    },
+    {
+      "organization": "Quantigo AI",
+      "location": "Dhaka, BD",
+      "position": "Senior Engineer, MLOps",
+      "url": "https://quantigo.ai",
+      "startDate": "2022-05",
+      "endDate": "2023-08",
+      "summary": "Led web applications and ML-assisted annotation services, including the development of in-house platforms",
+      "highlights": ["MLOps", "Leadership"]
+    },
+    {
+      "organization": "OPUS Technology Limited",
+      "location": "Dhaka, BD",
+      "position": "Senior AI Engineer",
+      "startDate": "2021-07",
+      "endDate": "2022-05",
+      "summary": "Trained AI agents, developed esports prediction systems, and supervised ML engineering projects.",
+      "highlights": ["Reinforcement Learning", "Leadership"]
     }
   ],
   "education": [
     {
-      "institution": "University of Zurich, Zurich, Switzerland",
-      "location": "Zurich, Switzerland",
-      "url": "https://www.uzh.ch/",
-      "area": "Software Development",
+      "institution": "Concordia University",
+      "location": "Montreal, QC",
+      "url": "https://www.concordia.ca/ginacody.html",
+      "area": "Human-Computer Interaction",
       "studyType": "PhD",
-      "startDate": "1905-01-01",
-      "endDate": "1905-01-01",
-      "score": "10",
-      "courses": ["Theory of Relativity"]
-    }
-  ],
-  "awards": [
-    {
-      "title": "Nobel Prize in Physics",
-      "date": "1921-11-01",
-      "awarder": "Royal Swedish Academy of Sciences",
-      "url": "https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/",
-      "summary": "The Nobel Prizes are five separate prizes that, according to Alfred Nobel's will of 1895, are awarded to 'those who, during the preceding year, have conferred the greatest benefit to humankind.'"
-    }
-  ],
-  "certificates": [
-    {
-      "name": "Machine Learning",
-      "date": "2018-01-01",
-      "issuer": "Stanford University",
-      "url": "https://example.com",
-      "icon": "fa-solid fa-location-dot"
+      "startDate": "2023-09",
+      "endDate": "Present",
+      "summary": "Fast-tracked MSc to PhD focusing on HCI and Extended Reality under Dr. Anil Ufuk Batmaz."
     },
     {
-      "name": "Quantum Computing",
-      "date": "2018-01-01",
-      "issuer": "Stanford University",
-      "url": "https://example.com",
-      "icon": "fa-solid fa-tag"
-    },
-    {
-      "name": "Quantum Information",
-      "date": "2018-01-01",
-      "issuer": "Stanford University",
-      "url": "https://example.com",
-      "icon": "fa-solid fa-envelope"
-    },
-    {
-      "name": "Quantum Cryptography",
-      "date": "2018-01-01",
-      "issuer": "Stanford University",
-      "url": "https://example.com",
-      "icon": "fa-solid fa-hashtag"
-    },
-    {
-      "name": "Quantum Communication",
-      "date": "2018-01-01",
-      "issuer": "Stanford University",
-      "url": "https://example.com",
-      "icon": "fa-solid fa-calendar"
-    },
-    {
-      "name": "Quantum Teleportation",
-      "date": "2018-01-01",
-      "issuer": "Stanford University",
-      "url": "https://example.com",
-      "icon": "fa-solid fa-clipboard-check"
+      "institution": "Independent University, Bangladesh",
+      "location": "Dhaka, BD",
+      "url": "https://www.iub.edu.bd",
+      "area": "Computer Science",
+      "studyType": "BSc",
+      "startDate": "2013-01",
+      "endDate": "2017-08",
+      "summary": "Completed with a thesis on EEG signal processing for video category classification."
     }
   ],
   "publications": [
     {
-      "name": "Zur Elektrody/namik bewegter Körper",
-      "publisher": "Annalen der Physik",
-      "releaseDate": "1905-06-30",
-      "url": "https://en.wikisource.org/wiki/Translation:On_the_Electrodynamics_of_Moving_Bodies",
-      "summary": "It concerned an interpretation of the Michelson–Morley experiment and the properties of light and time. Special relativity incorporates the principle that the speed of light is the same for all inertial observers regardless of the state of motion of the source."
+      "name": "Virtual Task Environments Factors Explored in 3D Selection Studies",
+      "publisher": "ACM",
+      "releaseDate": "2024-09-21",
+      "url": "https://dl.acm.org/doi/abs/10.1145/3670947.3670983",
+      "summary": "This study analyzes 909 HCI papers from major repositories to classify virtual task environments in 3D selection methods, offering insights into user studies and advancing virtual interaction understanding."
     },
     {
-      "name": "Über einen die Erzeugung und Verwandlung des Lichtes betreffenden heuristischen Gesichtspunkt",
-      "publisher": "Annalen der Physik",
-      "releaseDate": "1905-03-18",
-      "url": "https://de.wikisource.org/wiki/Über_einen_die_Erzeugung_und_Verwandlung_des_Lichtes_betreffenden_heuristischen_Gesichtspunkt",
-      "summary": "In the second paper, he applied the quantum theory to light to explain the photoelectric effect. In particular, he used the idea of light quanta (photons) to explain experimental results, but stressed the importance of the experimental results. The importance of his work on the photoelectric effect earned him the Nobel Prize in Physics in 1921."
+      "name": "Subtask-Based Virtual Hand Visualization Method for Enhanced User Accuracy in Virtual Reality Environments",
+      "publisher": "IEEE",
+      "releaseDate": "2024-05-29",
+      "url": "https://ieeexplore.ieee.org/document/10536569",
+      "summary": "The paper presents a subtask-based virtual hand visualization method designed to improve user accuracy and interaction performance in virtual reality environments."
     },
     {
-      "name": "Die Grundlage der allgemeinen Relativitätstheorie",
-      "publisher": "Annalen der Physik",
-      "releaseDate": "1916-03-20",
-      "url": "https://de.wikisource.org/wiki/Die_Grundlage_der_allgemeinen_Relativitätstheorie",
-      "summary": "The publication of the theory of general relativity made him internationally famous. He was professor of physics at the universities of Zurich (1909–1911) and Prague (1911–1912), before he returned to ETH Zurich (1912–1914)."
+      "name": "EEG-Based Preference Classification for Neuromarketing Application",
+      "publisher": "Computational Intelligence and Neuroscience",
+      "releaseDate": "2023-03-01",
+      "url": "https://onlinelibrary.wiley.com/doi/10.1155/2023/4994751",
+      "summary": "The paper explores the use of EEG signals to classify user preferences for neuromarketing applications, aiming to enhance consumer behavior insights through brain-computer interface technologies."
+    },
+    {
+      "name": "Use of spontaneous blinking for application in human authentication",
+      "publisher": "Engineering Science and Technology",
+      "releaseDate": "2020-08-01",
+      "url": "https://www.sciencedirect.com/science/article/pii/S221509861931403X#:~:text=Each%20instance%20of%20a%20blinking,extracted%20features%20from%20each%20signal.",
+      "summary": "The paper investigates the potential of spontaneous blinking patterns as a biometric feature for reliable human authentication."
+    },
+    {
+      "name": "Effect of Artefact Removal Techniques on EEG Signals for Video Category Classification",
+      "publisher": "IEEE",
+      "releaseDate": "2018-11-29",
+      "url": "https://ieeexplore.ieee.org/document/8545416",
+      "summary": "The study evaluates how different artifact removal techniques, specifically Stationary Wavelet Transform (SWT) and an extended SWT technique (SWTSD), impact the accuracy of EEG-based video category classification, finding that SWTSD can improve classification accuracy by up to 7.2%."
+    },
+    {
+      "name": "Computational Intelligence for Pattern Recognition in EEG Signals",
+      "publisher": "Springer",
+      "releaseDate": "2018-05-01",
+      "url": "https://link.springer.com/chapter/10.1007/978-3-319-89629-8_11",
+      "summary": "The chapter discusses how computational intelligence techniques enhance pattern recognition in EEG signals, improving applications in medicine, psychology, and rehabilitation."
+    },
+    {
+      "name": "Effect of EMG artifacts on video category classification from EEG",
+      "publisher": "IEEE",
+      "releaseDate": "2018-04-19",
+      "url": "https://ieeexplore.ieee.org/document/8338603",
+      "summary": "The study examines the impact of EMG artifacts on EEG signals used for video category classification, highlighting that the presence of EMG artifacts can significantly affect classification performance."
+    },
+    {
+      "name": "Implementation of Low Cost Stereo Humanoid Adaptive Vision for 3D Positioning and Distance Measurement for Robotics Application with Self-Calibration",
+      "publisher": "IEEE",
+      "releaseDate": "2018-08-02",
+      "url": "https://ieeexplore.ieee.org/document/8424311",
+      "summary": "The paper presents a low-cost stereo vision system for humanoid robots, enabling 3D positioning and distance measurement with self-calibration capabilities."
+    },
+    {
+      "name": "Video Category Classification Using Wireless EEG",
+      "publisher": "Springer",
+      "releaseDate": "2017-11-04",
+      "url": "https://link.springer.com/chapter/10.1007/978-3-319-70772-3_4",
+      "summary": "The study demonstrates that EEG signals recorded via a wireless headset can be analyzed to classify the genre of videos being watched, achieving up to 80% accuracy, with the right frontal lobe (AF8 channel) providing the most predictive data."
+    },
+    {
+      "name": "2D Surface Mapping for Mine Detection via Wireless Networking",
+      "publisher": "IEEE",
+      "releaseDate": "2017-05-29",
+      "url": "https://ieeexplore.ieee.org/abstract/document/7935066",
+      "summary": "The paper presents a prototype mapping robot system, MinerBot, designed to create real-time 2D surface maps of areas, aiding in mine detection."
+    }
+  ],
+  "awards": [
+    {
+      "title": "FRS Scholarship for PhD",
+      "date": "2024",
+      "awarder": "Concordia University",
+      "summary": "CAD 22,000/year research funding for PhD students."
+    },
+    {
+      "title": "Concordia International Tuition Award of Excellence",
+      "date": "2024",
+      "awarder": "Concordia University",
+      "summary": "CAD 44,893 tuition scholarship for international students."
+    },
+    {
+      "title": "SECS Award",
+      "date": "2016",
+      "awarder": "Independent University, Bangladesh",
+      "summary": "Recognized for outstanding academic achievements."
     }
   ],
   "skills": [
     {
-      "name": "Physics",
-      "level": "Master",
-      "icon": "fa-solid fa-hashtag",
-      "keywords": [
-        "Quantum Mechanics",
-        "Quantum Computing",
-        "Quantum Information",
-        "Quantum Cryptography",
-        "Quantum Communication",
-        "Quantum Teleportation"
-      ]
+      "name": "Programming Languages",
+      "keywords": ["Python", "C++", "C#", "Java", "SQL", "Julia"]
+    },
+    {
+      "name": "Technologies",
+      "keywords": ["AWS", "Docker", "Kafka", "Terraform", "Git", "TensorRT", "LaTeX"]
+    },
+    {
+      "name": "Frameworks",
+      "keywords": ["PyTorch", "Keras", "OpenCV", "Unity", "Unreal"]
     }
   ],
   "languages": [
     {
-      "language": "German",
+      "language": "Bengali",
       "fluency": "Native speaker",
       "icon": ""
     },
@@ -163,38 +208,19 @@
   ],
   "interests": [
     {
-      "name": "Physics",
-      "icon": "fa-solid fa-tag",
-      "keywords": [
-        "Quantum Mechanics",
-        "Quantum Computing",
-        "Quantum Information",
-        "Quantum Cryptography",
-        "Quantum Communication",
-        "Quantum Teleportation"
-      ]
-    }
-  ],
-  "references": [
-    {
-      "name": "Professor John Doe",
-      "icon": "fa-solid fa-laptop",
-      "reference": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam condimentum, diam quis convallis euismod, arcu mi ullamcorper lorem, a vestibulum nunc magna at sem. Sed in risus ac felis varius blandit. D"
+      "name": "Astrophysics"
     },
     {
-      "name": "Professor John Doe",
-      "icon": "fa-solid fa-thumbtack",
-      "reference": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam condimentum, diam quis convallis euismod, arcu mi ullamcorper lorem, a vestibulum nunc magna at sem. Sed in risus ac felis varius blandit. D"
-    }
-  ],
-  "projects": [
+      "name": "Philosophy"
+    },
     {
-      "name": "Quantum Computing",
-      "summary": "Quantum computing is the use of quantum-mechanical phenomena such as superposition and entanglement to perform computation. Computers that perform quantum computations are known as quantum computers.",
-      "highlights": ["Quantum Teleportation", "Quantum Cryptography"],
-      "startDate": "2018-01-01",
-      "endDate": "2018-01-01",
-      "url": "https://example.com"
+      "name": "Psychology"
+    },
+    {
+      "name": "Video Games"
+    },
+    {
+      "name": "Cycling"
     }
   ]
 }
