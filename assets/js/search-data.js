@@ -492,6 +492,13 @@ ninja.data = [{
           window.open("https://www.semanticscholar.org/author/2303687304", "_blank");
         },
       },{
+        id: 'social-x',
+        title: 'X',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://twitter.com/rbfahim", "_blank");
+        },
+      },{
       id: 'light-theme',
       title: 'Change theme to light',
       description: 'Change the theme of the site to Light',
