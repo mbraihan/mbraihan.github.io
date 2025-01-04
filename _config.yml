@@ -10,11 +10,12 @@ last_name: Bashar
 # contact_note: >
 #   You can even add a little note about which of these is the best way to reach you.
 # Mohammad Raihanul Bashar | Homepage. Based on [*folio](https://github.com/bogoli/-folio) design.
+  # Powered by <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio">al-folio</a> theme.
+  # Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
 description: > # the ">" symbol means to ignore newlines until "footer_text:"
   PhD student exploring on how to improve interaction techniques within XR using HCI framework and AI."
 footer_text: >
-  # Powered by <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio">al-folio</a> theme.
-  # Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
+
 keywords: jekyll, jekyll-theme, academic-website, portfolio-website, raihan, mohammad raihanul bashar # add your own keywords or leave empty
 lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
 icon: icon.png # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
@@ -57,6 +58,19 @@ bib_search: true
 
 # Dimensions
 max_width: 1000px
+
+# -----------------------------------------------------------------------------
+# Publications search
+# -----------------------------------------------------------------------------
+# lunr:
+#   include: # Specify the pages or collections to index
+#     - publications
+#   fields:
+#     title: 10  # Higher weight for the title
+#     content: 5 # Lower weight for the content
+#     tags: 8    # Higher weight for tags or keywords
+#   strip_html: true # Removes HTML tags from the index
+
 
 # TODO: add layout settings (single page vs. multi-page)
 
