@@ -1304,6 +1304,58 @@ ninja-keys::part(ninja-input-wrapper) {
   }
 }
 
+.news {
+  margin-top: 20px;
+}
+
+.news-list {
+  list-style-type: none; /* Remove bullets */
+  padding: 0;
+}
+
+.news-list li {
+  margin-bottom: 15px; /* Add spacing between items */
+  display: flex;
+  align-items: center; /* Vertically center date and content */
+}
+
+.news-date {
+  background-color: #b22222; /* Red background */
+  color: white; /* White text */
+  font-weight: bold;
+  font-size: 14px;
+  text-transform: uppercase; /* Uppercase text */
+  padding: 5px 10px; /* Add padding */
+  border-radius: 4px; /* Rounded corners */
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional shadow effect */
+  margin-right: 10px; /* Add spacing between date and title/content */
+  width: fit-content; /* Adjust size to content */
+}
+
+.news-title {
+  font-size: 16px; /* Adjust font size */
+  text-decoration: none; /* Remove underline */
+  color: #333; /* Dark text color */
+}
+
+.news-title:hover {
+  text-decoration: underline; /* Add underline on hover */
+  color: #b22222; /* Match red with the badge */
+}
+
+.news-content {
+  font-size: 14px; /* Adjust content font size */
+  color: #555; /* Grey color */
+}
+
+.news-date:hover {
+  background-color: #8b0000; /* Darker red on hover */
+  transform: translateY(-2px); /* Slight lift on hover */
+  transition: all 0.2s ease-in-out;
+}
+
+
 // popover is used for annotation in bib.liquid
 .popover {
   background-color: var(--global-bg-color);
