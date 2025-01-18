@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-One paper accepted at Graphics Interface, 2024.
+One paper accepted at [ACM Graphics Interface '24](https://graphicsinterface.org/conference/2024/).
