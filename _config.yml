@@ -290,7 +290,7 @@ display_categories: ["external-services"] # these categories will be displayed o
 
 scholar:
   last_name: [Bashar]
-  first_name: [Mohammad Raihanul]
+  first_name: [Mohammad Raihanul, M Raihanul]
 
   style: apa
   locale: en
