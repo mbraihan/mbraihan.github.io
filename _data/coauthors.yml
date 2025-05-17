@@ -14,10 +14,18 @@
   - firstname: ["Wolfgang"]
     url: https://vvise.iat.sfu.ca/people/wolfgang-stuerzlinger
 
-"machucha":
-  - firstname: ["Mayra Barrera"]
+"barrera machuca":
+  - firstname: ["Mayra Donaji"]
     url: https://www.mayradonaji.net/
 
 "pfeuffer":
   - firstname: ["Ken"]
     url: https://kenpfeuffer.com/
+
+"lutteroth":
+  - firstname: ["Christof"]
+    url: https://people.bath.ac.uk/cl2073/
+
+"sarac":
+  - firstname: ["Mine"]
+    url: https://scholar.google.com.tr/citations?user=0J1AIrkAAAAJ&hl=tr
