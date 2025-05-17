@@ -62,14 +62,14 @@ max_width: 1000px
 # -----------------------------------------------------------------------------
 # Publications search
 # -----------------------------------------------------------------------------
-# lunr:
-#   include: # Specify the pages or collections to index
-#     - publications
-#   fields:
-#     title: 10  # Higher weight for the title
-#     content: 5 # Lower weight for the content
-#     tags: 8    # Higher weight for tags or keywords
-#   strip_html: true # Removes HTML tags from the index
+lunr:
+  include: # Specify the pages or collections to index
+    - publications
+  fields:
+    title: 10 # Higher weight for the title
+    content: 5 # Lower weight for the content
+    tags: 8 # Higher weight for tags or keywords
+  strip_html: true # Removes HTML tags from the index
 
 # TODO: add layout settings (single page vs. multi-page)
 
