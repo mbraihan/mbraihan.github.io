@@ -19,14 +19,14 @@
     - eXtended Reality (XR)
     - 3D User Interface
     - Human-Centered AI
-    - Metaverse
+    - Human-AI Interaction
     - Cognitive Science
     - Computer Vision
 
 - title: Education
   type: time_table
   contents:
-    - title: Doctor of Philosophy in Computer Science
+    - title: Doctor of Philosophy in Computer Science (ABD)
       institution: EXiT Lab, Concordia University
       year: Sept 2023 - Present
       description:
@@ -48,6 +48,8 @@
         - Computational Intelligence for Pattern Recognition in EEG Signals, Springer-Verlag, November 2017
     - title: Journals
       items:
+        - The Effect of Visual Depth on the Vergence-Accommodation Conflict on 3D Selection Performance within Virtual Reality Headsets, 2025
+        - An Early Warning System Based on Visual Feedback for Light-Based Hand Tracking Failures in VR Head-Mounted Displays, 2025
         - EEG-Based Preference Classification for Neuromarketing Application, Computational Intelligence and Neuroscience, 2023
         - Use of spontaneous blinking for application in human authentication, Engineering Science and Technology, Elsevier, 2020
     - title: Conferences
