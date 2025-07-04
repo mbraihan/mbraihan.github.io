@@ -1,6 +1,6 @@
 ---
 layout: about
-title: about
+title: Home
 permalink: /
 # subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Motto. Etc.
 
@@ -24,7 +24,7 @@ Put your address / P.O. box / other info right below your picture. You can also 
 
 Link to your social media connections, too. This theme is set up to use [Font Awesome icons](https://fontawesome.com/) and [Academicons](https://jpswalsh.github.io/academicons/), like the ones below. Add your Facebook, Twitter, LinkedIn, Google Scholar, or just disable all of them. -->
 
-I am a Ph.D. student in the [EXiT Lab](https://users.encs.concordia.ca/~abatmaz/) at Concordia University, advised by [Dr. Anil Ufuk Batmaz](https://users.encs.concordia.ca/~abatmaz/about.html).
+I am a Ph.D. candidate in the [EXiT Lab](https://users.encs.concordia.ca/~abatmaz/) at Concordia University, advised by [Dr. Anil Ufuk Batmaz](https://users.encs.concordia.ca/~abatmaz/about.html).
 
 My research centers on Virtual Reality, Augmented Reality and 3D User Interfaces, focusing on improving user interaction and experience in virtual environments. By integrating methodologies from human-computer interaction (HCI) and immersive technologies, I design, develop, and evaluate interactive VR systems that improve human capabilities in creating, consuming, and interacting with digital content, including video, audio, images, and graphical user interfaces.
 
