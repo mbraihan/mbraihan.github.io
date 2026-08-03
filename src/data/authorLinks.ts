@@ -1,6 +1,6 @@
 export const authorLinks: Record<string, string> = {
-  'Mohammad Raihanul Bashar': 'https://mbraihan.github.io/',
-  'Raihan': 'https://mbraihan.github.io/',
+  'Mohammad Raihanul Bashar': '',
+  'Raihan': '',
   'Mohammadreza Amini': 'https://scholar.google.com/citations?user=m_p4X6IAAAAJ',
   'Aunnoy K. Mutasim': 'https://scholar.google.com/citations?user=1Nt5UowAAAAJ&hl=en',
   'Aunnoy K Mutasim': 'https://scholar.google.com/citations?user=1Nt5UowAAAAJ&hl=en',

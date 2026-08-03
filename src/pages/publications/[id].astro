@@ -49,25 +49,28 @@ const authorAffilMap = data.authors.map((authorName) => {
     uniqueAffiliations.push(affil);
     affilIndex = uniqueAffiliations.length - 1;
   }
+  const isMe = authorName === 'Mohammad Raihanul Bashar' || authorName === 'Raihan';
   return {
     name: authorName,
-    link: getAuthorLink(authorName),
+    link: isMe ? null : getAuthorLink(authorName),
+    isMe,
     affilNum: affilIndex + 1,
   };
 });
 
 // Fetch all publications for related work section
 const allPubs = await getCollection('publications');
-const relatedPubs = data.relatedPaperIds && data.relatedPaperIds.length > 0
+const relatedPubs = (data.relatedPaperIds && data.relatedPaperIds.length > 0
   ? allPubs.filter((p) => data.relatedPaperIds!.includes(p.id))
-  : allPubs.filter((p) => p.id !== id).slice(0, 3);
+  : allPubs.filter((p) => p.id !== id).slice(0, 3)
+).sort((a, b) => b.data.year - a.data.year);
 
 const affiliationEntries = uniqueAffiliations.map((name, idx) => ({
   name,
   index: idx + 1,
   logo: getInstitutionLogo(name),
 }));
-const showInstitutionLogos = affiliationEntries.length === 3 && affiliationEntries.every((entry) => entry.logo);
+const showInstitutionLogos = affiliationEntries.length > 0 && affiliationEntries.every((entry) => entry.logo);
 const venueUrl = data.website || data.doi;
 const venueDisplay = (() => {
   if (id === 'vergence-accommodation-gaze-selection') return 'ISMAR, 2026';
@@ -122,7 +125,9 @@ const publicationStructuredData = {
       <div class="paper-authors">
         {authorAffilMap.map((author, idx) => (
           <span class="author-span">
-            {author.link ? (
+            {author.isMe ? (
+              <strong class="author-me">{author.name}<sup>{author.affilNum}</sup></strong>
+            ) : author.link ? (
               <a href={author.link} target="_blank" rel="noopener noreferrer" class="author-link">
                 {author.name}<sup>{author.affilNum}</sup>
               </a>
@@ -633,6 +638,12 @@ const publicationStructuredData = {
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 2px;
+  }
+
+  .author-me {
+    font-weight: 700;
+    color: var(--text-main);
+    text-decoration: none;
   }
 
   .author-name {

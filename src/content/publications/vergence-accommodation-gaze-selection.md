@@ -46,6 +46,7 @@ designGuidelines:
 relatedPaperIds:
   - "visual-depth-vac-model"
   - "virtual-task-environments"
+  - "effects-visual-depth-vac"
 bibtex: |
   @article{bashar2026vergence,
     author = {Bashar, Mohammad Raihanul and Amini, Mohammadreza and Mutasim, Aunnoy K and Barrera Machuca, Mayra Donaji and Stuerzlinger, Wolfgang and Batmaz, Anil Ufuk},
