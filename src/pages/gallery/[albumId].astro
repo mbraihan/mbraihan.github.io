@@ -1,0 +1,919 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { 
+  ArrowLeft, Calendar, MapPin, Share2, Download, Camera, Clock, Globe, 
+  Sparkles, Grid, X, ChevronLeft, ChevronRight 
+} from 'lucide-astro';
+import { galleryAlbums, type GalleryAlbum, type GalleryPhoto } from '../../data/galleryData';
+import { siteSections } from '../../config/siteSections';
+
+export function getStaticPaths() {
+  if (!siteSections.gallery) return [];
+
+  return galleryAlbums.filter((album) => !album.draft).map((album) => ({
+    params: { albumId: album.id },
+    props: { album },
+  }));
+}
+
+const { album } = Astro.props as { album: GalleryAlbum };
+const photos = album.photos ?? [];
+const highlights = photos.slice(0, 6);
+const photoCategories = Array.from(new Set(photos.map((photo) => photo.category)));
+const publishedAlbumIds = new Set(
+  galleryAlbums.filter((galleryAlbum) => !galleryAlbum.draft).map((galleryAlbum) => galleryAlbum.id)
+);
+const tripAlbums = album.tripAlbums?.filter((tripAlbum) => publishedAlbumIds.has(tripAlbum.id)) ?? [];
+---
+
+<BaseLayout 
+  title={`${album.title} | Gallery`}
+  description={album.description}
+>
+  <div class="album-page-container">
+    <!-- Back to Gallery link -->
+    <div class="back-nav-row">
+      <a href="/gallery" class="back-link">
+        <ArrowLeft size={16} />
+        <span>Back to Gallery</span>
+      </a>
+    </div>
+
+    <!-- Album Header Section -->
+    <header class="album-header">
+      <div class="header-top-row">
+        <div class="title-block">
+          <h1 class="album-title">{album.title}</h1>
+          <div class="meta-row">
+            <span class="meta-item">
+              <Calendar size={15} />
+              <span>{album.dateRange}</span>
+            </span>
+            <span class="meta-divider">•</span>
+            <span class="meta-item">
+              <MapPin size={15} />
+              <span>{album.location}</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="header-actions">
+          <button id="share-album-btn" class="action-btn secondary" type="button">
+            <Share2 size={16} />
+            <span>Share album</span>
+          </button>
+          <button id="download-album-btn" class="action-btn primary" type="button">
+            <Download size={16} />
+            <span>Download album</span>
+          </button>
+        </div>
+      </div>
+
+      <p class="album-desc">{album.description}</p>
+    </header>
+
+    <!-- Two-Column Layout (Sidebar + Main Grid) -->
+    <div class="album-layout">
+      <!-- Left Sidebar -->
+      <aside class="album-sidebar">
+        <!-- Main Cover Image -->
+        <div class="cover-card">
+          <img src={album.coverImage} alt={album.title} class="cover-img" decoding="async" />
+        </div>
+
+        <!-- Stats List -->
+        <div class="sidebar-block stats-block">
+          <div class="stat-item">
+            <Camera size={16} />
+            <span><strong>{photos.length}</strong> photos</span>
+          </div>
+          <div class="stat-item">
+            <Calendar size={16} />
+            <span><strong>{album.days}</strong> days</span>
+          </div>
+          <div class="stat-item">
+            <Globe size={16} />
+            <span>{album.isPublic ? 'Public album' : 'Private album'}</span>
+          </div>
+          <div class="stat-item">
+            <Clock size={16} />
+            <span>Created on {album.createdAt}</span>
+          </div>
+        </div>
+
+        <!-- Tags Block -->
+        <div class="sidebar-block">
+          <h3 class="sidebar-label">Tags</h3>
+          <div class="tags-row">
+            {album.tags.map(t => (
+              <span class="tag-pill">{t}</span>
+            ))}
+          </div>
+        </div>
+
+        <!-- Albums in this trip -->
+        {tripAlbums.length > 0 && (
+          <div class="sidebar-block trip-albums-block">
+            <h3 class="sidebar-label">Albums in this trip</h3>
+            <div class="trip-list">
+              {tripAlbums.map(t => (
+                <a 
+                  href={`/gallery/${t.id}`} 
+                  class={`trip-card ${t.id === album.id ? 'active' : ''}`}
+                >
+                  <img src={t.coverImage} alt={t.title} class="trip-thumb" />
+                  <div class="trip-info">
+                    <div class="trip-title">{t.title}</div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </aside>
+
+      <!-- Right Main Column -->
+      <section class="album-main-content">
+        <!-- Highlights Row -->
+        <section class="highlights-section">
+          <div class="highlights-header">
+            <div class="h-title">
+              <Sparkles size={16} class="sparkle-icon" />
+              <span>Highlights</span>
+            </div>
+            <button class="view-all-btn" type="button">
+              <span>View all</span>
+              <Grid size={15} />
+            </button>
+          </div>
+
+          <div class="highlights-grid">
+            {highlights.map((photo, pIdx) => (
+              <button
+                class="highlight-thumb-box" 
+                data-photo-index={pIdx} 
+                title={photo.title}
+                type="button"
+                aria-label={`Open ${photo.title}`}
+              >
+                <img src={photo.src} alt={photo.title} class="highlight-img" loading="lazy" decoding="async" />
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <!-- Category Filters inside Album -->
+        <div class="in-album-filters">
+          <button class="in-filter-pill active" data-in-cat="All" type="button" aria-pressed="true">All ({photos.length})</button>
+          {photoCategories.map((category) => (
+            <button class="in-filter-pill" data-in-cat={category} type="button" aria-pressed="false">
+              {category} ({photos.filter((photo) => photo.category === category).length})
+            </button>
+          ))}
+        </div>
+
+        <!-- Photos Grid -->
+        <div id="photos-grid" class="photos-grid">
+          {photos.map((photo, pIdx) => (
+            <button
+              class="photo-card" 
+              data-photo-index={pIdx}
+              data-category={photo.category}
+              type="button"
+              aria-label={`Open ${photo.title}`}
+            >
+              <img src={photo.src} alt={photo.title} class="photo-img" loading="lazy" decoding="async" />
+              <div class="photo-overlay">
+                <span class="photo-overlay-title">{photo.title}</span>
+              </div>
+            </button>
+          ))}
+          {photos.length === 0 && (
+            <p class="empty-album-message">Photos will appear here when this album is published.</p>
+          )}
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Fullscreen Split Image Lightbox Modal Overlay (Matching Image 3 Mockup) -->
+  <div id="photo-lightbox" class="lightbox-overlay hidden" aria-modal="true" role="dialog">
+    <button id="lightbox-close-btn" class="lightbox-close" aria-label="Close lightbox" type="button">
+      <X size={24} />
+    </button>
+
+    <div class="lightbox-split-container">
+      <!-- Left Dark Sidebar Panel for Caption/Story -->
+      <aside class="lightbox-dark-sidebar">
+        <div class="sidebar-scroll-content">
+          <h2 id="lightbox-title" class="lightbox-photo-title">Photo Title</h2>
+          <p id="lightbox-caption" class="lightbox-caption">Caption paragraph text...</p>
+          <div id="lightbox-story" class="lightbox-story">Extended narrative story text...</div>
+          
+          <div id="lightbox-meta" class="lightbox-location-date">Location & Date</div>
+        </div>
+
+        <!-- Prev / Next Navigation Controls -->
+        <div class="lightbox-nav-row">
+          <button id="lightbox-prev-btn" class="lightbox-nav-btn" aria-label="Previous photo" type="button">
+            <ChevronLeft size={20} />
+            <span>Previous</span>
+          </button>
+
+          <span id="lightbox-counter" class="lightbox-counter">1 / 10</span>
+
+          <button id="lightbox-next-btn" class="lightbox-nav-btn" aria-label="Next photo" type="button">
+            <span>Next</span>
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      </aside>
+
+      <!-- Right Main Full Image Viewport -->
+      <div class="lightbox-image-viewport">
+        <img id="lightbox-img" src="" alt="" class="lightbox-full-img" />
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .album-page-container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem 1.5rem;
+  }
+
+  .highlight-thumb-box,
+  .photo-card {
+    appearance: none;
+    width: 100%;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+  }
+
+  .back-nav-row {
+    margin-bottom: 1.5rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    transition: transform var(--transition-fast);
+  }
+
+  .back-link:hover {
+    transform: translateX(-3px);
+  }
+
+  /* Album Header */
+  .album-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .header-top-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .album-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .meta-divider {
+    color: var(--border-color);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .action-btn.secondary {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+  }
+
+  .action-btn.secondary:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  .action-btn.primary {
+    background-color: var(--accent-blue);
+    border: 1px solid var(--accent-blue);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  }
+
+  .action-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+  }
+
+  .album-desc {
+    font-size: 1.02rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-width: 820px;
+  }
+
+  /* Two Column Layout */
+  .album-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2.25rem;
+  }
+
+  /* Left Sidebar */
+  .album-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .cover-card {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+  }
+
+  .cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .sidebar-block {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.15rem;
+  }
+
+  .sidebar-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.75rem;
+  }
+
+  .stats-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  .tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag-pill {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-pill);
+    color: var(--text-subtle);
+    border: 1px solid var(--border-color);
+  }
+
+  /* Trip List */
+  .trip-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .trip-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    transition: all var(--transition-fast);
+  }
+
+  .trip-card:hover {
+    background-color: var(--bg-pill);
+    border-color: var(--border-color);
+  }
+
+  .trip-card.active {
+    background-color: rgba(37, 99, 235, 0.08);
+    border-color: var(--accent-blue);
+  }
+
+  .trip-thumb {
+    width: 3.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .trip-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .trip-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.25;
+  }
+
+  .trip-count {
+    font-size: 0.72rem;
+    color: var(--text-subtle);
+  }
+
+  /* Right Main Content */
+  .album-main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  /* Highlights Section */
+  .highlights-section {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+  }
+
+  .highlights-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .h-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .sparkle-icon {
+    color: var(--accent-blue);
+  }
+
+  .view-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-subtle);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+  }
+
+  .view-all-btn:hover {
+    color: var(--accent-blue);
+  }
+
+  .highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.6rem;
+  }
+
+  .highlight-thumb-box {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: transform var(--transition-fast), border-color var(--transition-fast);
+  }
+
+  .highlight-thumb-box:hover {
+    transform: scale(1.05);
+    border-color: var(--accent-blue);
+  }
+
+  .highlight-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* In-Album Filters */
+  .in-album-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .in-filter-pill {
+    padding: 0.4rem 1rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .in-filter-pill:hover {
+    color: var(--text-main);
+    border-color: var(--accent-blue);
+  }
+
+  .in-filter-pill.active {
+    color: var(--accent-blue);
+    font-weight: 600;
+    border-color: var(--accent-blue);
+    background-color: rgba(37, 99, 235, 0.06);
+  }
+
+  /* Photos Grid */
+  .photos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .photo-card {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .photo-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .photo-card:hover .photo-img {
+    transform: scale(1.06);
+  }
+
+  .photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 60%);
+    opacity: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 1rem;
+    transition: opacity var(--transition-fast);
+  }
+
+  .photo-card:hover .photo-overlay {
+    opacity: 1;
+  }
+
+  .photo-overlay-title {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* ==========================================================================
+     SPLIT LIGHTBOX MODAL OVERLAY (MATCHING IMAGE 3 MOCKUP)
+     ========================================================================== */
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background-color: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 110;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .lightbox-close:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+    transform: scale(1.08);
+  }
+
+  .lightbox-split-container {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    overflow: hidden;
+  }
+
+  /* Left Dark Panel (Image 3 Left Sidebar) */
+  .lightbox-dark-sidebar {
+    background-color: #1a1b1e;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2.5rem 1.75rem 2rem 1.75rem;
+    color: #ffffff;
+    overflow-y: auto;
+  }
+
+  .sidebar-scroll-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .lightbox-photo-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+
+  .lightbox-caption {
+    font-size: 0.95rem;
+    color: #d1d5db;
+    line-height: 1.55;
+    font-weight: 400;
+  }
+
+  .lightbox-story {
+    font-size: 0.9rem;
+    color: #9ca3af;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  .lightbox-location-date {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: #9ca3af;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Navigation Row at bottom of Left Sidebar */
+  .lightbox-nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .lightbox-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: var(--radius-md);
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .lightbox-nav-btn:hover {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+  }
+
+  .lightbox-counter {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    font-weight: 600;
+  }
+
+  /* Right Main Image Viewport */
+  .lightbox-image-viewport {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow: hidden;
+    background-color: #0f1012;
+  }
+
+  .lightbox-full-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 900px) {
+    .album-layout {
+      grid-template-columns: 1fr;
+    }
+    .highlights-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .photos-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .lightbox-split-container {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr auto;
+    }
+    .lightbox-dark-sidebar {
+      padding: 1.5rem;
+      order: 2;
+    }
+    .lightbox-image-viewport {
+      order: 1;
+      padding: 1rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .header-top-row {
+      flex-direction: column;
+    }
+    .photos-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script define:vars={{ photos }}>
+  let currentIndex = 0;
+
+  const lightbox = document.getElementById('photo-lightbox');
+  const closeBtn = document.getElementById('lightbox-close-btn');
+  const prevBtn = document.getElementById('lightbox-prev-btn');
+  const nextBtn = document.getElementById('lightbox-next-btn');
+
+  const lbTitle = document.getElementById('lightbox-title');
+  const lbCaption = document.getElementById('lightbox-caption');
+  const lbStory = document.getElementById('lightbox-story');
+  const lbMeta = document.getElementById('lightbox-location-date');
+  const lbImg = document.getElementById('lightbox-img');
+  const lbCounter = document.getElementById('lightbox-counter');
+  let lightboxTrigger = null;
+
+  document.querySelectorAll('.in-filter-pill').forEach((pill) => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.in-filter-pill').forEach((item) => {
+        item.classList.remove('active');
+        item.setAttribute('aria-pressed', 'false');
+      });
+      pill.classList.add('active');
+      pill.setAttribute('aria-pressed', 'true');
+      const category = pill.getAttribute('data-in-cat');
+      document.querySelectorAll<HTMLElement>('.photo-card').forEach((card) => {
+        card.hidden = category !== 'All' && card.getAttribute('data-category') !== category;
+      });
+    });
+  });
+
+  function openPhoto(idx, trigger = null) {
+    if (!photos || photos.length === 0) return;
+    currentIndex = (idx + photos.length) % photos.length;
+    const p = photos[currentIndex];
+
+    if (lbTitle) lbTitle.textContent = p.title;
+    if (lbCaption) lbCaption.textContent = p.caption || '';
+    if (lbStory) lbStory.textContent = p.storyText || '';
+    if (lbMeta) lbMeta.textContent = p.locationDate || '';
+    if (lbImg) {
+      lbImg.src = p.src;
+      lbImg.alt = p.title;
+    }
+    if (lbCounter) lbCounter.textContent = `${currentIndex + 1} / ${photos.length}`;
+
+    lightbox?.classList.remove('hidden');
+    lightboxTrigger = trigger || lightboxTrigger;
+    closeBtn?.focus();
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox?.classList.add('hidden');
+    document.body.style.overflow = '';
+    lightboxTrigger?.focus();
+  }
+
+  // Event Listeners for Thumbnails
+  document.querySelectorAll('[data-photo-index]').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.getAttribute('data-photo-index') || '0', 10);
+      openPhoto(idx, el);
+    });
+  });
+
+  closeBtn?.addEventListener('click', closeLightbox);
+  prevBtn?.addEventListener('click', () => openPhoto(currentIndex - 1));
+  nextBtn?.addEventListener('click', () => openPhoto(currentIndex + 1));
+
+  // Close on Backdrop Click
+  lightbox?.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  // Keyboard Shortcuts
+  window.addEventListener('keydown', (e) => {
+    if (lightbox?.classList.contains('hidden')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') openPhoto(currentIndex - 1);
+    if (e.key === 'ArrowRight') openPhoto(currentIndex + 1);
+  });
+</script>

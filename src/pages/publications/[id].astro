@@ -1,0 +1,1545 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { 
+  FileText, Github, ExternalLink, Copy, Check, ChevronLeft, ChevronRight, Database, BookOpen, Layers, Video, ArrowLeft, ArrowRight
+} from 'lucide-astro';
+import LoopingPreviewVideo from '../../components/LoopingPreviewVideo.astro';
+import {
+  getPublicationPresentationVideo,
+  getPublicationPreviewVideo,
+  getPublicationTeaserImage,
+  shouldContainPublicationMedia,
+  shouldShowRelatedWork,
+} from '../../data/publicationMedia';
+import { getAuthorLink, getAuthorAffiliation } from '../../data/authorLinks';
+import { getInstitutionLogo } from '../../data/institutions';
+
+export async function getStaticPaths() {
+  const pubs = await getCollection('publications');
+  return pubs.map((pub) => ({
+    params: { id: pub.id },
+    props: { pub },
+  }));
+}
+
+const { pub } = Astro.props;
+const { data, id } = pub;
+const { Content } = await render(pub);
+const previewVideo = getPublicationPreviewVideo(id);
+const teaserImage = getPublicationTeaserImage(id) || data.image;
+const rawPresentation = data.presentationVideo || data.presentation;
+const presentationVideo = rawPresentation
+  ? {
+      url: rawPresentation,
+      embedUrl: rawPresentation.includes('embed')
+        ? rawPresentation
+        : `https://www.youtube-nocookie.com/embed/${rawPresentation.includes('v=') ? rawPresentation.split('v=')[1].split('&')[0] : rawPresentation.split('/').pop()}?rel=0`,
+    }
+  : getPublicationPresentationVideo(id);
+const containMedia = shouldContainPublicationMedia(id);
+const showRelatedWork = shouldShowRelatedWork(id);
+
+// Author Link & Affiliation Superscript Processing
+const uniqueAffiliations: string[] = [];
+const authorAffilMap = data.authors.map((authorName) => {
+  const affil = getAuthorAffiliation(authorName) || 'Affiliation not added yet';
+  let affilIndex = uniqueAffiliations.indexOf(affil);
+  if (affilIndex === -1) {
+    uniqueAffiliations.push(affil);
+    affilIndex = uniqueAffiliations.length - 1;
+  }
+  return {
+    name: authorName,
+    link: getAuthorLink(authorName),
+    affilNum: affilIndex + 1,
+  };
+});
+
+// Fetch all publications for related work section
+const allPubs = await getCollection('publications');
+const relatedPubs = data.relatedPaperIds && data.relatedPaperIds.length > 0
+  ? allPubs.filter((p) => data.relatedPaperIds!.includes(p.id))
+  : allPubs.filter((p) => p.id !== id).slice(0, 3);
+
+const affiliationEntries = uniqueAffiliations.map((name, idx) => ({
+  name,
+  index: idx + 1,
+  logo: getInstitutionLogo(name),
+}));
+const showInstitutionLogos = affiliationEntries.length === 3 && affiliationEntries.every((entry) => entry.logo);
+const venueUrl = data.website || data.doi;
+const venueDisplay = (() => {
+  if (id === 'vergence-accommodation-gaze-selection') return 'ISMAR, 2026';
+  if (!data.venueShort) return `${data.venue}, ${data.year}`;
+
+  const shortVenue = data.venueShort.replace(/\s+(19|20)\d{2}$|\s+\d{2}$/, '').trim();
+  return `${shortVenue}, ${data.year}`;
+})();
+const publicationStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'ScholarlyArticle',
+  headline: data.title,
+  description: data.abstract || data.title,
+  datePublished: `${data.year}-01-01`,
+  url: new URL(`/publications/${id}`, 'https://mbraihan.github.io').href,
+  isPartOf: {
+    '@type': data.type === 'Journal' ? 'Periodical' : 'PublicationIssue',
+    name: data.venue,
+  },
+  author: data.authors.map((name) => ({
+    '@type': 'Person',
+    name,
+    ...(getAuthorLink(name) ? { sameAs: getAuthorLink(name) } : {}),
+  })),
+};
+---
+
+<BaseLayout 
+  title={`${data.title} | Mohammad Raihanul Bashar`}
+  description={data.abstract || data.title}
+  type="article"
+  structuredData={publicationStructuredData}
+>
+  <article class="paper-page-container">
+    <!-- Top Left Back Button -->
+    <div class="top-nav-bar-row">
+      <a href="/publications" class="back-to-pubs-btn">
+        <ArrowLeft size={16} />
+        <span>Back to Publications</span>
+      </a>
+    </div>
+
+    <!-- Header Hero Area -->
+    <header class="paper-header">
+      <h1 class="paper-title">{data.title}</h1>
+
+      {data.type === 'Workshop' && (
+        <div class="paper-type-label">Workshop Paper</div>
+      )}
+
+      <!-- Author Hyperlinks and Organization Superscripts -->
+      <div class="paper-authors">
+        {authorAffilMap.map((author, idx) => (
+          <span class="author-span">
+            {author.link ? (
+              <a href={author.link} target="_blank" rel="noopener noreferrer" class="author-link">
+                {author.name}<sup>{author.affilNum}</sup>
+              </a>
+            ) : (
+              <span class="author-name">{author.name}<sup>{author.affilNum}</sup></span>
+            )}
+            {idx < authorAffilMap.length - 1 ? ', ' : ''}
+          </span>
+        ))}
+      </div>
+
+      <!-- Author Organizations & Affiliations List -->
+      <div class="author-affiliations">
+        {uniqueAffiliations.map((affil, idx) => (
+          <span class="affiliation-item">
+            <sup>{idx + 1}</sup> {affil}{idx < uniqueAffiliations.length - 1 ? '   •   ' : ''}
+          </span>
+        ))}
+      </div>
+
+      {showInstitutionLogos && (
+        <div class="institution-logos" aria-label="Author institutions">
+          {affiliationEntries.map((institution) => (
+            <div class="institution-logo-item">
+              <img
+                src={institution.logo!}
+                alt={`${institution.name} logo`}
+                class="institution-logo"
+                width="96"
+                height="42"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div class="venue-badge-wrapper">
+        {venueUrl ? (
+          <a href={venueUrl} target="_blank" rel="noopener noreferrer" class="venue-badge venue-link">
+            <span>{venueDisplay}</span>
+          </a>
+        ) : (
+          <span class="venue-badge">
+            <span>{venueDisplay}</span>
+          </span>
+        )}
+      </div>
+
+      {data.correspondingAuthor && (
+        <p class="corresponding-note">Corresponding author: {data.correspondingAuthor}</p>
+      )}
+
+      <!-- Action Chips Buttons (Dark Pills with Vibrant Icons) -->
+      <div class="action-buttons-group">
+        {data.pdf && (
+          <a href={data.pdf} target="_blank" rel="noopener noreferrer" class="chip-btn chip-pdf" aria-label="Paper PDF">
+            <FileText size={16} class="chip-icon" />
+            <span>Paper</span>
+          </a>
+        )}
+        {data.arxiv && (
+          <a href={data.arxiv} target="_blank" rel="noopener noreferrer" class="chip-btn chip-arxiv" aria-label="arXiv preprint">
+            <BookOpen size={16} class="chip-icon" />
+            <span>arXiv</span>
+          </a>
+        )}
+        {data.video && (
+          <a
+            href={data.video}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="chip-btn chip-video"
+            aria-label="Teaser Video"
+          >
+            <Video size={16} class="chip-icon" />
+            <span>Video</span>
+          </a>
+        )}
+        {data.github && (
+          <a href={data.github} target="_blank" rel="noopener noreferrer" class="chip-btn chip-github" aria-label="GitHub Code">
+            <Github size={16} class="chip-icon" />
+            <span>Code</span>
+          </a>
+        )}
+        {data.data && (
+          <a href={data.data} target="_blank" rel="noopener noreferrer" class="chip-btn chip-data" aria-label="Dataset">
+            <Database size={16} class="chip-icon" />
+            <span>Data</span>
+          </a>
+        )}
+        {data.poster && (
+          <a href={data.poster} target="_blank" rel="noopener noreferrer" class="chip-btn chip-poster" aria-label="Poster">
+            <FileText size={16} class="chip-icon" />
+            <span>Poster</span>
+          </a>
+        )}
+        {data.doi && (
+          <a href={data.doi} target="_blank" rel="noopener noreferrer" class="chip-btn chip-doi" aria-label="DOI publication link">
+            <ExternalLink size={16} class="chip-icon" />
+            <span>DOI</span>
+          </a>
+        )}
+      </div>
+
+      <!-- Hero Banner Media -->
+      {(teaserImage || previewVideo) && (
+        <div class:list={[
+          'hero-banner-wrapper',
+          {
+            'has-looping-video': !teaserImage && previewVideo,
+            'has-contained-media': containMedia,
+          },
+        ]}>
+          {teaserImage ? (
+            <img src={teaserImage} alt={`${data.title} teaser`} class="hero-banner-img" />
+          ) : (
+            <LoopingPreviewVideo
+              src={previewVideo}
+              className="hero-banner-img"
+              label={`Looping preview of ${data.title}`}
+            />
+          )}
+          {data.bannerCaption && (
+            <p class="hero-banner-caption">{data.bannerCaption}</p>
+          )}
+        </div>
+      )}
+    </header>
+
+    <hr class="section-divider" />
+
+    <!-- Abstract Section -->
+    {data.abstract && (
+      <section class="paper-section abstract-section">
+        <h2 class="section-heading text-center">Abstract</h2>
+        <div class="abstract-text">
+          <p>{data.abstract}</p>
+        </div>
+      </section>
+    )}
+
+    <!-- Methodology Section -->
+    {(data.methodologyText || (data.methodologyImages && data.methodologyImages.length > 0) || (data.methodologyVideos && data.methodologyVideos.length > 0)) && (
+      <section class="paper-section methodology-section">
+        <h2 class="section-heading">Methodology</h2>
+        
+        {data.methodologyText && (
+          <div class="methodology-intro">
+            <p>{data.methodologyText}</p>
+          </div>
+        )}
+
+        {data.methodologyImages && data.methodologyImages.length > 0 && (
+          <div class="methodology-grid">
+            <div class="media-column">
+              {data.methodologyImages.length === 1 ? (
+                <div class="figure-box">
+                  <img src={data.methodologyImages[0]} alt={data.methodologyCaptions?.[0] || "Methodology diagram"} class="figure-img" />
+                  {data.methodologyCaptions?.[0] && (
+                    <p class="figure-caption">{data.methodologyCaptions[0]}</p>
+                  )}
+                </div>
+              ) : (
+                /* Carousel slider for multiple images */
+                <div class="carousel-container" data-carousel="methodology">
+                  <button class="carousel-control-btn prev-btn" aria-label="Previous slide" title="Previous slide">
+                    <ChevronLeft size={20} />
+                  </button>
+
+                <div class="carousel-slides">
+                    {data.methodologyImages.map((img, idx) => (
+                      <div class={`carousel-slide ${idx === 0 ? 'active' : ''}`} data-index={idx}>
+                        <div class="carousel-img-wrapper">
+                          <img src={img} alt={data.methodologyCaptions?.[idx] || `Methodology figure ${idx + 1}`} class="figure-img" />
+                        </div>
+                        {data.methodologyCaptions?.[idx] && (
+                          <p class="carousel-caption">{data.methodologyCaptions[idx]}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <button class="carousel-control-btn next-btn" aria-label="Next slide" title="Next slide">
+                    <ChevronRight size={20} />
+                  </button>
+
+                  <div class="carousel-pagination" aria-label="Figure selection">
+                    <div class="carousel-dots">
+                    {data.methodologyImages.map((_, idx) => (
+                      <button class={`carousel-dot ${idx === 0 ? 'active' : ''}`} data-dot-index={idx} aria-label={`Go to slide ${idx + 1}`}></button>
+                    ))}
+                    </div>
+                    <span class="carousel-counter">1 / {data.methodologyImages.length}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {data.methodologyVideos && data.methodologyVideos.length > 0 && (
+          <div class="methodology-videos-grid">
+            {data.methodologyVideos.map((vid) => (
+              <div class="methodology-video-card">
+                <h3 class="methodology-video-title">{vid.title}</h3>
+                <div class="methodology-video-wrapper">
+                  <iframe
+                    src={vid.embedSrc}
+                    style="height: auto; width: 100%; aspect-ratio: 640 / 360;"
+                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                    allowfullscreen
+                    frameborder="0"
+                    loading="lazy"
+                    title={`${vid.title} demo video`}
+                  ></iframe>
+                </div>
+                {vid.description && (
+                  <p class="methodology-video-desc">{vid.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    )}
+
+    <!-- Results Section -->
+    {(data.resultsText || (data.resultsImages && data.resultsImages.length > 0)) && (
+      <section class="paper-section results-section">
+        <h2 class="section-heading">Results</h2>
+
+        <div class="results-grid">
+          {data.resultsText && (
+            <div class="text-column">
+              <p>{data.resultsText}</p>
+            </div>
+          )}
+
+          {data.resultsImages && data.resultsImages.length > 0 && (
+            <div class="media-column">
+              {data.resultsImages.length === 1 ? (
+                <div class="figure-box">
+                  <img src={data.resultsImages[0]} alt={data.resultsCaptions?.[0] || "Results chart"} class="figure-img" />
+                  {data.resultsCaptions?.[0] && (
+                    <p class="figure-caption">{data.resultsCaptions[0]}</p>
+                  )}
+                </div>
+              ) : (
+                /* Carousel slider for multiple results charts */
+                <div class="carousel-container" data-carousel="results">
+                  <button class="carousel-control-btn prev-btn" aria-label="Previous slide" title="Previous slide">
+                    <ChevronLeft size={20} />
+                  </button>
+
+                  <div class="carousel-slides">
+                    {data.resultsImages.map((img, idx) => (
+                      <div class={`carousel-slide ${idx === 0 ? 'active' : ''}`} data-index={idx}>
+                        <div class="carousel-img-wrapper">
+                          <img src={img} alt={data.resultsCaptions?.[idx] || `Results chart ${idx + 1}`} class="figure-img" />
+                        </div>
+                        {data.resultsCaptions?.[idx] && (
+                          <p class="carousel-caption">{data.resultsCaptions[idx]}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <button class="carousel-control-btn next-btn" aria-label="Next slide" title="Next slide">
+                    <ChevronRight size={20} />
+                  </button>
+
+                  <div class="carousel-pagination" aria-label="Figure selection">
+                    <div class="carousel-dots">
+                    {data.resultsImages.map((_, idx) => (
+                      <button class={`carousel-dot ${idx === 0 ? 'active' : ''}`} data-dot-index={idx} aria-label={`Go to slide ${idx + 1}`}></button>
+                    ))}
+                    </div>
+                    <span class="carousel-counter">1 / {data.resultsImages.length}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+    )}
+
+    <!-- Poster Section -->
+    {data.poster && (
+      <section class="paper-section poster-section">
+        <h2 class="section-heading">Poster</h2>
+        <div class="poster-container">
+          <a href={data.poster} target="_blank" rel="noopener noreferrer" class="poster-link" title="Click to view full-resolution poster">
+            <img src={data.poster} alt={`${data.title} poster`} class="poster-img" loading="lazy" decoding="async" />
+          </a>
+        </div>
+      </section>
+    )}
+
+    <!-- Presentation Video -->
+    {presentationVideo && (
+      <section class="paper-section presentation-section">
+        <h2 class="section-heading">Presentation</h2>
+        <div class="presentation-video">
+          <iframe
+            src={presentationVideo.embedUrl}
+            title={`${data.title} presentation`}
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </section>
+    )}
+
+    <!-- Application & Implications / Design Guidelines Section -->
+    {(data.applicationText || data.designGuidelines) && (
+      <section class="paper-section application-section">
+        <h2 class="section-heading">Application & Implications</h2>
+
+        <div class="application-grid">
+          {data.applicationVideo && (
+            <div class="media-column">
+              <div class="video-preview-box">
+                <img src={data.applicationVideo} alt="Application scenario" class="figure-img" />
+              </div>
+            </div>
+          )}
+
+          <div class="text-column">
+            {data.applicationText && <p>{data.applicationText}</p>}
+
+            {data.designGuidelines && data.designGuidelines.length > 0 && (
+              <div class="guidelines-block">
+                <h3 class="sub-heading">Design Guidelines:</h3>
+                <ul class="guidelines-list">
+                  {data.designGuidelines.map((guideline) => (
+                    <li>{guideline}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Related Work Section -->
+    {showRelatedWork && relatedPubs.length > 0 && (
+      <section class="paper-section related-section">
+        <h2 class="section-heading">Related Work / Research</h2>
+        <div class="related-research-list">
+          {relatedPubs.map((rel) => (
+            <a href={`/publications/${rel.id}`} class="related-research-link">
+              <span class="related-research-title">{rel.data.title}</span>
+              <span class="related-research-venue">
+                {rel.data.venueShort || rel.data.venue}
+              </span>
+              <ArrowRight size={16} class="related-research-arrow" />
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- BibTeX Section -->
+    {data.bibtex && (
+      <section class="paper-section bibtex-section">
+        <h2 class="section-heading">BibTeX</h2>
+
+        <div class="bibtex-paper-box">
+          <button class="copy-btn" data-bib={data.bibtex}>
+            <Copy size={13} class="copy-icon" />
+            <Check size={13} class="check-icon hidden" />
+            <span class="copy-text">Copy</span>
+          </button>
+          <pre><code>{data.bibtex}</code></pre>
+        </div>
+      </section>
+    )}
+
+    <!-- Footer Template Notice -->
+    <footer class="paper-footer-notice">
+      <p>This page was built using the <a href="https://github.com/nerfies/nerfies.github.io" target="_blank" rel="noopener noreferrer" class="template-link">Academic Project Page Template</a> and adapted from the <a href="https://nerfies.github.io/" target="_blank" rel="noopener noreferrer" class="template-link">Nerfies</a> project page.</p>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .paper-page-container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem 1.5rem;
+    font-family: var(--font-noto-sans);
+  }
+
+  .paper-page-container :where(h2, h3, h4, h5, h6, p, section, span, button, a, div, footer, li) {
+    font-family: var(--font-noto-sans);
+  }
+
+  /* Header Hero */
+  .paper-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .top-nav-bar-row {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 1.25rem;
+  }
+
+  .back-to-pubs-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    background: var(--bg-card);
+    transition: color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  }
+
+  .back-to-pubs-btn:hover {
+    color: var(--accent-blue);
+    border-color: var(--accent-blue-border);
+    transform: translateX(-2px);
+  }
+
+  .venue-badge-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 1.25rem 0 1rem;
+  }
+
+  .venue-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.7rem 1.1rem;
+    border-radius: var(--radius-md);
+    background-color: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-family: var(--font-noto-sans);
+  }
+
+  .venue-label {
+    color: var(--text-subtle);
+    font-weight: 500;
+  }
+
+  .venue-link:hover {
+    border-color: var(--accent-blue);
+    background-color: var(--accent-blue-light);
+  }
+
+  :global([data-theme='dark']) .venue-badge {
+    background-color: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+
+  /* Google Sans for Main paper title, author names, and teaser sentence */
+  .paper-title {
+    font-family: var(--font-google-sans) !important;
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text-main);
+    margin-bottom: 1.25rem;
+  }
+
+  .paper-type-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.7rem;
+    margin: -0.45rem 0 0.9rem;
+    border-radius: var(--radius-full);
+    background: var(--accent-blue-light);
+    border: 1px solid var(--accent-blue-border);
+    color: var(--accent-blue);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .paper-authors,
+  .paper-authors span,
+  .paper-authors a,
+  .author-primary {
+    font-family: var(--font-google-sans) !important;
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .author-link {
+    color: var(--accent-blue);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  .author-name {
+    color: var(--text-muted);
+  }
+
+  .author-affiliations {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem 0.7rem;
+    max-width: 850px;
+    margin: 0 auto 0.75rem;
+    color: var(--text-subtle);
+    font-size: 0.86rem;
+    line-height: 1.5;
+  }
+
+  .affiliation-item sup {
+    color: var(--accent-blue);
+    font-weight: 700;
+  }
+
+  .institution-logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.25rem 2.5rem;
+    margin: 0.9rem auto 0;
+  }
+
+  .institution-logo-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 9rem;
+    height: 3.75rem;
+  }
+
+  .institution-logo {
+    display: block;
+    width: 8.5rem;
+    height: 3.5rem;
+    object-fit: contain;
+    border-radius: 0.35rem;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    padding: 0.18rem;
+    line-height: 0;
+  }
+
+  .author-primary {
+    color: var(--accent-blue);
+    text-decoration: underline;
+    font-weight: 600;
+  }
+
+  .institution-name {
+    font-family: var(--font-noto-sans) !important;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+  }
+
+  .corresponding-note {
+    font-family: var(--font-noto-sans) !important;
+    font-size: 0.82rem;
+    color: var(--text-subtle);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Action Chips - Modern Refined Design */
+  .action-buttons-group {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .chip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1.15rem;
+    border-radius: var(--radius-full);
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.2;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+  }
+
+  .chip-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .chip-icon {
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+  }
+
+  .chip-btn:hover .chip-icon {
+    transform: scale(1.1);
+  }
+
+  /* Refined Icon & Border Colors for Chips */
+  .chip-pdf .chip-icon {
+    color: #dc2626;
+  }
+  .chip-pdf:hover {
+    border-color: rgba(220, 38, 38, 0.4);
+    background-color: rgba(254, 242, 242, 0.6);
+    color: #dc2626;
+  }
+  :global([data-theme='dark']) .chip-pdf .chip-icon {
+    color: #f87171;
+  }
+  :global([data-theme='dark']) .chip-pdf:hover {
+    border-color: rgba(248, 113, 113, 0.5);
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+  }
+
+  .chip-arxiv .chip-icon {
+    color: #b91c1c;
+  }
+  .chip-arxiv:hover {
+    border-color: rgba(185, 28, 28, 0.4);
+    background-color: rgba(255, 241, 242, 0.6);
+    color: #991b1b;
+  }
+  :global([data-theme='dark']) .chip-arxiv .chip-icon {
+    color: #fb7185;
+  }
+  :global([data-theme='dark']) .chip-arxiv:hover {
+    border-color: rgba(251, 113, 133, 0.5);
+    background-color: rgba(225, 29, 72, 0.15);
+    color: #fda4af;
+  }
+
+  .chip-video .chip-icon {
+    color: #ea580c;
+  }
+  .chip-video:hover {
+    border-color: rgba(234, 88, 12, 0.4);
+    background-color: rgba(255, 247, 237, 0.6);
+    color: #c2410c;
+  }
+  :global([data-theme='dark']) .chip-video .chip-icon {
+    color: #fb923c;
+  }
+  :global([data-theme='dark']) .chip-video:hover {
+    border-color: rgba(251, 146, 60, 0.5);
+    background-color: rgba(249, 115, 22, 0.15);
+    color: #ffedd5;
+  }
+
+  .chip-doi .chip-icon {
+    color: #2563eb;
+  }
+  .chip-doi:hover {
+    border-color: rgba(37, 99, 235, 0.4);
+    background-color: rgba(239, 246, 255, 0.6);
+    color: #1d4ed8;
+  }
+  :global([data-theme='dark']) .chip-doi .chip-icon {
+    color: #60a5fa;
+  }
+  :global([data-theme='dark']) .chip-doi:hover {
+    border-color: rgba(96, 165, 250, 0.5);
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #93c5fd;
+  }
+
+  .chip-github:hover {
+    border-color: var(--accent-blue-border);
+    color: var(--accent-blue);
+  }
+
+  .chip-data .chip-icon {
+    color: #059669;
+  }
+  .chip-data:hover {
+    border-color: rgba(5, 150, 105, 0.4);
+    background-color: rgba(236, 253, 245, 0.6);
+    color: #047857;
+  }
+  :global([data-theme='dark']) .chip-data .chip-icon {
+    color: #34d399;
+  }
+  :global([data-theme='dark']) .chip-data:hover {
+    border-color: rgba(52, 211, 153, 0.5);
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #a7f3d0;
+  }
+
+  /* Hero Banner */
+  .hero-banner-wrapper {
+    margin-top: 2rem;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+  }
+
+  .hero-banner-wrapper.has-looping-video {
+    aspect-ratio: 16 / 9;
+    background-color: #000;
+  }
+
+  .hero-banner-wrapper.has-looping-video .hero-banner-img {
+    max-height: none;
+  }
+
+  .hero-banner-wrapper.has-contained-media .hero-banner-img {
+    object-fit: contain;
+  }
+
+  .hero-banner-img {
+    width: 100%;
+    max-height: 480px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-banner-caption {
+    font-family: var(--font-google-sans) !important;
+    font-size: 0.88rem;
+    color: var(--text-subtle);
+    padding: 0.85rem 1rem;
+    text-align: center;
+    background-color: var(--bg-card);
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 3rem 0;
+  }
+
+  /* Sections */
+  .paper-section {
+    margin-bottom: 3.5rem;
+  }
+
+  .section-heading {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 1.25rem;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .abstract-text {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+  }
+
+  /* Methodology & Results Layout */
+  .methodology-grid {
+    display: block;
+  }
+
+  .application-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .results-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .results-grid .text-column {
+    max-width: 78ch;
+  }
+
+  .methodology-intro {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+  }
+
+  /* Methodology Videos 2×2 Grid */
+  .methodology-videos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .methodology-video-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .methodology-video-card:hover {
+    border-color: var(--accent-blue-border);
+    box-shadow: var(--shadow-md);
+  }
+
+  .methodology-video-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    padding: 0.85rem 1rem 0.5rem;
+  }
+
+  .methodology-video-wrapper {
+    width: 100%;
+    background-color: #000;
+  }
+
+  .methodology-video-wrapper iframe {
+    display: block;
+    width: 100%;
+    border: 0;
+  }
+
+  .methodology-video-desc {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+    padding: 0.75rem 1rem 1rem;
+  }
+
+  .media-column {
+    width: 100%;
+  }
+
+  .figure-box, .video-preview-box {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-pill);
+  }
+
+  .figure-img {
+    width: 100%;
+    height: auto;
+    max-height: 560px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .text-column {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+  }
+
+  /* Carousel */
+  .carousel-container {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: visible;
+    border: 0;
+    background-color: transparent;
+    margin: 0;
+  }
+
+  .carousel-slides {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-card);
+  }
+
+  .carousel-slide {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .carousel-slide.active {
+    display: flex;
+  }
+
+  .carousel-img-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: auto;
+    background-color: var(--bg-pill);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .carousel-slide .figure-img {
+    width: 100%;
+    height: auto;
+    max-height: 560px;
+    object-fit: contain;
+  }
+
+  .carousel-caption,
+  .figure-caption {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 0.65rem 0.85rem;
+    background-color: var(--bg-card);
+    border-top: 1px solid var(--border-color);
+  }
+
+  /* Carousel Control Bar - Centered at bottom of figure image area */
+  .carousel-controls-bar {
+    position: absolute;
+    bottom: 0.65rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+  }
+
+  .carousel-control-btn {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+  }
+
+  .prev-btn { left: -3rem; }
+  .next-btn { right: -3rem; }
+
+  .carousel-control-btn:hover {
+    background-color: var(--accent-blue-light);
+    color: var(--accent-blue);
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  .carousel-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    margin-top: 0.75rem;
+  }
+
+  .carousel-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .carousel-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--border-color);
+    border: 1px solid var(--text-subtle);
+    transition: transform var(--transition-fast), background-color var(--transition-fast);
+  }
+
+  .carousel-dot:hover,
+  .carousel-dot.active {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    transform: scale(1.25);
+  }
+
+  .carousel-counter {
+    color: var(--text-subtle);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .carousel-control-btn.is-paused {
+    background-color: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.6);
+  }
+
+  .carousel-control-btn .play-icon {
+    display: none !important;
+  }
+
+  .carousel-control-btn .pause-icon {
+    display: block !important;
+  }
+
+  .carousel-control-btn.is-paused .play-icon {
+    display: block !important;
+  }
+
+  .carousel-control-btn.is-paused .pause-icon {
+    display: none !important;
+  }
+
+  /* Poster Section */
+  .poster-container {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background-color: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .poster-container:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .poster-link {
+    display: block;
+    width: 100%;
+    cursor: zoom-in;
+  }
+
+  .poster-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+
+  .presentation-video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: #000;
+  }
+
+  .presentation-video iframe {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: 0;
+  }
+
+  /* Guidelines */
+  .sub-heading {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+  }
+
+  .guidelines-list {
+    padding-left: 1.25rem;
+  }
+
+  .guidelines-list li {
+    margin-bottom: 0.4rem;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+  }
+
+  /* Video Placeholder */
+  .video-placeholder-container {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    background-color: var(--bg-card);
+  }
+
+  .video-placeholder-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .play-icon-circle {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background-color: var(--bg-pill);
+    color: var(--accent-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .placeholder-text {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
+
+  /* Related Work Grid */
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .related-research-list {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+  }
+
+  .related-research-link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 1.25rem;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.95rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+  }
+
+  .related-research-link:last-child {
+    border-bottom: 0;
+  }
+
+  .related-research-link:hover {
+    background: var(--bg-pill);
+    color: var(--accent-blue);
+  }
+
+  .related-research-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .related-research-venue {
+    color: var(--text-subtle);
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .related-research-arrow {
+    color: var(--text-subtle);
+  }
+
+  .related-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform var(--transition-fast), border-color var(--transition-fast);
+  }
+
+  .related-card:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+  }
+
+  .related-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.35rem;
+    line-height: 1.35;
+  }
+
+  .related-authors {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+  }
+
+  .related-venue {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    margin-bottom: 0.5rem;
+  }
+
+  .related-tags {
+    display: flex;
+    gap: 0.3rem;
+  }
+
+  .rel-tag {
+    font-size: 0.72rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-pill);
+    color: var(--text-subtle);
+  }
+
+  .related-thumb {
+    width: 100%;
+    height: 90px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-top: 0.75rem;
+  }
+
+  .rel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* BibTeX Box */
+  .bibtex-paper-box {
+    position: relative;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+
+  /* Footer Notice */
+  .paper-footer-notice {
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--text-subtle);
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .template-link {
+    color: var(--accent-blue);
+    text-decoration: underline;
+  }
+
+
+
+  @media (max-width: 768px) {
+    .results-grid,
+    .application-grid {
+      grid-template-columns: 1fr;
+    }
+    .methodology-videos-grid {
+      grid-template-columns: 1fr;
+    }
+    .related-grid {
+      grid-template-columns: 1fr;
+    }
+    .related-research-link {
+      grid-template-columns: minmax(0, 1fr) 1.25rem;
+    }
+    .related-research-venue {
+      display: none;
+    }
+    .paper-title {
+      font-size: 1.75rem;
+    }
+    .institution-logos {
+      gap: 0.75rem 1rem;
+      margin-top: 0.75rem;
+    }
+    .institution-logo-item {
+      width: 8.5rem;
+      height: 3.35rem;
+    }
+    .institution-logo {
+      width: 8rem;
+      height: 3.1rem;
+    }
+    .figure-img,
+    .carousel-slide .figure-img {
+      max-height: 380px;
+    }
+    .carousel-container {
+      margin: 0 2.35rem;
+    }
+    .carousel-control-btn {
+      width: 2.15rem;
+      height: 2.15rem;
+    }
+    .prev-btn { left: -2.6rem; }
+    .next-btn { right: -2.6rem; }
+  }
+</style>
+
+<script>
+  // User-controlled carousel logic with robust event delegation
+  document.querySelectorAll('[data-carousel]').forEach((carousel) => {
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    if (slides.length === 0) return;
+
+    let currentIndex = 0;
+
+    function showSlide(index: number) {
+      slides.forEach((slide, idx) => {
+        slide.classList.toggle('active', idx === index);
+      });
+      carousel.querySelectorAll('.carousel-dot').forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === index);
+      });
+      const counter = carousel.querySelector('.carousel-counter');
+      if (counter) counter.textContent = `${index + 1} / ${slides.length}`;
+    }
+
+    // Event delegation: listens for clicks anywhere inside carousel
+    carousel.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      const prevBtn = target.closest('.prev-btn');
+      const nextBtn = target.closest('.next-btn');
+      const dot = target.closest('.carousel-dot');
+
+      if (prevBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+        showSlide(currentIndex);
+      } else if (nextBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        currentIndex = (currentIndex + 1) % slides.length;
+        showSlide(currentIndex);
+      } else if (dot) {
+        e.preventDefault();
+        const dotIndex = Number((dot as HTMLElement).dataset.dotIndex);
+        if (Number.isInteger(dotIndex)) {
+          currentIndex = dotIndex;
+          showSlide(currentIndex);
+        }
+      }
+    });
+
+    if (slides.length < 2) {
+      carousel.querySelectorAll('.carousel-controls-bar').forEach((bar) => {
+        bar.classList.add('hidden');
+      });
+    }
+  });
+
+  // Copy BibTeX
+  document.querySelectorAll('.copy-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const textToCopy = btn.getAttribute('data-bib');
+      if (textToCopy) {
+        await navigator.clipboard.writeText(textToCopy);
+        const copyIcon = btn.querySelector('.copy-icon');
+        const checkIcon = btn.querySelector('.check-icon');
+        const copyText = btn.querySelector('.copy-text');
+
+        copyIcon?.classList.add('hidden');
+        checkIcon?.classList.remove('hidden');
+        if (copyText) copyText.textContent = 'Copied!';
+
+        setTimeout(() => {
+          copyIcon?.classList.remove('hidden');
+          checkIcon?.classList.add('hidden');
+          if (copyText) copyText.textContent = 'Copy';
+        }, 2000);
+      }
+    });
+  });
+</script>

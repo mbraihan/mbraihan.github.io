@@ -1,0 +1,144 @@
+---
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import ScrollToTop from '../components/ScrollToTop.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonicalUrl?: string;
+  type?: string;
+  structuredData?: Record<string, unknown>;
+}
+
+const siteUrl = 'https://mbraihan.github.io';
+const goatCounterCode = 'mbraihan';
+
+const { 
+  title = "Mohammad Raihanul Bashar | Ph.D. Candidate & Researcher", 
+  description = "Ph.D. candidate at Concordia University researching Human-Computer Interaction and Extended Reality.",
+  image = "/prof_pic.jpg",
+  canonicalUrl,
+  type = "website",
+  structuredData
+} = Astro.props;
+
+const resolvedCanonical = canonicalUrl || new URL(Astro.url.pathname, siteUrl).href;
+const resolvedImage = image.startsWith('http') ? image : new URL(image, siteUrl).href;
+const defaultStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Mohammad Raihanul Bashar",
+  "url": siteUrl,
+  "image": resolvedImage,
+  "jobTitle": "Ph.D. Candidate",
+  "worksFor": {
+    "@type": "Organization",
+    "name": "Concordia University"
+  },
+  "alumniOf": {
+    "@type": "Organization",
+    "name": "Concordia University"
+  },
+  "knowsAbout": ["Human-Computer Interaction", "Extended Reality", "Multimodal Interaction", "Virtual Reality", "Augmented Reality"],
+  "sameAs": [
+    "https://github.com/mbraihan",
+    "https://linkedin.com/in/mbraihan",
+    "https://scholar.google.com/citations?user=zDyfhn0AAAAJ&hl=en&oi=ao",
+    "https://orcid.org/0000-0002-5271-457X"
+  ]
+};
+const pageStructuredData = structuredData || defaultStructuredData;
+const publishedTime = typeof pageStructuredData === 'object' && pageStructuredData !== null && 'datePublished' in pageStructuredData
+  ? pageStructuredData.datePublished
+  : null;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Primary SEO Meta Tags -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Mohammad Raihanul Bashar" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={resolvedCanonical} />
+
+    <!-- Keywords (supplementary) -->
+    <meta name="keywords" content="Mohammad Raihanul Bashar, HCI, Human-Computer Interaction, Extended Reality, XR, VR, AR, Multimodal Interaction, Concordia University, Ph.D., Researcher" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={resolvedCanonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={resolvedImage} />
+    <meta property="og:site_name" content="Mohammad Raihanul Bashar" />
+    <meta property="og:locale" content="en_US" />
+    {type === 'article' && publishedTime && (
+      <meta property="article:published_time" content={String(publishedTime)} />
+    )}
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={resolvedCanonical} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={resolvedImage} />
+
+    <!-- Structured Data (JSON-LD) for Google -->
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(pageStructuredData)} />
+
+    <!-- Theme Init (Prevents Flash of Unstyled Theme) -->
+    <script is:inline>
+      (() => {
+        const storageKey = 'theme';
+        const getStoredTheme = () => {
+          try {
+            return localStorage.getItem(storageKey);
+          } catch {
+            return null;
+          }
+        };
+        const storedTheme = getStoredTheme();
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const theme = storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : systemTheme;
+
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
+
+    <!-- GoatCounter Analytics -->
+    <script
+      is:inline
+      data-goatcounter={`https://${goatCounterCode}.goatcounter.com/count`}
+      async
+      src="//gc.zgo.at/count.js"
+    ></script>
+    <script is:inline define:vars={{ goatCounterCode }}>
+      window.__goatcounter_code = goatCounterCode;
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <Navbar />
+    <main id="main-content" class="main-content" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <ScrollToTop />
+  </body>
+</html>
+
+<style>
+  .main-content {
+    flex-grow: 1;
+  }
+</style>

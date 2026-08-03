@@ -1,0 +1,575 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import {
+  ClipboardList, Brain, BarChart3, User, Smile, MessageSquare,
+  LineChart, CheckSquare2, Contact, Activity, ShieldAlert, ArrowRight, CalendarRange, Shuffle
+} from 'lucide-astro';
+
+const categories = ['All', 'Planning', 'Usability & UX', 'Workload', 'Presence'];
+
+const tools = [
+  {
+    id: 'conference-tracker',
+    title: 'HCI Conference Tracker',
+    badge: 'Dashboard',
+    description: 'Track confirmed HCI and XR deadlines, conference dates, and potential resubmission windows.',
+    tags: ['Deadlines', 'Venues', 'Planning'],
+    categories: ['Planning'],
+    icon: CalendarRange,
+    bgTint: 'indigo',
+    iconColor: '#4f46e5',
+    link: '/tools/conference-tracker',
+  },
+  {
+    id: 'counterbalancing',
+    title: 'Counterbalancing & Randomization Planner',
+    badge: 'Planner',
+    description: 'Generate reproducible condition orders and participant assignments with balance diagnostics.',
+    tags: ['Latin Square', 'Randomization', 'Export'],
+    categories: ['Planning'],
+    icon: Shuffle,
+    bgTint: 'teal',
+    iconColor: '#0f766e',
+    link: '/tools/counterbalancing',
+  },
+  {
+    id: 'sus',
+    title: 'System Usability Scale (SUS)',
+    badge: 'Questionnaire',
+    description: 'Collect SUS responses and instantly calculate scores with percentile rankings and interpretation.',
+    tags: ['Survey', 'Scoring', 'Reports'],
+    categories: ['Usability & UX'],
+    icon: ClipboardList,
+    bgTint: 'blue',
+    iconColor: '#2563eb',
+    link: '/tools/sus',
+  },
+  {
+    id: 'nasa-tlx',
+    title: 'NASA Task Load Index (NASA-TLX)',
+    badge: 'Questionnaire',
+    description: 'Run NASA-TLX assessments with weighted scoring and visual workload analysis.',
+    tags: ['Workload', 'Scoring', 'Visualization'],
+    categories: ['Workload'],
+    icon: Brain,
+    bgTint: 'green',
+    iconColor: '#16a34a',
+    link: '/tools/nasa-tlx',
+  },
+  {
+    id: 'ueq',
+    title: 'User Experience Questionnaire (UEQ)',
+    badge: 'Questionnaire',
+    description: 'Manage UEQ questionnaires and analyze attractiveness, pragmatic and hedonic quality.',
+    tags: ['Survey', 'Benchmark', 'Analysis'],
+    categories: ['Usability & UX'],
+    icon: BarChart3,
+    bgTint: 'orange',
+    iconColor: '#ea580c',
+    link: '/tools/ueq',
+  },
+  {
+    id: 'ipq',
+    title: 'IPQ (Igroup Presence Questionnaire)',
+    badge: 'Questionnaire',
+    description: 'Assess sense of presence in XR environments using the IPQ framework.',
+    tags: ['Presence', 'Survey', 'Analysis'],
+    categories: ['Presence'],
+    icon: User,
+    bgTint: 'purple',
+    iconColor: '#9333ea',
+    link: '/tools/ipq',
+  },
+  {
+    id: 'ssq',
+    title: 'SSQ (Simulator Sickness)',
+    badge: 'Questionnaire',
+    description: 'Measure VR and simulator sickness symptoms across Nausea, Oculomotor, and Disorientation subscales.',
+    tags: ['Presence', 'VR Sickness', 'Scoring'],
+    categories: ['Presence'],
+    icon: ShieldAlert,
+    bgTint: 'pink',
+    iconColor: '#db2777',
+    link: '/tools/ssq',
+  },
+  {
+    id: 'borg',
+    title: 'Borg CR-10 (Perceived Exertion)',
+    badge: 'Questionnaire',
+    description: 'Evaluate physical exertion and fatigue dynamics before, during, and after task completion.',
+    tags: ['Workload', 'Ergonomics', 'Analysis'],
+    categories: ['Workload'],
+    icon: Activity,
+    bgTint: 'teal',
+    iconColor: '#0d9488',
+    link: '/tools/borg',
+  },
+  // {
+  //   id: 'pssuq',
+  //   title: 'PSSUQ (Post-Study System Usability)',
+  //   badge: 'Web App',
+  //   description: 'Measure system usability after task completion with the PSSUQ questionnaire.',
+  //   tags: ['Usability', 'Survey', 'Scoring'],
+  //   categories: ['Questionnaires', 'Usability', 'Surveys'],
+  //   icon: Smile,
+  //   bgTint: 'yellow',
+  //   iconColor: '#d97706',
+  //   link: '#',
+  // },
+  // {
+  //   id: 'builder',
+  //   title: 'Custom Questionnaire Builder',
+  //   badge: 'Web App',
+  //   description: 'Create, customize and deploy your own questionnaires with multiple question types.',
+  //   tags: ['Builder', 'Deploy', 'Export'],
+  //   categories: ['Questionnaires', 'Surveys'],
+  //   icon: MessageSquare,
+  //   bgTint: 'sky',
+  //   iconColor: '#0284c7',
+  //   link: '#',
+  // },
+  // {
+  //   id: 'sus-benchmark',
+  //   title: 'SUS Benchmark',
+  //   badge: 'Web App',
+  //   description: 'Compare SUS scores against benchmarks and industry percentile data.',
+  //   tags: ['Benchmark', 'Comparison', 'Reports'],
+  //   categories: ['Usability', 'UX'],
+  //   icon: LineChart,
+  //   bgTint: 'indigo',
+  //   iconColor: '#4f46e5',
+  //   link: '#',
+  // },
+];
+---
+
+<BaseLayout
+  title="Tools | Mohammad Raihanul Bashar"
+  description="Research planning, questionnaire, survey, and evaluation web apps for HCI studies."
+>
+  <div class="tools-page-wrapper">
+    <!-- Header Section -->
+    <header class="tools-header">
+      <h1 class="page-title">Tools</h1>
+      <p class="page-subtitle">
+        Research planning, questionnaire, survey, and evaluation tools for HCI studies.<br />
+        Track opportunities, collect responses, and analyze study results.
+      </p>
+
+      <div class="tools-filter-bar">
+        <!-- Category Filter Pills -->
+        <div class="filter-pills-row" role="group" aria-label="Filter tools by category">
+          {categories.map((cat, idx) => (
+            <button
+              type="button"
+              class={`filter-pill ${idx === 0 ? 'active' : ''}`}
+              data-category={cat}
+              aria-pressed={idx === 0 ? 'true' : 'false'}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        <!-- Compact mobile filter -->
+        <label class="mobile-filter-control">
+          <span>Filter tools</span>
+          <select id="mobile-tool-filter">
+            {categories.map((cat) => <option value={cat}>{cat}</option>)}
+          </select>
+        </label>
+
+        <p id="tools-result-count" class="tools-result-count" aria-live="polite">
+          {tools.length} tools
+        </p>
+      </div>
+    </header>
+
+    <!-- Tools 3-Column Grid -->
+    <div class="tools-grid">
+      {tools.map((tool) => {
+        const IconComponent = tool.icon;
+        return (
+          <article
+            class="tool-card"
+            data-categories={JSON.stringify(tool.categories)}
+          >
+            <div class="card-top-row">
+              <!-- Colored Icon Box -->
+              <div class={`icon-box tint-${tool.bgTint}`}>
+                <IconComponent size={24} style={{ color: tool.iconColor }} />
+              </div>
+
+              <!-- Title & Web App Badge -->
+              <div class="title-block">
+                <h2 class="tool-title">
+                  <a href={tool.link}>{tool.title}</a>
+                </h2>
+                <span class="badge-pill">{tool.badge}</span>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <p class="tool-description">{tool.description}</p>
+
+            <!-- Topic Tags -->
+            <div class="tool-tags-row">
+              {tool.tags.map((tag) => (
+                <span class="tool-tag">{tag}</span>
+              ))}
+            </div>
+
+            <!-- Action Links Footer -->
+            <div class="card-action-row">
+              <a href={tool.link} class="open-link">
+                <span>Open tool</span>
+                <ArrowRight size={14} />
+              </a>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tools-page-wrapper {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 6rem 1.5rem;
+  }
+
+  .tools-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  .page-subtitle {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 2.25rem;
+  }
+
+  /* Filter Pills */
+  .tools-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .filter-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .filter-pill {
+    padding: 0.45rem 1.15rem;
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+  }
+
+  .filter-pill:hover {
+    color: var(--text-main);
+    border-color: var(--accent-blue);
+  }
+
+  .filter-pill.active {
+    color: var(--accent-blue);
+    font-weight: 600;
+    border-color: var(--accent-blue);
+    background-color: rgba(37, 99, 235, 0.06);
+  }
+
+  .mobile-filter-control {
+    display: none;
+  }
+
+  .tools-result-count {
+    flex-shrink: 0;
+    color: var(--text-subtle);
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* Tools 3-Column Grid */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  /* Tool Card */
+  .tool-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .tool-card[hidden] {
+    display: none;
+  }
+
+  .tool-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent-blue);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Card Top Row: Icon + Title/Badge */
+  .card-top-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .icon-box {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Icon Box Background Tints */
+  .tint-blue { background-color: #eff6ff; }
+  .tint-green { background-color: #f0fdf4; }
+  .tint-orange { background-color: #fff7ed; }
+  .tint-purple { background-color: #faf5ff; }
+  .tint-yellow { background-color: #fffbeb; }
+  .tint-teal { background-color: #f0fdfa; }
+  .tint-sky { background-color: #f0f9ff; }
+  .tint-pink { background-color: #fdf2f8; }
+  .tint-indigo { background-color: #eef2ff; }
+
+  :global([data-theme='dark']) .tint-blue { background-color: rgba(37, 99, 235, 0.15); }
+  :global([data-theme='dark']) .tint-green { background-color: rgba(22, 163, 74, 0.15); }
+  :global([data-theme='dark']) .tint-orange { background-color: rgba(234, 88, 12, 0.15); }
+  :global([data-theme='dark']) .tint-purple { background-color: rgba(147, 51, 234, 0.15); }
+  :global([data-theme='dark']) .tint-yellow { background-color: rgba(217, 119, 6, 0.15); }
+  :global([data-theme='dark']) .tint-teal { background-color: rgba(13, 148, 136, 0.15); }
+  :global([data-theme='dark']) .tint-sky { background-color: rgba(2, 132, 199, 0.15); }
+  :global([data-theme='dark']) .tint-pink { background-color: rgba(219, 39, 119, 0.15); }
+  :global([data-theme='dark']) .tint-indigo { background-color: rgba(79, 70, 229, 0.15); }
+
+  .title-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .tool-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.3;
+  }
+
+  .tool-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+
+  .tool-title a:hover {
+    color: var(--accent-blue);
+  }
+
+  .tool-title a:focus-visible {
+    outline: 3px solid var(--accent-blue);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .badge-pill {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.15rem 0.55rem;
+    border-radius: var(--radius-full);
+    background-color: #dbeafe;
+    color: #2563eb;
+  }
+
+  :global([data-theme='dark']) .badge-pill {
+    background-color: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+  }
+
+  /* Description */
+  .tool-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+    min-height: 2.7rem;
+  }
+
+  /* Tags */
+  .tool-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tool-tag {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-pill);
+    color: var(--text-subtle);
+    border: 1px solid var(--border-color);
+  }
+
+  /* Action Row */
+  .card-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.5rem;
+  }
+
+  .open-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    transition: gap var(--transition-fast);
+  }
+
+  .open-link:hover {
+    gap: 0.55rem;
+  }
+
+  .external-icon-link {
+    color: var(--text-subtle);
+    transition: color var(--transition-fast);
+  }
+
+  .external-icon-link:hover {
+    color: var(--accent-blue);
+  }
+
+  @media (max-width: 992px) {
+    .tools-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .tools-page-wrapper {
+      padding-top: 2.5rem;
+    }
+
+    .tools-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-subtitle {
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-pills-row {
+      display: none;
+    }
+
+    .tools-filter-bar {
+      align-items: flex-end;
+    }
+
+    .mobile-filter-control {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 0.4rem;
+      color: var(--text-main);
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .mobile-filter-control select {
+      width: 100%;
+      min-height: 44px;
+      padding: 0.6rem 2.25rem 0.6rem 0.8rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      font: inherit;
+    }
+
+    .tools-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Interactive Category Filter for Tools
+  const pills = document.querySelectorAll('.filter-pill');
+  const toolCards = document.querySelectorAll<HTMLElement>('.tool-card');
+  const mobileFilter = document.querySelector<HTMLSelectElement>('#mobile-tool-filter');
+  const resultCount = document.querySelector<HTMLElement>('#tools-result-count');
+
+  function applyToolFilter(selectedCategory: string) {
+    pills.forEach((pill) => {
+      const isActive = pill.getAttribute('data-category') === selectedCategory;
+      pill.classList.toggle('active', isActive);
+      pill.setAttribute('aria-pressed', String(isActive));
+    });
+
+    if (mobileFilter) mobileFilter.value = selectedCategory;
+
+    let visibleCount = 0;
+    toolCards.forEach((card) => {
+      const rawCategories = card.getAttribute('data-categories');
+      const cardCategories: string[] = rawCategories ? JSON.parse(rawCategories) : [];
+      const isVisible = selectedCategory === 'All' || cardCategories.includes(selectedCategory);
+      card.hidden = !isVisible;
+      if (isVisible) visibleCount += 1;
+    });
+
+    if (resultCount) {
+      const categorySuffix = selectedCategory === 'All' ? '' : ` in ${selectedCategory}`;
+      resultCount.textContent = `${visibleCount} ${visibleCount === 1 ? 'tool' : 'tools'}${categorySuffix}`;
+    }
+  }
+
+  pills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      applyToolFilter(pill.getAttribute('data-category') || 'All');
+    });
+  });
+
+  mobileFilter?.addEventListener('change', () => {
+    applyToolFilter(mobileFilter.value);
+  });
+</script>

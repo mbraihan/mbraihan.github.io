@@ -1,0 +1,2191 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  conferenceVenues,
+  type ConferenceMilestone,
+} from '../../data/conferences';
+import {
+  ArrowLeft,
+  BellRing,
+  CalendarDays,
+  CalendarPlus,
+  CalendarRange,
+  CheckCircle2,
+  CircleHelp,
+  Clock3,
+  ExternalLink,
+  Hourglass,
+  Info,
+  MapPin,
+  Search,
+  Users,
+} from 'lucide-astro';
+
+const today = '2026-07-26';
+const reviewedDate = '2026-07-26';
+
+const dateFormatter = new Intl.DateTimeFormat('en-CA', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+const shortDateFormatter = new Intl.DateTimeFormat('en-CA', {
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+
+const parseDate = (date: string) => new Date(`${date}T12:00:00Z`);
+const formatDate = (date: string) => dateFormatter.format(parseDate(date));
+const formatShortDate = (date: string) =>
+  shortDateFormatter.format(parseDate(date));
+const getDateRange = (milestone: ConferenceMilestone) =>
+  milestone.endDate
+    ? `${formatDate(milestone.date)} – ${formatDate(milestone.endDate)}`
+    : formatDate(milestone.date);
+const getCutoffLabel = (milestone: ConferenceMilestone) =>
+  milestone.timeZone
+    ? `${milestone.cutoffTime || '23:59'} ${milestone.timeZone}`
+    : '';
+
+const upcomingMilestones = conferenceVenues
+  .flatMap((venue) =>
+    venue.milestones
+      .filter((milestone) => milestone.date >= today)
+      .map((milestone) => ({
+        ...milestone,
+        venue: venue.name,
+        venueFullName: venue.fullName,
+        sourceUrl: venue.sourceUrl,
+      })),
+  )
+  .sort((a, b) => a.date.localeCompare(b.date));
+
+const deadlineMilestones = upcomingMilestones.filter(
+  (milestone) => milestone.kind === 'Abstract' || milestone.kind === 'Paper',
+);
+
+const timelineMilestones = upcomingMilestones.slice(0, 18);
+
+const categories = [
+  'Core HCI',
+  'XR / 3D Interaction',
+  'Design / UbiComp',
+] as const;
+const statuses = ['Open', 'In Review', 'Closed', 'TBA'] as const;
+
+const statItems = [
+  {
+    label: 'Venues tracked',
+    value: conferenceVenues.length,
+    icon: Users,
+    color: 'blue',
+  },
+  {
+    label: 'Open',
+    value: conferenceVenues.filter((venue) => venue.status === 'Open').length,
+    icon: CheckCircle2,
+    color: 'green',
+  },
+  {
+    label: 'In review',
+    value: conferenceVenues.filter((venue) => venue.status === 'In Review')
+      .length,
+    icon: Hourglass,
+    color: 'amber',
+  },
+  {
+    label: 'Dates TBA',
+    value: conferenceVenues.filter((venue) => venue.status === 'TBA').length,
+    icon: CircleHelp,
+    color: 'violet',
+  },
+];
+
+const getNextDeadline = (venue: (typeof conferenceVenues)[number]) =>
+  venue.milestones
+    .filter(
+      (milestone) =>
+        milestone.date >= today &&
+        (milestone.kind === 'Abstract' || milestone.kind === 'Paper'),
+    )
+    .sort((a, b) => a.date.localeCompare(b.date))[0];
+
+const getConferenceDate = (venue: (typeof conferenceVenues)[number]) =>
+  venue.milestones.find((milestone) => milestone.kind === 'Conference');
+
+const resubmissionRoutes = [
+  {
+    sourceId: 'vrst-2026',
+    notificationLabel: 'Author notification',
+    targetIds: ['ieee-vr-2027', 'chi-2027'],
+  },
+  {
+    sourceId: 'ieee-vr-2027',
+    notificationLabel: 'Initial notification',
+    targetIds: ['dis-2027', 'mobilehci-2027', 'uist-2027'],
+  },
+  {
+    sourceId: 'chi-2027',
+    notificationLabel: 'Final notification',
+    targetIds: ['dis-2027', 'mobilehci-2027', 'uist-2027'],
+  },
+];
+
+const getDaysBetween = (start: string, end: string) =>
+  Math.round(
+    (Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) /
+      86_400_000,
+  );
+
+const getWindowRisk = (days: number) => {
+  if (days < 14) return { label: 'Tight', className: 'tight' };
+  if (days < 30) return { label: 'Short', className: 'short' };
+  return { label: 'Workable', className: 'workable' };
+};
+
+const resubmissionRows = resubmissionRoutes.flatMap((route) => {
+  const source = conferenceVenues.find((venue) => venue.id === route.sourceId);
+  const notification = source?.milestones.find(
+    (milestone) =>
+      milestone.kind === 'Notification' &&
+      milestone.label === route.notificationLabel,
+  );
+  if (!source || !notification) return [];
+
+  const targets = route.targetIds.flatMap((targetId) => {
+    const venue = conferenceVenues.find((item) => item.id === targetId);
+    if (!venue) return [];
+    const deadline = venue.milestones
+      .filter(
+        (milestone) =>
+          (milestone.kind === 'Abstract' || milestone.kind === 'Paper') &&
+          milestone.date > notification.date &&
+          !milestone.label.toLowerCase().includes('revised'),
+      )
+      .sort((a, b) => a.date.localeCompare(b.date))[0];
+    const days = deadline
+      ? getDaysBetween(notification.date, deadline.date)
+      : null;
+
+    return [
+      {
+        venue: venue.name,
+        deadline,
+        days,
+        risk: days === null ? null : getWindowRisk(days),
+      },
+    ];
+  });
+
+  return [{ source: source.name, notification, targets }];
+});
+---
+
+<BaseLayout
+  title="HCI Conference Tracker | Mohammad Raihanul Bashar"
+  description="Track confirmed HCI, XR, and interaction design conference deadlines, dates, and resubmission windows."
+>
+  <div class="tracker-shell">
+    <header class="tracker-header">
+      <div class="header-copy">
+        <a class="back-link" href="/tools">
+          <ArrowLeft size={16} aria-hidden="true" />
+          All tools
+        </a>
+        <h1>HCI Conference Tracker</h1>
+        <p>
+          Plan submissions across major HCI, XR, and interaction design venues
+          using confirmed dates and clearly marked TBA entries.
+        </p>
+        <div class="reviewed-date">
+          <CalendarDays size={16} aria-hidden="true" />
+          <span
+            >Last reviewed: <time datetime={reviewedDate}
+              >{formatDate(reviewedDate)}</time
+            ></span
+          >
+        </div>
+      </div>
+
+      <div class="calendar-visual" aria-hidden="true">
+        <span class="visual-bell"><BellRing size={20} /></span>
+        <CalendarRange size={72} stroke-width={1.5} />
+        <span class="visual-date">26</span>
+      </div>
+    </header>
+
+    <section class="stats-grid" aria-label="Tracker summary">
+      {
+        statItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <article class={`stat-item stat-${item.color}`}>
+              <span class="stat-icon">
+                <Icon size={22} aria-hidden="true" />
+              </span>
+              <span class="stat-value">{item.value}</span>
+              <span class="stat-label">{item.label}</span>
+            </article>
+          );
+        })
+      }
+    </section>
+
+    <section class="planning-grid" aria-label="Deadline planning">
+      <article class="planning-panel timeline-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-number">1</p>
+            <div>
+              <h2>Timeline</h2>
+              <p>Upcoming deadlines and conference dates</p>
+            </div>
+          </div>
+          <label class="range-control">
+            <span class="sr-only">Timeline range</span>
+            <select id="timeline-range">
+              <option value="3">Next 3 months</option>
+              <option value="6" selected>Next 6 months</option>
+              <option value="12">Next 12 months</option>
+              <option value="all">All dates</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="timeline-table-wrap">
+          <table class="timeline-table" id="timeline-list">
+            <caption class="sr-only">Upcoming conference milestones</caption>
+            <colgroup>
+              <col class="timeline-date-column" />
+              <col class="timeline-year-column" />
+              <col class="timeline-stage-column" />
+              <col class="timeline-conference-column" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Year</th>
+                <th scope="col">Stage</th>
+                <th scope="col">Conference</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                timelineMilestones.map((milestone) => (
+                  <tr
+                    class="timeline-item"
+                    data-timeline-date={milestone.date}
+                    data-kind={milestone.kind.toLowerCase()}
+                  >
+                    <td>
+                      <time datetime={milestone.date}>
+                        {formatShortDate(milestone.date)}
+                      </time>
+                    </td>
+                    <td class="timeline-year">
+                      {parseDate(milestone.date).getUTCFullYear()}
+                    </td>
+                    <td>
+                      <span class="timeline-stage">
+                        <span class="timeline-dot" aria-hidden="true" />
+                        <span class="timeline-stage-copy">
+                          <span class="timeline-event">{milestone.label}</span>
+                          {
+                            milestone.timeZone && (
+                              <small>{getCutoffLabel(milestone)}</small>
+                            )
+                          }
+                        </span>
+                      </span>
+                    </td>
+                    <th scope="row" class="timeline-venue">{milestone.venue}</th>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p id="timeline-empty" class="empty-message" hidden>
+          No dates fall within this range.
+        </p>
+
+        <div class="timeline-legend" aria-label="Timeline legend">
+          <span><i class="dot-abstract"></i>Abstract</span>
+          <span><i class="dot-paper"></i>Paper</span>
+          <span><i class="dot-notification"></i>Notification</span>
+          <span><i class="dot-conference"></i>Conference</span>
+          <span class="timezone-key">AoE = Anywhere on Earth (UTC−12)</span>
+        </div>
+      </article>
+
+      <div class="planning-side">
+        <article class="planning-panel upcoming-panel">
+          <div class="compact-heading">
+            <CalendarDays size={18} aria-hidden="true" />
+            <h2>Upcoming deadlines</h2>
+            <span>Next {Math.min(6, deadlineMilestones.length)}</span>
+          </div>
+          <ol class="upcoming-list">
+            {
+              deadlineMilestones.slice(0, 6).map((milestone) => (
+                <li>
+                  <span
+                    class={`deadline-dot kind-${milestone.kind.toLowerCase()}`}
+                    aria-hidden="true"
+                  />
+                  <strong>{milestone.venue}</strong>
+                  <span class="upcoming-stage">
+                    <span>{milestone.kind}</span>
+                    <small>{getCutoffLabel(milestone)}</small>
+                  </span>
+                  <time datetime={milestone.date}>
+                    {formatShortDate(milestone.date)}
+                  </time>
+                  <button
+                    class="deadline-calendar-button"
+                    type="button"
+                    title={`Add ${milestone.venue} ${milestone.kind.toLowerCase()} deadline to calendar`}
+                    aria-label={`Add ${milestone.venue} ${milestone.kind.toLowerCase()} deadline to calendar`}
+                    data-calendar
+                    data-calendar-mode="deadline"
+                    data-calendar-title={`Deadline: ${milestone.venue} — ${milestone.label}`}
+                    data-calendar-description={milestone.venueFullName}
+                    data-calendar-start={milestone.date}
+                    data-calendar-end={milestone.date}
+                    data-calendar-url={milestone.sourceUrl}
+                    data-calendar-cutoff={getCutoffLabel(milestone)}
+                  >
+                    <CalendarPlus size={16} aria-hidden="true" />
+                  </button>
+                </li>
+              ))
+            }
+          </ol>
+        </article>
+
+        <article class="planning-panel resubmission-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-number">2</p>
+              <div>
+                <h2>Resubmission planner</h2>
+                <p>Potential windows after notification</p>
+              </div>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">If rejected from</th>
+                  <th scope="col">Notification</th>
+                  <th scope="col">Potential targets</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  resubmissionRows.map((row) => (
+                    <tr>
+                      <th scope="row">{row.source}</th>
+                      <td>
+                        <time datetime={row.notification.date}>
+                          {formatDate(row.notification.date)}
+                        </time>
+                      </td>
+                      <td>
+                        <div class="window-list">
+                          {row.targets.map((target) => (
+                            <span
+                              class={`window-chip ${target.risk ? `is-${target.risk.className}` : 'is-tba'}`}
+                            >
+                              <strong>{target.venue}</strong>
+                              {target.deadline && target.days !== null ? (
+                                <>
+                                  <span>
+                                    {target.days} {target.days === 1 ? 'day' : 'days'} ·{' '}
+                                    {formatShortDate(target.deadline.date)}
+                                  </span>
+                                  <em>{target.risk?.label}</em>
+                                </>
+                              ) : (
+                                <span>Date TBA</span>
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="planner-note">
+            <Info size={15} aria-hidden="true" />
+            Tight means fewer than 14 calendar days. Check scope, fit, and the
+            official call before resubmitting.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="venue-directory" aria-labelledby="venues-heading">
+      <div class="directory-heading">
+        <div>
+          <h2 id="venues-heading">Conference directory</h2>
+          <p>Search, filter, compare, and export dates to your calendar.</p>
+        </div>
+        <p class="verified-key">
+          <CheckCircle2 size={16} aria-hidden="true" />
+          Confirmed dates link to official sources
+        </p>
+      </div>
+
+      <div class="filter-toolbar" aria-label="Filter conferences">
+        <label class="search-field">
+          <Search size={18} aria-hidden="true" />
+          <span class="sr-only">Search conferences</span>
+          <input
+            id="conference-search"
+            type="search"
+            placeholder="Search venues, topics, or locations"
+          />
+        </label>
+
+        <label class="sort-field">
+          <span>Sort</span>
+          <select id="conference-sort">
+            <option value="deadline">Deadline (Earliest)</option>
+            <option value="rank">ICORE rank (A* first)</option>
+            <option value="name">Name A–Z</option>
+            <option value="status">Status</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-set" aria-label="Filter by status">
+          <span class="filter-label">Status</span>
+          <button
+            class="filter-chip active"
+            type="button"
+            data-filter-status="All"
+            aria-pressed="true">All</button
+          >
+          {
+            statuses.map((status) => (
+              <button
+                class="filter-chip"
+                type="button"
+                data-filter-status={status}
+                aria-pressed="false"
+              >
+                {status}
+              </button>
+            ))
+          }
+        </div>
+
+        <div class="filter-set" aria-label="Filter by research area">
+          <span class="filter-label">Area</span>
+          <button
+            class="filter-chip active"
+            type="button"
+            data-filter-category="All"
+            aria-pressed="true">All</button
+          >
+          {
+            categories.map((category) => (
+              <button
+                class="filter-chip"
+                type="button"
+                data-filter-category={category}
+                aria-pressed="false"
+              >
+                {category === 'XR / 3D Interaction' ? 'XR / 3D' : category}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <p id="results-status" class="results-status" aria-live="polite">
+        Showing {conferenceVenues.length} conferences
+      </p>
+
+      <div id="conference-groups">
+        {
+          categories.map((category) => (
+            <section class="conference-group" data-conference-group={category}>
+              <div class="group-heading">
+                <span aria-hidden="true" />
+                <h3>{category}</h3>
+                <p>
+                  {
+                    conferenceVenues.filter(
+                      (venue) => venue.category === category,
+                    ).length
+                  }{' '}
+                  venues
+                </p>
+              </div>
+
+              <div class="conference-grid">
+                {conferenceVenues
+                  .filter((venue) => venue.category === category)
+                  .map((venue) => {
+                    const nextDeadline = getNextDeadline(venue);
+                    const conferenceDate = getConferenceDate(venue);
+                    const sortDeadline = nextDeadline?.date || '9999-12-31';
+                    const rankLabel = ['A*', 'A', 'B'].includes(venue.rank)
+                      ? `ICORE ${venue.rank}`
+                      : venue.rank;
+
+                    return (
+                      <article
+                        class="conference-card"
+                        data-conference
+                        data-name={`${venue.name} ${venue.fullName} ${venue.tags.join(' ')} ${venue.location}`.toLowerCase()}
+                        data-status={venue.status}
+                        data-category={venue.category}
+                        data-deadline={sortDeadline}
+                        data-rank={venue.rank}
+                      >
+                        <div class="conference-card-header">
+                          <div class="conference-brand">
+                            <span class="conference-logo">
+                              <img
+                                src={venue.logo}
+                                alt={venue.logoAlt}
+                                width="64"
+                                height="44"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            </span>
+                            <div class="conference-title-copy">
+                              <div class="title-line">
+                                <h4>{venue.name}</h4>
+                                <a
+                                  class="rank-badge"
+                                  href={venue.rankUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title={`${rankLabel} — ICORE 2026 classification`}
+                                >
+                                  {rankLabel}
+                                  <span class="sr-only">
+                                    (view ICORE ranking in a new tab)
+                                  </span>
+                                </a>
+                              </div>
+                              <p>{venue.fullName}</p>
+                            </div>
+                          </div>
+                          <span
+                            class={`status-badge status-${venue.status.toLowerCase().replace(' ', '-')}`}
+                          >
+                            {venue.status}
+                          </span>
+                        </div>
+
+                        <dl class="conference-facts">
+                          <div>
+                            <dt>
+                              <Clock3 size={15} aria-hidden="true" />
+                              Next deadline
+                            </dt>
+                            <dd>
+                              {nextDeadline ? (
+                                <>
+                                  <time datetime={nextDeadline.date}>
+                                    {formatDate(nextDeadline.date)}
+                                  </time>
+                                  <span>
+                                    {nextDeadline.label}
+                                    {nextDeadline.timeZone &&
+                                      ` · ${getCutoffLabel(nextDeadline)}`}
+                                  </span>
+                                </>
+                              ) : (
+                                <span>To be announced</span>
+                              )}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>
+                              <CalendarDays size={15} aria-hidden="true" />
+                              Conference
+                            </dt>
+                            <dd>
+                              {conferenceDate ? (
+                                <time datetime={conferenceDate.date}>
+                                  {getDateRange(conferenceDate)}
+                                </time>
+                              ) : (
+                                <span>To be announced</span>
+                              )}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>
+                              <MapPin size={15} aria-hidden="true" />
+                              Location
+                            </dt>
+                            <dd>{venue.location}</dd>
+                          </div>
+                        </dl>
+
+                        <div class="conference-tags">
+                          {venue.tags.map((tag) => (
+                            <span>{tag}</span>
+                          ))}
+                        </div>
+
+                        <div class="conference-actions">
+                          <a
+                            href={venue.sourceUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Official source
+                            <ExternalLink size={15} aria-hidden="true" />
+                            <span class="sr-only">(opens in a new tab)</span>
+                          </a>
+                          {conferenceDate && (
+                            <button
+                              class="calendar-button"
+                              type="button"
+                              data-calendar
+                              data-calendar-mode="date-range"
+                              data-calendar-title={venue.name}
+                              data-calendar-description={venue.fullName}
+                              data-calendar-start={conferenceDate.date}
+                              data-calendar-end={
+                                conferenceDate.endDate || conferenceDate.date
+                              }
+                              data-calendar-location={venue.location}
+                              data-calendar-url={venue.sourceUrl}
+                            >
+                              <CalendarPlus size={16} aria-hidden="true" />
+                              Add dates
+                            </button>
+                          )}
+                        </div>
+
+                        <p
+                          class={`verification ${venue.verified ? 'is-verified' : ''}`}
+                        >
+                          {venue.verified ? (
+                            <>
+                              <CheckCircle2 size={14} aria-hidden="true" />
+                              Dates checked against the official call
+                            </>
+                          ) : (
+                            <>
+                              <CircleHelp size={14} aria-hidden="true" />
+                              Deadline announcement pending
+                            </>
+                          )}
+                        </p>
+                      </article>
+                    );
+                  })}
+              </div>
+            </section>
+          ))
+        }
+      </div>
+
+      <div id="directory-empty" class="directory-empty" hidden>
+        <Search size={24} aria-hidden="true" />
+        <h3>No conferences match these filters</h3>
+        <p>Try a broader search or reset one of the filters.</p>
+        <button type="button" id="reset-filters">Reset filters</button>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .tracker-shell {
+    width: min(1320px, 100%);
+    margin: 0 auto;
+    padding: 2.25rem 1.5rem 5rem;
+  }
+
+  .tracker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .header-copy {
+    max-width: 720px;
+  }
+
+  .back-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.35rem;
+    color: var(--accent-blue);
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+
+  .tracker-header h1 {
+    margin-bottom: 0.45rem;
+    font-size: 2rem;
+    letter-spacing: 0;
+  }
+
+  .tracker-header p {
+    max-width: 680px;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .reviewed-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+    color: var(--text-subtle);
+    font-size: 0.84rem;
+  }
+
+  .calendar-visual {
+    width: 176px;
+    height: 112px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    position: relative;
+    border: 1px solid var(--accent-blue-border);
+    border-radius: var(--radius-sm);
+    background:
+      linear-gradient(var(--border-subtle) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px),
+      var(--accent-blue-light);
+    background-size: 18px 18px;
+    color: var(--accent-blue);
+  }
+
+  .visual-date {
+    position: absolute;
+    bottom: 29px;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  .visual-bell {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    position: absolute;
+    top: -11px;
+    right: -10px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: #fff;
+    box-shadow: var(--shadow-md);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat-item {
+    min-height: 92px;
+    display: grid;
+    grid-template-columns: 44px auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+    grid-row: 1 / 3;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-sm);
+  }
+
+  .stat-blue .stat-icon {
+    color: #2563eb;
+    background: #eff6ff;
+  }
+  .stat-green .stat-icon {
+    color: #15803d;
+    background: #f0fdf4;
+  }
+  .stat-amber .stat-icon {
+    color: #b45309;
+    background: #fffbeb;
+  }
+  .stat-violet .stat-icon {
+    color: #7c3aed;
+    background: #f5f3ff;
+  }
+
+  :global([data-theme='dark']) .stat-blue .stat-icon {
+    background: rgba(37, 99, 235, 0.18);
+  }
+  :global([data-theme='dark']) .stat-green .stat-icon {
+    background: rgba(21, 128, 61, 0.18);
+  }
+  :global([data-theme='dark']) .stat-amber .stat-icon {
+    background: rgba(180, 83, 9, 0.18);
+  }
+  :global([data-theme='dark']) .stat-violet .stat-icon {
+    background: rgba(124, 58, 237, 0.18);
+  }
+
+  .stat-value {
+    align-self: end;
+    font-family: var(--font-heading);
+    color: var(--text-main);
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .stat-label {
+    align-self: start;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+  }
+
+  .planning-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(520px, 1.35fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .planning-side {
+    min-width: 0;
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+  }
+
+  .planning-panel {
+    min-width: 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .timeline-panel,
+  .resubmission-panel {
+    padding: 1rem;
+  }
+
+  .panel-heading,
+  .panel-heading > div,
+  .compact-heading {
+    display: flex;
+    align-items: center;
+  }
+
+  .panel-heading {
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .panel-heading > div {
+    min-width: 0;
+    gap: 0.65rem;
+  }
+
+  .panel-heading h2,
+  .compact-heading h2 {
+    font-size: 1rem;
+  }
+
+  .panel-heading p:not(.section-number) {
+    margin-top: 0.05rem;
+    color: var(--text-subtle);
+    font-size: 0.76rem;
+  }
+
+  .section-number {
+    width: 25px;
+    height: 25px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: #fff;
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+
+  select,
+  input {
+    font: inherit;
+    color: var(--text-main);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+  }
+
+  .range-control select,
+  .sort-field select {
+    min-height: 44px;
+    padding: 0.55rem 2.1rem 0.55rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+  }
+
+  .timeline-table-wrap {
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+  }
+
+  .timeline-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 0.74rem;
+  }
+
+  .timeline-date-column {
+    width: 70px;
+  }
+
+  .timeline-year-column {
+    width: 50px;
+  }
+
+  .timeline-conference-column {
+    width: 96px;
+  }
+
+  .timeline-table th,
+  .timeline-table td {
+    padding: 0.45rem 0.5rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: middle;
+  }
+
+  .timeline-table thead th {
+    background: var(--bg-pill);
+    color: var(--text-subtle);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .timeline-table tbody tr:last-child th,
+  .timeline-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .timeline-item time {
+    color: var(--accent-blue);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .timeline-year {
+    color: var(--text-subtle);
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .timeline-stage {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .timeline-stage-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+  }
+
+  .timeline-stage-copy small {
+    color: var(--text-subtle);
+    font-size: 0.58rem;
+    font-weight: 700;
+  }
+
+  .timeline-dot,
+  .deadline-dot,
+  .timeline-legend i {
+    width: 8px;
+    height: 8px;
+    display: inline-block;
+    border-radius: 50%;
+    background: #2563eb;
+  }
+
+  .timeline-item[data-kind='paper'] .timeline-dot,
+  .dot-paper,
+  .kind-paper {
+    background: #16a34a !important;
+  }
+  .timeline-item[data-kind='notification'] .timeline-dot,
+  .dot-notification {
+    background: #ea580c !important;
+  }
+  .timeline-item[data-kind='conference'] .timeline-dot,
+  .dot-conference {
+    background: #7c3aed !important;
+  }
+  .timeline-item[data-kind='abstract'] .timeline-dot,
+  .dot-abstract,
+  .kind-abstract {
+    background: #2563eb !important;
+  }
+
+  .timeline-event {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .timeline-venue {
+    overflow: hidden;
+    color: var(--text-main);
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .timeline-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem 1rem;
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-subtle);
+    font-size: 0.68rem;
+  }
+
+  .timeline-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .timeline-legend .timezone-key {
+    margin-left: auto;
+    font-weight: 700;
+  }
+
+  .upcoming-panel {
+    padding: 0.8rem 1rem;
+  }
+
+  .compact-heading {
+    gap: 0.55rem;
+    margin-bottom: 0.4rem;
+    color: var(--accent-blue);
+  }
+
+  .compact-heading h2 {
+    color: var(--text-main);
+  }
+
+  .compact-heading > span {
+    margin-left: auto;
+    color: var(--text-subtle);
+    font-size: 0.7rem;
+  }
+
+  .upcoming-list {
+    list-style: none;
+  }
+
+  .upcoming-list li {
+    min-height: 48px;
+    display: grid;
+    grid-template-columns: 10px minmax(82px, 0.8fr) minmax(72px, 1fr) 62px 44px;
+    align-items: center;
+    gap: 0.45rem;
+    border-top: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: 0.76rem;
+  }
+
+  .upcoming-list strong {
+    color: var(--text-main);
+  }
+
+  .upcoming-list time {
+    color: var(--text-main);
+    text-align: right;
+  }
+
+  .upcoming-stage {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+  }
+
+  .upcoming-stage small {
+    color: var(--text-subtle);
+    font-size: 0.58rem;
+    font-weight: 700;
+  }
+
+  .deadline-calendar-button {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--accent-blue);
+  }
+
+  .deadline-calendar-button:hover {
+    border-color: var(--accent-blue-border);
+    background: var(--accent-blue-light);
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+  }
+
+  th,
+  td {
+    padding: 0.55rem 0.65rem;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th:last-child,
+  td:last-child {
+    border-right: 0;
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  thead th {
+    background: var(--bg-pill);
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  tbody th {
+    color: var(--text-main);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    color: var(--text-muted);
+  }
+
+  .window-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .window-chip {
+    min-width: 126px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.08rem 0.45rem;
+    padding: 0.38rem 0.5rem;
+    border-left: 3px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-pill);
+    line-height: 1.25;
+  }
+
+  .window-chip strong {
+    color: var(--text-main);
+    font-size: 0.7rem;
+  }
+
+  .window-chip span {
+    grid-column: 1 / -1;
+    color: var(--text-subtle);
+    font-size: 0.64rem;
+  }
+
+  .window-chip em {
+    padding: 0.08rem 0.28rem;
+    border-radius: 3px;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: 0.56rem;
+    font-style: normal;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .window-chip.is-tight {
+    border-left-color: #dc2626;
+  }
+
+  .window-chip.is-tight em {
+    color: #b91c1c;
+  }
+
+  .window-chip.is-short {
+    border-left-color: #d97706;
+  }
+
+  .window-chip.is-short em {
+    color: #b45309;
+  }
+
+  .window-chip.is-workable {
+    border-left-color: #16a34a;
+  }
+
+  .window-chip.is-workable em {
+    color: #15803d;
+  }
+
+  :global([data-theme='dark']) .window-chip.is-tight em {
+    color: #fca5a5;
+  }
+
+  :global([data-theme='dark']) .window-chip.is-short em {
+    color: #fcd34d;
+  }
+
+  :global([data-theme='dark']) .window-chip.is-workable em {
+    color: #86efac;
+  }
+
+  .planner-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    margin-top: 0.65rem;
+    color: var(--text-subtle);
+    font-size: 0.72rem;
+  }
+
+  .planner-note svg {
+    flex: 0 0 auto;
+    color: var(--accent-blue);
+  }
+
+  .venue-directory {
+    scroll-margin-top: 5rem;
+  }
+
+  .directory-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .directory-heading h2 {
+    margin-bottom: 0.15rem;
+    font-size: 1.45rem;
+  }
+
+  .directory-heading p {
+    color: var(--text-muted);
+    font-size: 0.86rem;
+  }
+
+  .verified-key {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .verified-key svg {
+    color: #15803d;
+  }
+
+  .filter-toolbar {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) auto;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .search-field {
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-subtle);
+  }
+
+  .search-field:focus-within {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px var(--accent-blue-light);
+  }
+
+  .search-field input {
+    width: 100%;
+    min-height: 44px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+  }
+
+  .sort-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-subtle);
+    font-size: 0.78rem;
+  }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.25rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .filter-set {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .filter-label {
+    margin-right: 0.2rem;
+    color: var(--text-subtle);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .filter-chip {
+    min-height: 40px;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .filter-chip:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  .filter-chip.active {
+    border-color: var(--accent-blue);
+    background: var(--accent-blue);
+    color: #fff;
+  }
+
+  .results-status {
+    min-height: 1.4rem;
+    margin: 0.65rem 0 0.25rem;
+    color: var(--text-subtle);
+    font-size: 0.76rem;
+  }
+
+  .conference-group {
+    margin-top: 1.15rem;
+  }
+
+  .group-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .group-heading > span {
+    width: 24px;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--accent-blue);
+  }
+
+  .group-heading h3 {
+    font-size: 1rem;
+  }
+
+  .group-heading p {
+    color: var(--text-subtle);
+    font-size: 0.73rem;
+  }
+
+  .conference-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .conference-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0.95rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+    transition:
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .conference-card:hover {
+    border-color: var(--accent-blue-border);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .conference-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.55rem;
+    min-height: 88px;
+  }
+
+  .conference-brand {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    align-items: start;
+    gap: 0.65rem;
+  }
+
+  .conference-logo {
+    width: 56px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: #fff;
+  }
+
+  .conference-logo img {
+    width: 100%;
+    height: 100%;
+    padding: 0.25rem;
+    object-fit: contain;
+  }
+
+  .conference-title-copy {
+    min-width: 0;
+  }
+
+  .title-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .title-line h4 {
+    color: var(--accent-blue);
+    font-size: 1rem;
+  }
+
+  .conference-card-header p {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  .rank-badge,
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-full);
+    font-size: 0.62rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .rank-badge {
+    min-height: 24px;
+    padding: 0.18rem 0.42rem;
+    border: 1px solid var(--accent-blue-border);
+    background: var(--accent-blue-light);
+    color: var(--accent-blue);
+  }
+
+  .rank-badge:hover {
+    border-color: var(--accent-blue);
+  }
+
+  .status-badge {
+    min-height: 24px;
+    flex: 0 0 auto;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .status-open {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .status-in-review {
+    background: #ffedd5;
+    color: #9a3412;
+  }
+  .status-closed {
+    background: #f1f5f9;
+    color: #475569;
+  }
+  .status-tba {
+    background: #f3e8ff;
+    color: #7e22ce;
+  }
+
+  :global([data-theme='dark']) .status-open {
+    background: rgba(22, 101, 52, 0.34);
+    color: #86efac;
+  }
+  :global([data-theme='dark']) .status-in-review {
+    background: rgba(154, 52, 18, 0.34);
+    color: #fdba74;
+  }
+  :global([data-theme='dark']) .status-closed {
+    background: #334155;
+    color: #cbd5e1;
+  }
+  :global([data-theme='dark']) .status-tba {
+    background: rgba(126, 34, 206, 0.3);
+    color: #d8b4fe;
+  }
+
+  .conference-facts {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0.8rem 0;
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .conference-facts > div {
+    min-width: 0;
+  }
+
+  .conference-facts dt {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.05rem;
+    color: var(--text-subtle);
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .conference-facts dd {
+    color: var(--text-main);
+    font-size: 0.76rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .conference-facts dd span {
+    display: block;
+    margin-top: 0.05rem;
+    color: var(--text-subtle);
+    font-size: 0.67rem;
+    font-weight: 500;
+  }
+
+  .conference-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .conference-tags span {
+    padding: 0.18rem 0.42rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    background: var(--bg-pill);
+    color: var(--text-subtle);
+    font-size: 0.64rem;
+  }
+
+  .conference-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: auto;
+  }
+
+  .conference-actions a,
+  .calendar-button {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.58rem;
+    border: 1px solid var(--accent-blue-border);
+    border-radius: var(--radius-sm);
+    color: var(--accent-blue);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .conference-actions a:hover,
+  .calendar-button:hover {
+    border-color: var(--accent-blue);
+    background: var(--accent-blue-light);
+  }
+
+  .deadline-calendar-button:focus-visible,
+  .calendar-button:focus-visible {
+    outline: 3px solid var(--accent-blue);
+    outline-offset: 2px;
+  }
+
+  .verification {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.3rem;
+    margin-top: 0.65rem;
+    color: var(--text-subtle);
+    font-size: 0.62rem;
+    line-height: 1.35;
+  }
+
+  .verification svg {
+    flex: 0 0 auto;
+  }
+
+  .verification.is-verified {
+    color: #15803d;
+  }
+
+  :global([data-theme='dark']) .verification.is-verified {
+    color: #86efac;
+  }
+
+  .directory-empty {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .directory-empty svg {
+    color: var(--accent-blue);
+  }
+
+  .directory-empty h3 {
+    margin: 0.6rem 0 0.2rem;
+    font-size: 1.05rem;
+  }
+
+  .directory-empty p {
+    margin-bottom: 0.85rem;
+    font-size: 0.82rem;
+  }
+
+  .directory-empty button {
+    min-height: 44px;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-sm);
+    background: var(--accent-blue);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .empty-message {
+    padding: 1rem;
+    color: var(--text-subtle);
+    text-align: center;
+    font-size: 0.8rem;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 1120px) {
+    .planning-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .planning-side {
+      grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+    }
+
+    .conference-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 840px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .planning-side {
+      grid-template-columns: 1fr;
+    }
+
+    .conference-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .tracker-shell {
+      padding: 1.4rem 1rem 4rem;
+    }
+
+    .tracker-header {
+      align-items: flex-start;
+    }
+
+    .tracker-header h1 {
+      font-size: 1.65rem;
+    }
+
+    .calendar-visual {
+      display: none;
+    }
+
+    .stat-item {
+      min-height: 82px;
+      padding: 0.75rem;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+    }
+
+    .panel-heading {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .range-control,
+    .range-control select {
+      width: 100%;
+    }
+
+    .timeline-date-column {
+      width: 58px;
+    }
+
+    .timeline-year-column {
+      width: 43px;
+    }
+
+    .timeline-conference-column {
+      width: 92px;
+    }
+
+    .timeline-table th,
+    .timeline-table td {
+      padding: 0.52rem 0.35rem;
+    }
+
+    .timeline-table thead th {
+      font-size: 0.56rem;
+    }
+
+    .timeline-event {
+      white-space: normal;
+    }
+
+    .timeline-venue {
+      text-align: left;
+      font-size: 0.66rem;
+    }
+
+    .upcoming-list li {
+      grid-template-columns: 10px minmax(72px, 0.8fr) minmax(66px, 1fr) 56px 44px;
+      gap: 0.32rem;
+      min-height: 52px;
+    }
+
+    .timeline-legend .timezone-key {
+      width: 100%;
+      margin-left: 0;
+    }
+
+    .directory-heading {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .filter-toolbar {
+      grid-template-columns: 1fr;
+    }
+
+    .sort-field {
+      justify-content: space-between;
+    }
+
+    .sort-field select {
+      flex: 1;
+    }
+
+    .filter-row {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .filter-chip,
+    .conference-actions a,
+    .calendar-button {
+      min-height: 44px;
+    }
+
+    .conference-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .conference-card-header {
+      min-height: 0;
+    }
+
+    .rank-badge {
+      min-height: 44px;
+    }
+
+    .conference-actions a,
+    .calendar-button {
+      flex: 1 1 130px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .conference-card {
+      transition: none;
+    }
+
+    .conference-card:hover {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const searchInput =
+    document.querySelector<HTMLInputElement>('#conference-search');
+  const sortSelect =
+    document.querySelector<HTMLSelectElement>('#conference-sort');
+  const statusButtons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>('[data-filter-status]'),
+  );
+  const categoryButtons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>('[data-filter-category]'),
+  );
+  const conferenceCards = Array.from(
+    document.querySelectorAll<HTMLElement>('[data-conference]'),
+  );
+  const conferenceGroups = Array.from(
+    document.querySelectorAll<HTMLElement>('[data-conference-group]'),
+  );
+  const resultsStatus = document.querySelector<HTMLElement>('#results-status');
+  const directoryEmpty =
+    document.querySelector<HTMLElement>('#directory-empty');
+  const resetButton =
+    document.querySelector<HTMLButtonElement>('#reset-filters');
+
+  let activeStatus = 'All';
+  let activeCategory = 'All';
+
+  const setActiveButton = (
+    buttons: HTMLButtonElement[],
+    activeButton: HTMLButtonElement,
+  ) => {
+    buttons.forEach((button) => {
+      const isActive = button === activeButton;
+      button.classList.toggle('active', isActive);
+      button.setAttribute('aria-pressed', String(isActive));
+    });
+  };
+
+  const applyFilters = () => {
+    const query = searchInput?.value.trim().toLowerCase() || '';
+    let visibleCount = 0;
+
+    conferenceCards.forEach((card) => {
+      const matchesSearch = !query || (card.dataset.name || '').includes(query);
+      const matchesStatus =
+        activeStatus === 'All' || card.dataset.status === activeStatus;
+      const matchesCategory =
+        activeCategory === 'All' || card.dataset.category === activeCategory;
+      const isVisible = matchesSearch && matchesStatus && matchesCategory;
+      card.hidden = !isVisible;
+      if (isVisible) visibleCount += 1;
+    });
+
+    conferenceGroups.forEach((group) => {
+      const visibleCards = Array.from(
+        group.querySelectorAll<HTMLElement>('[data-conference]'),
+      ).filter((card) => !card.hidden);
+      group.hidden = visibleCards.length === 0;
+    });
+
+    if (resultsStatus) {
+      resultsStatus.textContent = `Showing ${visibleCount} ${visibleCount === 1 ? 'conference' : 'conferences'}`;
+    }
+    if (directoryEmpty) directoryEmpty.hidden = visibleCount !== 0;
+  };
+
+  const sortCards = () => {
+    const mode = sortSelect?.value || 'deadline';
+    const statusOrder: Record<string, number> = {
+      Open: 0,
+      'In Review': 1,
+      TBA: 2,
+      Closed: 3,
+    };
+    const rankOrder: Record<string, number> = {
+      'A*': 0,
+      A: 1,
+      B: 2,
+      'Journal published': 3,
+      'Not ranked': 4,
+    };
+
+    conferenceGroups.forEach((group) => {
+      const grid = group.querySelector<HTMLElement>('.conference-grid');
+      if (!grid) return;
+
+      const cards = Array.from(
+        grid.querySelectorAll<HTMLElement>('[data-conference]'),
+      );
+      cards.sort((a, b) => {
+        if (mode === 'name') {
+          return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+        }
+        if (mode === 'status') {
+          return (
+            (statusOrder[a.dataset.status || ''] ?? 9) -
+            (statusOrder[b.dataset.status || ''] ?? 9)
+          );
+        }
+        if (mode === 'rank') {
+          const rankDifference =
+            (rankOrder[a.dataset.rank || ''] ?? 9) -
+            (rankOrder[b.dataset.rank || ''] ?? 9);
+          if (rankDifference !== 0) return rankDifference;
+          return (a.dataset.deadline || '').localeCompare(
+            b.dataset.deadline || '',
+          );
+        }
+        return (a.dataset.deadline || '').localeCompare(
+          b.dataset.deadline || '',
+        );
+      });
+      cards.forEach((card) => grid.appendChild(card));
+    });
+  };
+
+  statusButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      activeStatus = button.dataset.filterStatus || 'All';
+      setActiveButton(statusButtons, button);
+      applyFilters();
+    });
+  });
+
+  categoryButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      activeCategory = button.dataset.filterCategory || 'All';
+      setActiveButton(categoryButtons, button);
+      applyFilters();
+    });
+  });
+
+  searchInput?.addEventListener('input', applyFilters);
+  sortSelect?.addEventListener('change', () => {
+    sortCards();
+    applyFilters();
+  });
+
+  resetButton?.addEventListener('click', () => {
+    activeStatus = 'All';
+    activeCategory = 'All';
+    if (searchInput) searchInput.value = '';
+    if (sortSelect) sortSelect.value = 'deadline';
+    const allStatusButton = statusButtons.find(
+      (button) => button.dataset.filterStatus === 'All',
+    );
+    const allCategoryButton = categoryButtons.find(
+      (button) => button.dataset.filterCategory === 'All',
+    );
+    if (allStatusButton) setActiveButton(statusButtons, allStatusButton);
+    if (allCategoryButton) setActiveButton(categoryButtons, allCategoryButton);
+    sortCards();
+    applyFilters();
+    searchInput?.focus();
+  });
+
+  const timelineRange =
+    document.querySelector<HTMLSelectElement>('#timeline-range');
+  const timelineItems = Array.from(
+    document.querySelectorAll<HTMLElement>('[data-timeline-date]'),
+  );
+  const timelineEmpty = document.querySelector<HTMLElement>('#timeline-empty');
+
+  const updateTimeline = () => {
+    const months = timelineRange?.value || '6';
+    const start = new Date('2026-07-26T00:00:00Z');
+    const end = new Date(start);
+    if (months !== 'all') end.setUTCMonth(end.getUTCMonth() + Number(months));
+
+    let visibleCount = 0;
+    timelineItems.forEach((item) => {
+      const itemDate = new Date(`${item.dataset.timelineDate}T00:00:00Z`);
+      const isVisible = months === 'all' || itemDate <= end;
+      item.hidden = !isVisible;
+      if (isVisible) visibleCount += 1;
+    });
+    if (timelineEmpty) timelineEmpty.hidden = visibleCount !== 0;
+  };
+
+  timelineRange?.addEventListener('change', updateTimeline);
+
+  const escapeIcs = (value: string) =>
+    value
+      .replace(/\\/g, '\\\\')
+      .replace(/,/g, '\\,')
+      .replace(/;/g, '\\;')
+      .replace(/\n/g, '\\n');
+  const toIcsDate = (date: string) => date.replaceAll('-', '');
+  const addOneDay = (date: string) => {
+    const nextDate = new Date(`${date}T00:00:00Z`);
+    nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+    return nextDate.toISOString().slice(0, 10);
+  };
+  const toAoeUtcStamp = (date: string, time: 'start' | 'end') => {
+    const utcDate = addOneDay(date).replaceAll('-', '');
+    return `${utcDate}T${time === 'start' ? '115900' : '120000'}Z`;
+  };
+
+  document
+    .querySelectorAll<HTMLButtonElement>('[data-calendar]')
+    .forEach((button) => {
+      button.addEventListener('click', () => {
+        const title = button.dataset.calendarTitle || 'Conference';
+        const description = button.dataset.calendarDescription || '';
+        const start = button.dataset.calendarStart;
+        const end = button.dataset.calendarEnd;
+        const location = button.dataset.calendarLocation || '';
+        const url = button.dataset.calendarUrl || '';
+        const mode = button.dataset.calendarMode || 'date-range';
+        const cutoff = button.dataset.calendarCutoff || '';
+        if (!start || !end) return;
+        const isDeadline = mode === 'deadline';
+        const calendarDescription = isDeadline
+          ? `${description}\nOfficial cutoff: ${cutoff} (UTC−12). Verify the official source before submitting.`
+          : description;
+
+        const ics = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//Mohammad Raihanul Bashar//HCI Conference Tracker//EN',
+          'CALSCALE:GREGORIAN',
+          'BEGIN:VEVENT',
+          `UID:${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}@mbraihan.github.io`,
+          isDeadline
+            ? `DTSTART:${toAoeUtcStamp(start, 'start')}`
+            : `DTSTART;VALUE=DATE:${toIcsDate(start)}`,
+          isDeadline
+            ? `DTEND:${toAoeUtcStamp(start, 'end')}`
+            : `DTEND;VALUE=DATE:${toIcsDate(addOneDay(end))}`,
+          `SUMMARY:${escapeIcs(title)}`,
+          `DESCRIPTION:${escapeIcs(calendarDescription)}`,
+          `LOCATION:${escapeIcs(location)}`,
+          `URL:${url}`,
+          'END:VEVENT',
+          'END:VCALENDAR',
+        ].join('\r\n');
+
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.ics`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(downloadUrl);
+      });
+    });
+
+  sortCards();
+  applyFilters();
+  updateTimeline();
+</script>

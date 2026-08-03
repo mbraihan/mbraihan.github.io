@@ -1,0 +1,527 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteSections } from '../../config/siteSections';
+import { 
+  ArrowLeft, Calendar, Folder, Clock, Tag, Pin, Mail, Github, Linkedin, Twitter 
+} from 'lucide-astro';
+
+export async function getStaticPaths() {
+  if (!siteSections.posts) return [];
+
+  const posts = await getCollection('posts');
+  return posts.filter((post) => !post.data.draft).map((post) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { data, id } = post;
+const { Content, headings } = await render(post);
+
+// Fetch related posts (excluding current post)
+const allPosts = (await getCollection('posts')).filter((post) => !post.data.draft);
+const relatedPosts = allPosts.filter((p) => p.id !== id).slice(0, 5);
+---
+
+<BaseLayout 
+  title={`${data.title} | Mohammad Raihanul Bashar`}
+  description={data.excerpt || data.title}
+>
+  <article class="post-detail-container">
+    <!-- Back Button -->
+    <div class="back-nav-row">
+      <a href="/posts" class="back-link">
+        <ArrowLeft size={16} />
+        <span>Back to Posts</span>
+      </a>
+    </div>
+
+    <!-- Header Meta & Title -->
+    <header class="post-header">
+      <div class="post-meta-badges">
+        <span class="meta-date">{data.date}</span>
+        <span class="meta-dot">•</span>
+        <span class="meta-category">{data.category}</span>
+        {data.pinned && (
+          <span class="pinned-badge">
+            <Pin size={13} />
+            <span>Pinned</span>
+          </span>
+        )}
+      </div>
+
+      <h1 class="post-title">{data.title}</h1>
+
+      {data.excerpt && <p class="post-excerpt">{data.excerpt}</p>}
+
+      <!-- Featured Hero Image -->
+      {data.image && (
+        <div class="hero-image-wrapper">
+          <img src={data.image} alt={data.title} class="hero-img" />
+          {data.caption && <p class="hero-caption">{data.caption}</p>}
+        </div>
+      )}
+    </header>
+
+    <!-- Main Content & Sidebar Grid -->
+    <div class="post-body-grid">
+      <!-- Left Column: Markdown Article Body -->
+      <main class="post-article-content">
+        <Content />
+      </main>
+
+      <!-- Right Column: Sticky Sidebar -->
+      <aside class="post-sidebar">
+        <!-- Widget 1: On this page (Table of Contents) -->
+        {headings && headings.length > 0 && (
+          <div class="sidebar-widget toc-widget">
+            <h3 class="widget-title">On this page</h3>
+            <nav class="toc-nav">
+              <ul>
+                {headings.map((heading) => (
+                  <li class={`toc-depth-${heading.depth}`}>
+                    <a href={`#${heading.slug}`} class="toc-link">
+                      {heading.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+        )}
+
+        <!-- Widget 2: Details -->
+        <div class="sidebar-widget details-widget">
+          <h3 class="widget-title">Details</h3>
+          <ul class="details-list">
+            <li class="detail-item">
+              <Calendar size={15} class="detail-icon" />
+              <span>{data.date}</span>
+            </li>
+            <li class="detail-item">
+              <Folder size={15} class="detail-icon" />
+              <span class="category-text">{data.category}</span>
+            </li>
+            <li class="detail-item">
+              <Clock size={15} class="detail-icon" />
+              <span>{data.readingTime || '5 min read'}</span>
+            </li>
+          </ul>
+
+          {data.tags && data.tags.length > 0 && (
+            <div class="sidebar-tags-block">
+              <div class="tags-header">
+                <Tag size={13} />
+                <span>Tags</span>
+              </div>
+              <div class="sidebar-tags-list">
+                {data.tags.map((tag) => (
+                  <span class="side-tag-pill">{tag}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <!-- Widget 3: Related Posts -->
+        {relatedPosts.length > 0 && (
+          <div class="sidebar-widget related-widget">
+            <h3 class="widget-title">Related Posts</h3>
+            <div class="related-posts-list">
+              {relatedPosts.map((rel) => (
+                <a href={`/posts/${rel.id}`} class="related-post-card">
+                  {rel.data.image && (
+                    <div class="rel-thumb-box">
+                      <img src={rel.data.image} alt={rel.data.title} class="rel-thumb-img" />
+                    </div>
+                  )}
+                  <div class="rel-info">
+                    <h4 class="rel-title">{rel.data.title}</h4>
+                    <span class="rel-date">{rel.data.date}</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </aside>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .post-detail-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 5rem 1.5rem;
+  }
+
+  .back-nav-row {
+    margin-bottom: 1.5rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    transition: transform var(--transition-fast);
+  }
+
+  .back-link:hover {
+    transform: translateX(-3px);
+  }
+
+  /* Header */
+  .post-header {
+    margin-bottom: 3rem;
+  }
+
+  .post-meta-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-subtle);
+    margin-bottom: 0.85rem;
+  }
+
+  .meta-category {
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+
+  .pinned-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: var(--radius-full);
+    background-color: #fef3c7;
+    color: #d97706;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  :global([data-theme='dark']) .pinned-badge {
+    background-color: rgba(217, 119, 6, 0.2);
+    color: #fbbf24;
+  }
+
+  .post-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1.25;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+  }
+
+  .post-excerpt {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 850px;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+  }
+
+  /* Hero Image */
+  .hero-image-wrapper {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-pill);
+    margin-bottom: 2rem;
+  }
+
+  .hero-img {
+    width: 100%;
+    max-height: 480px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-caption {
+    font-size: 0.88rem;
+    color: var(--text-subtle);
+    padding: 0.75rem 1rem;
+    text-align: center;
+    background-color: var(--bg-card);
+  }
+
+  /* Main Grid */
+  .post-body-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* Left Markdown Article */
+  .post-article-content {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--text-main);
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+  }
+
+  .post-article-content :global(h2) {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-top: 2.25rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    scroll-margin-top: 5rem;
+  }
+
+  .post-article-content :global(h3) {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-main);
+    scroll-margin-top: 5rem;
+  }
+
+  .post-article-content :global(p) {
+    margin-bottom: 1.25rem;
+    color: var(--text-muted);
+  }
+
+  .post-article-content :global(ul), 
+  .post-article-content :global(ol) {
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+    color: var(--text-muted);
+  }
+
+  .post-article-content :global(li) {
+    margin-bottom: 0.4rem;
+  }
+
+  .post-article-content :global(blockquote) {
+    border-left: 4px solid var(--accent-blue);
+    padding: 0.75rem 1.25rem;
+    background-color: var(--accent-blue-light);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+    color: var(--text-main);
+  }
+
+  .post-article-content :global(pre) {
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+  }
+
+  /* Right Sidebar Widgets */
+  .post-sidebar {
+    position: sticky;
+    top: 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sidebar-widget {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+  }
+
+  .widget-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.85rem;
+  }
+
+  /* Table of Contents */
+  .toc-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .toc-nav li {
+    margin-bottom: 0.45rem;
+  }
+
+  .toc-depth-2 {
+    font-weight: 600;
+  }
+
+  .toc-depth-3 {
+    padding-left: 0.85rem;
+    font-size: 0.88rem;
+  }
+
+  .toc-link {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    transition: color var(--transition-fast);
+    display: block;
+    line-height: 1.4;
+  }
+
+  .toc-link:hover, .toc-link.active {
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+
+  /* Details Widget */
+  .details-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .detail-icon {
+    color: var(--text-subtle);
+  }
+
+  .category-text {
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+
+  .sidebar-tags-block {
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.85rem;
+  }
+
+  .tags-header {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-subtle);
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .side-tag-pill {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-pill);
+    color: var(--text-subtle);
+    border: 1px solid var(--border-color);
+  }
+
+  /* Related Posts Widget */
+  .related-posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .related-post-card {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.35rem;
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+  }
+
+  .related-post-card:hover {
+    background-color: var(--bg-pill);
+  }
+
+  .rel-thumb-box {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+    background-color: var(--bg-pill);
+  }
+
+  .rel-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .rel-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rel-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    line-height: 1.35;
+    margin-bottom: 0.15rem;
+  }
+
+  .rel-date {
+    font-size: 0.76rem;
+    color: var(--text-subtle);
+  }
+
+  @media (max-width: 900px) {
+    .post-body-grid {
+      grid-template-columns: 1fr;
+    }
+    .post-sidebar {
+      position: static;
+    }
+  }
+</style>
+
+<script>
+  // Highlight active heading link on scroll
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          document.querySelectorAll('.toc-link').forEach((link) => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+          });
+        }
+      });
+    },
+    { rootMargin: '-100px 0px -66% 0px' }
+  );
+
+  document.querySelectorAll('.post-article-content h2, .post-article-content h3').forEach((heading) => {
+    observer.observe(heading);
+  });
+</script>

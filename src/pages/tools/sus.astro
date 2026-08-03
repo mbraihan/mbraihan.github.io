@@ -1,0 +1,1082 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ResearchToolProvenance from '../../components/ResearchToolProvenance.astro';
+import ResearchSaveOptions from '../../components/ResearchSaveOptions.astro';
+import { 
+  ArrowLeft, Github, CheckCircle2, AlertCircle,
+  RotateCcw, Sparkles, HelpCircle 
+} from 'lucide-astro';
+
+const questions = [
+  'I think that I would like to use this system frequently.',
+  'I found the system unnecessarily complex.',
+  'I thought the system was easy to use.',
+  'I think that I would need the support of a technical person to be able to use this system.',
+  'I found the various functions in this system were well-integrated.',
+  'I thought there was too much inconsistency in this system.',
+  'I would imagine that most people would learn to use this system very quickly.',
+  'I found the system very cumbersome (awkward) to use.',
+  'I felt very confident using the system.',
+  'I needed to learn a lot of things before I could get going with this system.',
+];
+
+const scaleOptions = [
+  { val: 1, label: 'Strongly Disagree' },
+  { val: 2, label: 'Disagree' },
+  { val: 3, label: 'Neutral' },
+  { val: 4, label: 'Agree' },
+  { val: 5, label: 'Strongly Agree' }
+];
+---
+
+<BaseLayout 
+  title="System Usability Scale (SUS) Calculator | Mohammad Raihanul Bashar"
+  description="Run System Usability Scale (SUS) assessments, calculate scores, grades, and export responses to CSV or Google Sheets."
+>
+  <div class="sus-page-container">
+    <!-- Back to Tools -->
+    <div class="back-nav-row">
+      <a href="/tools" class="back-link">
+        <ArrowLeft size={16} />
+        <span>Back to Tools</span>
+      </a>
+    </div>
+
+    <!-- Header Section -->
+    <header class="sus-header">
+      <div class="title-row">
+        <div>
+          <span class="tool-badge">HCI & UX Evaluation Tool</span>
+          <h1 class="page-title">System Usability Scale (SUS)</h1>
+        </div>
+        <a 
+          href="https://github.com/mbraihan/sus-web-app" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="github-link-btn"
+        >
+          <Github size={18} />
+          <span>GitHub Repository</span>
+          <span class="sr-only">(opens in a new tab)</span>
+        </a>
+      </div>
+      <p class="page-subtitle">
+        Collect SUS survey responses, instantly calculate percentile-based scores and grades, and export data directly to CSV or Google Sheets.
+      </p>
+    </header>
+
+    <ResearchToolProvenance tool="sus" supportsGoogleSheets />
+
+    <!-- Main Interactive Form -->
+    <div id="sus-app-card" class="sus-app-card">
+      <!-- Setup & Options -->
+      <section class="setup-section">
+        <h2 class="section-heading">Session Details & Destination</h2>
+        
+        <div class="fields-grid">
+          <div class="field-group">
+            <label for="participant-id">Participant ID <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="participant-id" 
+              placeholder="e.g., P01" 
+              class="form-input" 
+              required
+              aria-describedby="participant-id-error"
+            />
+            <span id="participant-id-error" class="field-error"></span>
+          </div>
+
+          <div class="field-group">
+            <label for="condition-id">Condition / Variant <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="condition-id" 
+              placeholder="e.g., With Gaze / Baseline" 
+              class="form-input" 
+              required
+              aria-describedby="condition-id-error"
+            />
+            <span id="condition-id-error" class="field-error"></span>
+          </div>
+        </div>
+
+        <ResearchSaveOptions sheetName="SUS" />
+      </section>
+
+      <!-- Progress Track -->
+      <div class="progress-block">
+        <div class="progress-info">
+          <span class="progress-label">Survey Progress</span>
+          <span id="progress-text" class="progress-count" role="status" aria-live="polite" aria-atomic="true">0 / 10 answered (0%)</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-label="Survey progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
+          <div id="progress-bar" class="progress-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Alert Message Toast Container -->
+      <div id="alert-box" class="tool-alert hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+      <!-- Questionnaire List -->
+      <section class="questions-section">
+        <h2 class="section-heading">System Usability Scale Questionnaire</h2>
+        <p class="section-subtext">Please rate your agreement with each statement regarding the system used.</p>
+
+        <div class="questions-list">
+          {questions.map((qText, qIdx) => (
+            <fieldset class="question-row" data-qindex={qIdx}>
+              <legend class="question-title">
+                <span class="q-num">{qIdx + 1}.</span>
+                <span class="q-text">{qText}</span>
+              </legend>
+
+              <div class="scale-options-row">
+                {scaleOptions.map((opt) => (
+                  <label class="scale-option-pill">
+                    <input 
+                      type="radio" 
+                      name={`q-${qIdx}`} 
+                      value={opt.val} 
+                      class="scale-radio" 
+                    />
+                    <span class="val-num">{opt.val}</span>
+                    <span class="val-label">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+      </section>
+
+      <!-- Submit Action -->
+      <div class="submit-action-row">
+        <button id="submit-sus-btn" class="submit-btn" type="button">
+          <Sparkles size={18} />
+          <span>Calculate Score & Save Response</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Display Card (Hidden until submitted) -->
+    <div id="result-card" class="result-card hidden" tabindex="-1">
+      <div class="result-header">
+        <div class="check-icon-circle">
+          <CheckCircle2 size={36} />
+        </div>
+        <h2>Assessment Completed!</h2>
+        <p>Your responses have been recorded and analyzed.</p>
+      </div>
+
+      <div class="score-breakdown-grid">
+        <div class="score-main-box">
+          <span class="score-caption">Overall SUS Score</span>
+          <span id="res-score" class="score-value">0</span>
+          <span class="score-max">out of 100</span>
+        </div>
+
+        <div class="score-badge-box">
+          <div class="badge-item">
+            <span class="badge-label">Grade Ranking</span>
+            <span id="res-grade" class="badge-val grade-badge">A+</span>
+          </div>
+
+          <div class="badge-item">
+            <span class="badge-label">Adjective Rating</span>
+            <span id="res-adjective" class="badge-val adj-badge">Excellent</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="interpretation-box">
+        <h3><HelpCircle size={16} /> Interpretation Benchmark</h3>
+        <p id="res-interpretation">
+          An SUS score above 68 is considered above average. A score of 80 or higher indicates high usability and user satisfaction.
+        </p>
+      </div>
+
+      <div class="result-actions">
+        <button id="reset-btn" class="reset-btn" type="button">
+          <RotateCcw size={16} />
+          <span>Start New Response</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .sus-page-container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem 1.5rem;
+  }
+
+  .back-nav-row {
+    margin-bottom: 1.5rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    transition: transform var(--transition-fast);
+  }
+
+  .back-link:hover {
+    transform: translateX(-3px);
+  }
+
+  /* Header */
+  .sus-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tool-badge {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+
+  .page-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.02em;
+  }
+
+  .github-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+  }
+
+  .github-link-btn:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  .page-subtitle {
+    font-size: 1.02rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  /* Main Card */
+  .sus-app-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .section-heading {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .section-subtext {
+    font-size: 0.9rem;
+    color: var(--text-subtle);
+    margin-top: -0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Setup Section */
+  .setup-section {
+    margin-bottom: 2rem;
+  }
+
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .field-group.flex-2 {
+    grid-column: span 2;
+  }
+
+  label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .required {
+    color: #ef4444;
+  }
+
+  .form-input {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-pill);
+    color: var(--text-main);
+    font-size: 0.92rem;
+    box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.06), inset -3px -3px 6px rgba(255, 255, 255, 0.7);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  :global([data-theme='dark']) .form-input {
+    box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.7), inset -4px -4px 10px rgba(255, 255, 255, 0.04);
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    background-color: var(--bg-card);
+    box-shadow: 
+      inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+      0 0 0 3px rgba(37, 99, 235, 0.25), 
+      0 0 18px rgba(37, 99, 235, 0.45), 
+      0 0 36px rgba(37, 99, 235, 0.2);
+    transform: translateY(-1px);
+  }
+
+  /* Save Cards */
+  .save-option-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .block-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .save-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .save-card {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-pill);
+    cursor: pointer;
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.04), -3px -3px 8px rgba(255, 255, 255, 0.6);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  :global([data-theme='dark']) .save-card {
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4), -3px -3px 8px rgba(255, 255, 255, 0.02);
+  }
+
+  .save-card:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+  }
+
+  .save-card.active {
+    border-color: var(--accent-blue);
+    background-color: rgba(37, 99, 235, 0.06);
+    box-shadow: 
+      inset 2px 2px 4px rgba(37, 99, 235, 0.1),
+      0 0 0 1px var(--accent-blue),
+      0 0 14px rgba(37, 99, 235, 0.3);
+  }
+
+  .card-icon-box {
+    color: var(--accent-blue);
+  }
+
+  .card-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .card-desc {
+    font-size: 0.78rem;
+    color: var(--text-subtle);
+  }
+
+  .sheets-inputs-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border-color);
+  }
+
+  /* Progress Block */
+  .progress-block {
+    background-color: var(--bg-pill);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-label {
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .progress-count {
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 8px;
+    background-color: var(--border-color);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background-color: var(--accent-blue);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+  }
+
+  /* Alert Box */
+  .alert-box {
+    padding: 0.85rem 1.15rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert-error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+
+  :global([data-theme='dark']) .alert-error {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+
+  /* Question Rows */
+  .questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .question-row {
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+  }
+
+  .question-title {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+    line-height: 1.45;
+  }
+
+  .q-num {
+    color: var(--accent-blue);
+    font-weight: 700;
+    margin-right: 0.35rem;
+  }
+
+  /* Scale Radio Pills */
+  .scale-options-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.6rem;
+  }
+
+  .scale-option-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 0.35rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    cursor: pointer;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.04), -2px -2px 5px rgba(255, 255, 255, 0.5);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+  }
+
+  :global([data-theme='dark']) .scale-option-pill {
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.35), -2px -2px 6px rgba(255, 255, 255, 0.02);
+  }
+
+  .scale-option-pill:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  }
+
+  .scale-option-pill.active {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: #ffffff;
+    box-shadow: 
+      inset 2px 2px 4px rgba(0, 0, 0, 0.2),
+      0 0 16px rgba(37, 99, 235, 0.6),
+      0 0 30px rgba(37, 99, 235, 0.3);
+    transform: scale(1.03);
+  }
+
+  .val-num {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.15rem;
+  }
+
+  .scale-option-pill.active .val-num,
+  .scale-option-pill.active .val-label {
+    color: #ffffff;
+  }
+
+  .val-label {
+    font-size: 0.72rem;
+    color: var(--text-subtle);
+    line-height: 1.2;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+
+  /* Submit Action */
+  .submit-action-row {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .submit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.9rem 2.2rem;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    font-size: 0.96rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border: none;
+    cursor: pointer;
+    box-shadow: 
+      0 4px 14px rgba(37, 99, 235, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .submit-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    letter-spacing: 0.05em;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 
+      0 0 24px rgba(37, 99, 235, 0.7),
+      0 0 48px rgba(37, 99, 235, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  /* Result Card */
+  .result-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+  }
+
+  .check-icon-circle {
+    width: 4rem;
+    height: 4rem;
+    border-radius: var(--radius-full);
+    background-color: #dcfce7;
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem auto;
+  }
+
+  :global([data-theme='dark']) .check-icon-circle {
+    background-color: rgba(22, 163, 74, 0.2);
+    color: #4ade80;
+  }
+
+  .result-header h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.4rem;
+  }
+
+  .result-header p {
+    font-size: 0.98rem;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+  }
+
+  .score-breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    max-width: 580px;
+    margin: 0 auto 2rem auto;
+  }
+
+  .score-main-box {
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-caption {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-subtle);
+    margin-bottom: 0.25rem;
+  }
+
+  .score-value {
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: var(--accent-blue);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .score-max {
+    font-size: 0.8rem;
+    color: var(--text-subtle);
+  }
+
+  .score-badge-box {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .badge-item {
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .badge-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-subtle);
+  }
+
+  .badge-val {
+    font-size: 1.1rem;
+    font-weight: 800;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+  }
+
+  .grade-badge {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  .adj-badge {
+    background-color: #dcfce7;
+    color: #15803d;
+  }
+
+  :global([data-theme='dark']) .grade-badge {
+    background-color: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+  }
+
+  :global([data-theme='dark']) .adj-badge {
+    background-color: rgba(22, 163, 74, 0.2);
+    color: #4ade80;
+  }
+
+  .interpretation-box {
+    max-width: 580px;
+    margin: 0 auto 2.5rem auto;
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+  }
+
+  .interpretation-box h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .interpretation-box p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .result-actions {
+    display: flex;
+    justify-content: center;
+  }
+
+  .reset-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .reset-btn:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  @media (max-width: 640px) {
+    .fields-grid, .save-cards-grid, .sheets-inputs-row, .score-breakdown-grid {
+      grid-template-columns: 1fr;
+    }
+    .field-group.flex-2 {
+      grid-column: span 1;
+    }
+    .scale-options-row {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .val-label {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import {
+    clearToolAlert,
+    initializeResearchSaveOptions,
+    markQuestionGroupInvalid,
+    showRemoteSaveFailure,
+    showToolAlert,
+    submitResearchData,
+    validateRequiredFields,
+  } from '../../scripts/researchToolSupport';
+
+  const saveOptions = initializeResearchSaveOptions();
+
+  // Scale Option Pills Active Highlight & Progress Calculation
+  const responses: Record<number, number> = {};
+  const questionRows = document.querySelectorAll('.question-row');
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const alertBox = document.getElementById('alert-box');
+
+  questionRows.forEach((row) => {
+    const qIdx = parseInt(row.getAttribute('data-qindex') || '0', 10);
+    const pills = row.querySelectorAll('.scale-option-pill');
+
+    pills.forEach((pill) => {
+      const radio = pill.querySelector<HTMLInputElement>('input[type="radio"]');
+      
+      pill.addEventListener('click', () => {
+        pills.forEach((p) => p.classList.remove('active'));
+        pill.classList.add('active');
+        if (radio) radio.checked = true;
+
+        if (radio) {
+          responses[qIdx] = parseInt(radio.value, 10);
+        }
+        row.classList.remove('question-group-invalid');
+        row.setAttribute('aria-invalid', 'false');
+
+        updateProgress();
+      });
+    });
+  });
+
+  function updateProgress() {
+    const count = Object.keys(responses).length;
+    const pct = Math.round((count / 10) * 100);
+    if (progressBar) progressBar.style.width = `${pct}%`;
+    if (progressText) progressText.textContent = `${count} / 10 answered (${pct}%)`;
+    progressBar?.parentElement?.setAttribute('aria-valuenow', String(count));
+    progressBar?.parentElement?.setAttribute('aria-valuetext', `${count} of 10 questions answered`);
+  }
+
+  // SUS Score Calculation Logic
+  function calculateSUSScore(res: Record<number, number>): number {
+    let totalScore = 0;
+    for (let i = 0; i < 10; i++) {
+      const val = res[i];
+      if (val === undefined || val === null) continue;
+      if ((i + 1) % 2 === 1) {
+        totalScore += val - 1; // Odd questions
+      } else {
+        totalScore += 5 - val; // Even questions
+      }
+    }
+    return totalScore * 2.5;
+  }
+
+  function getSUSGrade(score: number): string {
+    if (score >= 90) return 'A+';
+    if (score >= 85) return 'A';
+    if (score >= 80) return 'A-';
+    if (score >= 75) return 'B+';
+    if (score >= 70) return 'B';
+    if (score >= 65) return 'B-';
+    if (score >= 60) return 'C+';
+    if (score >= 55) return 'C';
+    if (score >= 50) return 'C-';
+    if (score >= 45) return 'D';
+    return 'F';
+  }
+
+  function getSUSAdjective(score: number): string {
+    if (score >= 85) return 'Excellent';
+    if (score >= 70) return 'Good';
+    if (score >= 50) return 'OK';
+    if (score >= 25) return 'Poor';
+    return 'Awful';
+  }
+
+  // CSV Export Utility
+  function downloadCSV(susData: any) {
+    const timestamp = new Date().toISOString();
+    const date = timestamp.split('T')[0];
+    const time = timestamp.split('T')[1].split('.')[0];
+
+    const headers = [
+      'Participant_ID', 'Condition', 'Question', 'Response',
+      'SUS_Score', 'SUS_Grade', 'SUS_Adjective',
+      'Submission_Date', 'Submission_Time', 'Timestamp'
+    ];
+
+    let csv = headers.join(',') + '\n';
+    Object.entries(susData.responses).forEach(([index, response]) => {
+      csv += [
+        susData.participantId,
+        susData.condition,
+        `Q${parseInt(index) + 1}`,
+        response,
+        susData.susScore,
+        susData.susGrade,
+        susData.susAdjective,
+        date,
+        time,
+        timestamp
+      ].join(',') + '\n';
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${susData.participantId}_${susData.condition}_SUS_${Date.now()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Submit Handler
+  const submitBtn = document.getElementById('submit-sus-btn');
+  const appCard = document.getElementById('sus-app-card');
+  const resultCard = document.getElementById('result-card');
+
+  function showResults(susData: any) {
+    if (appCard) appCard.classList.add('hidden');
+    if (resultCard) resultCard.classList.remove('hidden');
+
+    document.getElementById('res-score')!.textContent = String(susData.susScore);
+    document.getElementById('res-grade')!.textContent = susData.susGrade;
+    document.getElementById('res-adjective')!.textContent = susData.susAdjective;
+
+    const interpText = `An SUS score of ${susData.susScore} receives a grade rating of ${susData.susGrade} (${susData.susAdjective}). ` +
+      (susData.susScore >= 68 ? 'This is ABOVE average (benchmark mean = 68).' : 'This is BELOW average (benchmark mean = 68).');
+    document.getElementById('res-interpretation')!.textContent = interpText;
+    document.getElementById('result-card')?.focus({ preventScroll: true });
+    window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
+  }
+
+  async function saveResponse(susData: any) {
+    if (saveOptions.currentOption === 'local') {
+      downloadCSV(susData);
+      showResults(susData);
+      return;
+    }
+
+    const sheetUrl = (document.getElementById('sheet-url') as HTMLInputElement)?.value.trim();
+    const sheetName = (document.getElementById('sheet-name') as HTMLInputElement)?.value.trim() || 'SUS';
+
+    submitBtn?.setAttribute('disabled', '');
+    submitBtn?.setAttribute('aria-busy', 'true');
+    try {
+      await submitResearchData({
+        endpoint: sheetUrl,
+        sheetName,
+        tool: 'SUS',
+        payload: susData,
+      });
+      clearToolAlert(alertBox);
+      showResults(susData);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'The remote save could not be confirmed.';
+      showRemoteSaveFailure({
+        alertBox,
+        message,
+        onRetry: () => void saveResponse(susData),
+        onDownload: () => {
+          downloadCSV(susData);
+          showResults(susData);
+        },
+      });
+    } finally {
+      submitBtn?.removeAttribute('disabled');
+      submitBtn?.removeAttribute('aria-busy');
+    }
+  }
+
+  submitBtn?.addEventListener('click', async () => {
+    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
+
+    if (!validateRequiredFields([
+      { id: 'participant-id', label: 'Participant ID', errorId: 'participant-id-error' },
+      { id: 'condition-id', label: 'Condition', errorId: 'condition-id-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    const answeredCount = Object.keys(responses).length;
+    if (answeredCount < 10) {
+      const firstMissing = Array.from(questionRows).find((row) => {
+        const index = parseInt(row.getAttribute('data-qindex') || '0', 10);
+        return responses[index] === undefined;
+      }) as HTMLElement | undefined;
+      markQuestionGroupInvalid(
+        firstMissing || null,
+        alertBox,
+        `Please answer all 10 questions. You have completed ${answeredCount} of 10.`,
+      );
+      return;
+    }
+
+    if (saveOptions.currentOption === 'googlesheets' && !validateRequiredFields([
+      { id: 'sheet-url', label: 'Google Apps Script URL', errorId: 'sheet-url-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    clearToolAlert(alertBox);
+
+    const score = calculateSUSScore(responses);
+    const grade = getSUSGrade(score);
+    const adj = getSUSAdjective(score);
+
+    const susData = {
+      participantId: pId,
+      condition: cond,
+      responses,
+      susScore: score,
+      susGrade: grade,
+      susAdjective: adj
+    };
+
+    await saveResponse(susData);
+  });
+
+  // Reset Handler
+  const resetBtn = document.getElementById('reset-btn');
+  resetBtn?.addEventListener('click', () => {
+    window.location.reload();
+  });
+</script>

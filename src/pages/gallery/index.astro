@@ -1,0 +1,561 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Star, ArrowRight, ExternalLink, Plus } from 'lucide-astro';
+import { galleryAlbums, galleryCategories } from '../../data/galleryData';
+import { siteSections } from '../../config/siteSections';
+
+if (!siteSections.gallery) {
+  return Astro.redirect('/');
+}
+
+const publishedAlbums = galleryAlbums.filter((album) => !album.draft);
+const featuredAlbum = publishedAlbums.find((album) => album.featured) || publishedAlbums[0];
+const regularAlbums = featuredAlbum
+  ? publishedAlbums.filter((album) => album.id !== featuredAlbum.id)
+  : [];
+---
+
+<BaseLayout 
+  title="Gallery | Mohammad Raihanul Bashar"
+  description="Conference moments, travel memories, city explorations, and snapshots from my academic journey."
+>
+  <div class="gallery-page-container">
+    <!-- Header Title & Subtitle -->
+    <header class="gallery-header">
+      <h1 class="page-title">Gallery</h1>
+      <p class="page-subtitle">
+        Conference moments, travel memories, city explorations, and snapshots from my academic journey.
+      </p>
+
+      <!-- Category Filter Pills -->
+      <div class="filter-pills-row">
+        {galleryCategories.map((cat, idx) => (
+          <button 
+            type="button"
+            class={`filter-pill ${idx === 0 ? 'active' : ''}`}
+            data-category={cat}
+            aria-pressed={idx === 0 ? 'true' : 'false'}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+    </header>
+
+    {featuredAlbum ? (
+      <>
+        <!-- Featured Album Card -->
+        <section class="featured-section">
+          <article class="featured-card" data-categories={JSON.stringify(featuredAlbum.categories)}>
+            <div class="featured-image-wrapper">
+              <img
+                src={featuredAlbum.coverImage}
+                alt={featuredAlbum.title}
+                class="featured-img"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+
+            <div class="featured-content">
+              <div class="featured-badge">
+                <Star size={15} class="star-icon" />
+                <span>Featured</span>
+              </div>
+
+              <h2 class="featured-title">{featuredAlbum.title}</h2>
+              <p class="featured-desc">{featuredAlbum.description}</p>
+
+              <div class="tags-row">
+                {featuredAlbum.tags.map(tag => (
+                  <span class="tag-pill">{tag}</span>
+                ))}
+              </div>
+
+              <div class="featured-actions">
+                <a href={`/gallery/${featuredAlbum.id}`} class="view-details-btn">
+                  <span>View details</span>
+                  <ArrowRight size={16} />
+                </a>
+
+                <a href={`/gallery/${featuredAlbum.id}`} class="icon-link-btn" aria-label="Open album details">
+                  <ExternalLink size={18} />
+                </a>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- Album Cards 3-Column Grid -->
+        <section class="albums-grid-section">
+          <div id="albums-grid" class="albums-grid">
+            {regularAlbums.map((album, index) => (
+              <article
+                class="album-card"
+                data-categories={JSON.stringify(album.categories)}
+                data-album-index={index}
+              >
+                <a href={`/gallery/${album.id}`} class="card-image-link">
+                  <img
+                    src={album.coverImage}
+                    alt={album.title}
+                    class="album-img"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </a>
+
+                <div class="card-body">
+                  <h3 class="album-title">
+                    <a href={`/gallery/${album.id}`}>{album.title}</a>
+                  </h3>
+
+                  <div class="card-footer">
+                    <div class="tags-row">
+                      {album.tags.slice(0, 3).map(tag => (
+                        <span class="tag-pill">{tag}</span>
+                      ))}
+                    </div>
+
+                    <a href={`/gallery/${album.id}`} class="icon-link-btn" aria-label={`Open ${album.title}`}>
+                      <ExternalLink size={16} />
+                    </a>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <p id="gallery-results-status" class="sr-status" role="status" aria-live="polite"></p>
+
+        {regularAlbums.length > 0 && (
+          <footer class="pagination-footer">
+            <button id="load-more-btn" class="load-more-btn" type="button">
+              <Plus size={16} />
+              <span>Load more</span>
+            </button>
+          </footer>
+        )}
+      </>
+    ) : (
+      <p class="empty-gallery-message">No gallery albums are published yet.</p>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .gallery-page-container {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 6rem 1.5rem;
+  }
+
+  .empty-gallery-message {
+    padding: 3rem 0;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  /* Header Section */
+  .gallery-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .page-title {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.65rem;
+  }
+
+  .page-subtitle {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  /* Category Filter Pills */
+  .filter-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .filter-pill {
+    padding: 0.45rem 1.15rem;
+    border-radius: var(--radius-full);
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+  }
+
+  .filter-pill:hover {
+    color: var(--text-main);
+    border-color: var(--accent-blue);
+  }
+
+  .filter-pill.active {
+    color: var(--accent-blue);
+    font-weight: 600;
+    border-color: var(--accent-blue);
+    background-color: rgba(37, 99, 235, 0.06);
+  }
+
+  /* Featured Hero Card */
+  .featured-section {
+    margin-bottom: 2rem;
+  }
+
+  .featured-card {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 2rem;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+  }
+
+  .featured-card:hover {
+    border-color: var(--accent-blue);
+    box-shadow: var(--shadow-md);
+  }
+
+  .featured-image-wrapper {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+  }
+
+  .featured-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .featured-card:hover .featured-img {
+    transform: scale(1.03);
+  }
+
+  .featured-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .featured-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    margin-bottom: 0.75rem;
+  }
+
+  .star-icon {
+    color: var(--accent-blue);
+  }
+
+  .featured-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.01em;
+    margin-bottom: 0.75rem;
+    line-height: 1.25;
+  }
+
+  .featured-desc {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+
+  .tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag-pill {
+    font-size: 0.76rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-pill);
+    color: var(--text-subtle);
+    border: 1px solid var(--border-color);
+  }
+
+  .featured-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.75rem;
+    padding-top: 1rem;
+  }
+
+  .view-details-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    transition: gap var(--transition-fast);
+  }
+
+  .view-details-btn:hover {
+    gap: 0.65rem;
+  }
+
+  .icon-link-btn {
+    color: var(--text-subtle);
+    transition: color var(--transition-fast);
+  }
+
+  .icon-link-btn:hover {
+    color: var(--accent-blue);
+  }
+
+  /* 3-Column Album Cards Grid */
+  .albums-grid-section {
+    margin-bottom: 3rem;
+  }
+
+  .albums-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .album-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .album-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-blue);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-image-link {
+    display: block;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+
+  .album-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .album-card:hover .album-img {
+    transform: scale(1.05);
+  }
+
+  .card-body {
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+  }
+
+  .album-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+    line-height: 1.35;
+  }
+
+  .album-title a {
+    color: inherit;
+  }
+
+  .album-title a:hover {
+    color: var(--accent-blue);
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+  }
+
+  /* Pagination Bar */
+  .pagination-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding-top: 1rem;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .page-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.88rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .page-btn:hover:not(:disabled) {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  .page-btn.active {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: #ffffff;
+  }
+
+  .page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .load-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .load-more-btn:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  @media (max-width: 900px) {
+    .featured-card {
+      grid-template-columns: 1fr;
+    }
+    .albums-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .albums-grid {
+      grid-template-columns: 1fr;
+    }
+    .pagination-footer {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+</style>
+
+<script>
+  const pills = document.querySelectorAll('.filter-pill');
+  const albumCards = document.querySelectorAll<HTMLElement>('.album-card');
+  const featuredCard = document.querySelector<HTMLElement>('.featured-card');
+  const loadMoreButton = document.getElementById('load-more-btn') as HTMLButtonElement | null;
+  const galleryStatus = document.getElementById('gallery-results-status');
+  const PAGE_SIZE = 6;
+  let visibleLimit = PAGE_SIZE;
+  let selectedCategory = 'All';
+
+  function updateGallery() {
+    const matchingCards = Array.from(albumCards).filter((card) => {
+      const rawCats = card.getAttribute('data-categories');
+      const cardCats: string[] = rawCats ? JSON.parse(rawCats) : [];
+      return selectedCategory === 'All' || cardCats.includes(selectedCategory);
+    });
+
+    albumCards.forEach((card) => {
+      card.style.display = 'none';
+    });
+    matchingCards.slice(0, visibleLimit).forEach((card) => {
+      card.style.display = 'flex';
+    });
+
+    if (loadMoreButton) {
+      loadMoreButton.hidden = visibleLimit >= matchingCards.length;
+    }
+    if (galleryStatus) {
+      const shown = Math.min(visibleLimit, matchingCards.length);
+      galleryStatus.textContent = `${shown} of ${matchingCards.length} albums shown`;
+    }
+  }
+
+  pills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      pills.forEach((p) => {
+        p.classList.remove('active');
+        p.setAttribute('aria-pressed', 'false');
+      });
+      pill.classList.add('active');
+      pill.setAttribute('aria-pressed', 'true');
+
+      selectedCategory = pill.getAttribute('data-category') || 'All';
+      visibleLimit = PAGE_SIZE;
+
+      // Filter featured card
+      if (featuredCard) {
+        const rawCats = featuredCard.getAttribute('data-categories');
+        const cardCats: string[] = rawCats ? JSON.parse(rawCats) : [];
+        if (selectedCategory === 'All' || cardCats.includes(selectedCategory)) {
+          featuredCard.style.display = 'grid';
+        } else {
+          featuredCard.style.display = 'none';
+        }
+      }
+
+      updateGallery();
+    });
+  });
+
+  loadMoreButton?.addEventListener('click', () => {
+    visibleLimit += PAGE_SIZE;
+    updateGallery();
+  });
+
+  updateGallery();
+</script>

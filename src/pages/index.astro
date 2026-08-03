@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProfileCard from '../components/ProfileCard.astro';
+import BioSection from '../components/BioSection.astro';
+import NewsSection from '../components/NewsSection.astro';
+import PublicationsSection from '../components/PublicationsSection.astro';
+import WhereIveBeenMap from '../components/WhereIveBeenMap.astro';
+---
+
+<BaseLayout 
+  title="Mohammad Raihanul Bashar | Academic Portfolio"
+  description="Ph.D. Candidate at Concordia University specializing in Human-Computer Interaction & Extended Reality."
+>
+  <div class="container page-layout">
+    <!-- Left Column: Profile Card Sidebar -->
+    <div class="sidebar-col">
+      <ProfileCard />
+    </div>
+
+    <!-- Right Column: Main Content -->
+    <div class="content-col">
+      <BioSection />
+      <NewsSection />
+      <PublicationsSection />
+      <WhereIveBeenMap />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    padding-top: 2.5rem;
+    padding-bottom: 3rem;
+  }
+
+  .content-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    min-width: 0; /* Prevents overflow in flex/grid items */
+  }
+
+  @media (max-width: 1024px) {
+    .page-layout {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      padding-top: 1.5rem;
+    }
+
+    .sidebar-col {
+      display: none;
+    }
+  }
+</style>

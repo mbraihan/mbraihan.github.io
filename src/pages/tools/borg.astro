@@ -1,0 +1,367 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ResearchToolProvenance from '../../components/ResearchToolProvenance.astro';
+import ResearchSaveOptions from '../../components/ResearchSaveOptions.astro';
+import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-astro';
+
+const timepoints = ['Before Task', 'During Task', 'After Task'];
+
+const borgCR10Scale = [
+  { val: 0, label: 'Nothing at all' },
+  { val: 1, label: 'Very Weak' },
+  { val: 2, label: 'Weak' },
+  { val: 3, label: 'Moderate' },
+  { val: 4, label: 'Somewhat Strong' },
+  { val: 5, label: 'Strong' },
+  { val: 6, label: 'Moderate/Strong' },
+  { val: 7, label: 'Very Strong' },
+  { val: 8, label: 'Very Very Strong' },
+  { val: 9, label: 'Nearly Maximal' },
+  { val: 10, label: 'Extremely Strong (Maximal)' },
+];
+---
+
+<BaseLayout 
+  title="Borg CR-10 Rating of Perceived Exertion | Mohammad Raihanul Bashar"
+  description="Evaluate physical exertion and fatigue before, during, and after task completion using the Borg CR-10 scale."
+>
+  <div class="tool-page-container">
+    <div class="back-nav-row">
+      <a href="/tools" class="back-link">
+        <ArrowLeft size={16} />
+        <span>Back to Tools</span>
+      </a>
+    </div>
+
+    <header class="tool-header">
+      <div class="title-row">
+        <div>
+          <span class="tool-badge">Physical Effort & Ergonomics</span>
+          <h1 class="page-title">Borg CR-10 Scale (Perceived Exertion)</h1>
+        </div>
+        <a 
+          href="https://github.com/mbraihan/borg-cr10-web-app" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="github-link-btn"
+        >
+          <Github size={18} />
+          <span>GitHub Repository</span>
+          <span class="sr-only">(opens in a new tab)</span>
+        </a>
+      </div>
+      <p class="page-subtitle">
+        Measure physical effort and fatigue dynamics across task phases (Before, During, After) using the Borg Category-Ratio 10 scale.
+      </p>
+    </header>
+
+    <ResearchToolProvenance tool="borg" supportsGoogleSheets />
+
+    <div id="borg-app-card" class="app-card">
+      <section class="setup-section">
+        <h2 class="section-heading">Session Details</h2>
+        
+        <div class="fields-grid">
+          <div class="field-group">
+            <label for="participant-id">Participant ID <span class="required">*</span></label>
+            <input type="text" id="participant-id" placeholder="e.g., P01" class="form-input" required aria-describedby="participant-id-error" />
+            <span id="participant-id-error" class="field-error"></span>
+          </div>
+
+          <div class="field-group">
+            <label for="condition-id">Condition / Tech <span class="required">*</span></label>
+            <input type="text" id="condition-id" placeholder="e.g., Heavy VR Headset" class="form-input" required aria-describedby="condition-id-error" />
+            <span id="condition-id-error" class="field-error"></span>
+          </div>
+        </div>
+
+        <ResearchSaveOptions sheetName="BORG_CR10" />
+      </section>
+
+      <section class="questions-section">
+        <h2 class="section-heading">Exertion Rating Across Task Timepoints</h2>
+        <p class="section-subtext">Rate perceived exertion (0 = Nothing at all, 10 = Maximal effort) for each phase.</p>
+
+        <div class="timepoints-list">
+          {timepoints.map((tp, tpIdx) => (
+            <fieldset class="tp-card" data-tpidx={tpIdx}>
+              <legend class="tp-title">{tp}</legend>
+
+              <div class="borg-scale-grid">
+                {borgCR10Scale.map((item) => (
+                  <label class="borg-pill" data-tpidx={tpIdx} data-val={item.val}>
+                    <input class="sr-only" type="radio" name={`borg-${tpIdx}`} value={item.val} />
+                    <span class="b-val">{item.val}</span>
+                    <span class="b-label">{item.label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+      </section>
+
+      <div id="alert-box" class="tool-alert hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+      <div class="submit-action-row">
+        <button id="submit-borg-btn" class="submit-btn" type="button">
+          <Sparkles size={18} />
+          <span>Record Exertion & Export Data</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Result Card -->
+    <div id="result-card" class="result-card hidden" tabindex="-1">
+      <div class="result-header">
+        <div class="check-icon-circle">
+          <CheckCircle2 size={36} />
+        </div>
+        <h2>Borg CR-10 Exertion Recorded!</h2>
+        <p>Perceived effort ratings analyzed across task phases.</p>
+      </div>
+
+      <div class="score-breakdown-grid">
+        <div class="score-main-box">
+          <span class="score-caption">Peak Exertion</span>
+          <span id="res-peak-exertion" class="score-value">0</span>
+          <span class="score-max">Borg CR-10 Scale</span>
+        </div>
+
+        <div class="tp-results-list">
+          <div class="tp-res-row">
+            <span>Before Task:</span>
+            <span id="res-before" class="tp-res-val">0</span>
+          </div>
+          <div class="tp-res-row">
+            <span>During Task:</span>
+            <span id="res-during" class="tp-res-val">0</span>
+          </div>
+          <div class="tp-res-row">
+            <span>After Task:</span>
+            <span id="res-after" class="tp-res-val">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button id="reset-btn" class="reset-btn" type="button">
+          <RotateCcw size={16} />
+          <span>Start New Response</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tool-page-container { max-width: 880px; margin: 0 auto; padding: 3rem 1.5rem 6rem 1.5rem; }
+  .back-nav-row { margin-bottom: 1.5rem; }
+  .back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--accent-blue); transition: transform var(--transition-fast); }
+  .back-link:hover { transform: translateX(-3px); }
+  .tool-header { margin-bottom: 2.5rem; }
+  .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; }
+  .tool-badge { font-size: 0.78rem; font-weight: 600; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.35rem; }
+  .page-title { font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; }
+  .github-link-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--radius-md); background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.88rem; font-weight: 600; transition: all var(--transition-fast); }
+  .github-link-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+  .page-subtitle { font-size: 1.02rem; color: var(--text-muted); line-height: 1.55; }
+
+  .app-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); }
+  .section-heading { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+  .section-subtext { font-size: 0.9rem; color: var(--text-subtle); margin-top: -0.5rem; margin-bottom: 1.5rem; }
+
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+  .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  label { font-size: 0.88rem; font-weight: 600; color: var(--text-main); }
+  .required { color: #ef4444; }
+
+  .form-input { padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); color: var(--text-main); font-size: 0.92rem; box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.06), inset -3px -3px 6px rgba(255, 255, 255, 0.7); transition: all 0.25s; }
+  :global([data-theme='dark']) .form-input { box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.7), inset -4px -4px 10px rgba(255, 255, 255, 0.04); }
+  .form-input:focus { outline: none; border-color: var(--accent-blue); background-color: var(--bg-card); box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(37, 99, 235, 0.25), 0 0 18px rgba(37, 99, 235, 0.45); }
+
+  .timepoints-list { display: flex; flex-direction: column; gap: 1.75rem; margin-bottom: 2.5rem; }
+  .tp-card { min-width: 0; background-color: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; }
+  .tp-title { font-size: 1.05rem; font-weight: 700; color: var(--accent-blue); margin-bottom: 1rem; }
+
+  .borg-scale-grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 0.35rem; }
+  .borg-pill { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.6rem 0.15rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-card); cursor: pointer; transition: all 0.25s; text-align: center; }
+  .borg-pill:hover { border-color: var(--accent-blue); }
+  .borg-pill.active { background-color: var(--accent-blue); border-color: var(--accent-blue); color: #ffffff; box-shadow: 0 0 12px rgba(37, 99, 235, 0.4); transform: scale(1.05); }
+  .b-val { font-size: 1rem; font-weight: 800; }
+  .b-label { font-size: 0.65rem; color: var(--text-subtle); line-height: 1.1; margin-top: 0.15rem; }
+  .borg-pill.active .b-label { color: #ffffff; }
+
+  .submit-action-row { display: flex; justify-content: flex-end; }
+  .submit-btn { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.9rem 2.2rem; border-radius: var(--radius-full); background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-size: 0.96rem; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35); transition: all 0.3s; }
+  .submit-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 24px rgba(37, 99, 235, 0.7); }
+
+  .result-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 3rem 2rem; text-align: center; }
+  .check-icon-circle { width: 4rem; height: 4rem; border-radius: var(--radius-full); background-color: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; }
+  .score-breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; max-width: 600px; margin: 0 auto 2rem auto; }
+  .score-main-box { background-color: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-caption { font-size: 0.85rem; font-weight: 600; color: var(--text-subtle); margin-bottom: 0.25rem; }
+  .score-value { font-size: 3.2rem; font-weight: 800; color: var(--accent-blue); line-height: 1; margin-bottom: 0.25rem; }
+  .score-max { font-size: 0.8rem; color: var(--text-subtle); }
+  .tp-results-list { display: flex; flex-direction: column; gap: 0.75rem; justify-content: center; }
+  .tp-res-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.92rem; padding: 0.6rem 1rem; background-color: var(--bg-pill); border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+  .tp-res-val { font-weight: 800; color: var(--accent-blue); font-size: 1.1rem; }
+
+  .result-actions { display: flex; justify-content: center; }
+  .reset-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); background-color: var(--bg-pill); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; cursor: pointer; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+  .hidden { display: none !important; }
+
+  @media (max-width: 768px) {
+    .borg-scale-grid { grid-template-columns: repeat(6, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .fields-grid, .score-breakdown-grid { grid-template-columns: 1fr; }
+    .borg-scale-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+
+<script>
+  import {
+    clearToolAlert,
+    initializeResearchSaveOptions,
+    markQuestionGroupInvalid,
+    showRemoteSaveFailure,
+    submitResearchData,
+    validateRequiredFields,
+  } from '../../scripts/researchToolSupport';
+
+  const ratings: Record<number, number> = {};
+  const alertBox = document.getElementById('alert-box');
+  const saveOptions = initializeResearchSaveOptions();
+  const submitBtn = document.getElementById('submit-borg-btn');
+
+  const pills = document.querySelectorAll('.borg-pill');
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const tpidx = parseInt(pill.getAttribute('data-tpidx') || '0', 10);
+      const val = parseInt(pill.getAttribute('data-val') || '0', 10);
+
+      const card = pill.closest('.tp-card')!;
+      card.querySelectorAll('.borg-pill').forEach(el => el.classList.remove('active'));
+      pill.classList.add('active');
+      const radio = pill.querySelector<HTMLInputElement>('input[type="radio"]');
+      if (radio) radio.checked = true;
+
+      ratings[tpidx] = val;
+      card.classList.remove('question-group-invalid');
+      card.setAttribute('aria-invalid', 'false');
+    });
+  });
+
+  function downloadBorgCSV(data: any) {
+    let csv = `Participant_ID,Condition,Timepoint,Borg_CR10_Rating\n`;
+    csv += `${data.participantId},${data.condition},Before_Task,${data.before}\n`;
+    csv += `${data.participantId},${data.condition},During_Task,${data.during}\n`;
+    csv += `${data.participantId},${data.condition},After_Task,${data.after}\n`;
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${data.participantId}_${data.condition}_Borg_CR10_${Date.now()}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function showResults(data: any) {
+    document.getElementById('borg-app-card')!.classList.add('hidden');
+    const resultCard = document.getElementById('result-card')!;
+    resultCard.classList.remove('hidden');
+
+    document.getElementById('res-peak-exertion')!.textContent = String(data.peak);
+    document.getElementById('res-before')!.textContent = String(data.before);
+    document.getElementById('res-during')!.textContent = String(data.during);
+    document.getElementById('res-after')!.textContent = String(data.after);
+    resultCard.focus({ preventScroll: true });
+    window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
+  }
+
+  async function saveResponse(data: any) {
+    if (saveOptions.currentOption === 'local') {
+      downloadBorgCSV(data);
+      showResults(data);
+      return;
+    }
+
+    const endpoint = (document.getElementById('sheet-url') as HTMLInputElement).value.trim();
+    const sheetName = (document.getElementById('sheet-name') as HTMLInputElement).value.trim() || 'BORG_CR10';
+    submitBtn?.setAttribute('disabled', '');
+    submitBtn?.setAttribute('aria-busy', 'true');
+    try {
+      await submitResearchData({ endpoint, sheetName, tool: 'Borg CR-10', payload: data });
+      clearToolAlert(alertBox);
+      showResults(data);
+    } catch (error) {
+      showRemoteSaveFailure({
+        alertBox,
+        message: error instanceof Error ? error.message : 'The remote save could not be confirmed.',
+        onRetry: () => void saveResponse(data),
+        onDownload: () => {
+          downloadBorgCSV(data);
+          showResults(data);
+        },
+      });
+    } finally {
+      submitBtn?.removeAttribute('disabled');
+      submitBtn?.removeAttribute('aria-busy');
+    }
+  }
+
+  submitBtn?.addEventListener('click', async () => {
+    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
+
+    if (!validateRequiredFields([
+      { id: 'participant-id', label: 'Participant ID', errorId: 'participant-id-error' },
+      { id: 'condition-id', label: 'Condition', errorId: 'condition-id-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    if (Object.keys(ratings).length < 3) {
+      const firstMissing = Array.from(document.querySelectorAll('.tp-card')).find((card) => {
+        const index = parseInt(card.getAttribute('data-tpidx') || '0', 10);
+        return ratings[index] === undefined;
+      }) as HTMLElement | undefined;
+      markQuestionGroupInvalid(
+        firstMissing || null,
+        alertBox,
+        `Please rate perceived exertion for all 3 timepoints. You have completed ${Object.keys(ratings).length} of 3.`,
+      );
+      return;
+    }
+
+    if (saveOptions.currentOption === 'googlesheets' && !validateRequiredFields([
+      { id: 'sheet-url', label: 'Google Apps Script URL', errorId: 'sheet-url-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    clearToolAlert(alertBox);
+    const before = ratings[0] || 0;
+    const during = ratings[1] || 0;
+    const after = ratings[2] || 0;
+    const peak = Math.max(before, during, after);
+
+    await saveResponse({
+      participantId: pId,
+      condition: cond,
+      ratings: { ...ratings },
+      before,
+      during,
+      after,
+      peak,
+    });
+  });
+
+  document.getElementById('reset-btn')?.addEventListener('click', () => window.location.reload());
+</script>

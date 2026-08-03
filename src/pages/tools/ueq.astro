@@ -1,0 +1,550 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ResearchToolProvenance from '../../components/ResearchToolProvenance.astro';
+import ResearchSaveOptions from '../../components/ResearchSaveOptions.astro';
+import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-astro';
+---
+
+<BaseLayout 
+  title="User Experience Questionnaire (UEQ) | Mohammad Raihanul Bashar"
+  description="Measure user experience with UEQ Full (26 items) or UEQ Short (8 items) across Attractiveness, Pragmatic, and Hedonic Quality."
+>
+  <div class="tool-page-container">
+    <div class="back-nav-row">
+      <a href="/tools" class="back-link">
+        <ArrowLeft size={16} />
+        <span>Back to Tools</span>
+      </a>
+    </div>
+
+    <header class="tool-header">
+      <div class="title-row">
+        <div>
+          <span class="tool-badge">UX Measurement Tool</span>
+          <h1 class="page-title">User Experience Questionnaire (UEQ)</h1>
+        </div>
+        <a 
+          href="https://github.com/mbraihan/ueq-web-app" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="github-link-btn"
+        >
+          <Github size={18} />
+          <span>GitHub Repository</span>
+          <span class="sr-only">(opens in a new tab)</span>
+        </a>
+      </div>
+      <p class="page-subtitle">
+        Assess UX quality across benchmark scales: Attractiveness, Perspicuity, Efficiency, Dependability, Stimulation, and Novelty.
+      </p>
+    </header>
+
+    <ResearchToolProvenance tool="ueq" supportsGoogleSheets />
+
+    <div id="ueq-app-card" class="app-card">
+      <section class="setup-section">
+        <h2 class="section-heading">UEQ Version & Session Meta</h2>
+        
+        <div class="version-select-grid">
+          <button type="button" class="version-card active" id="card-ver-full" aria-pressed="true">
+            <div class="v-title">UEQ Full (26 Items)</div>
+            <div class="v-desc">Standard 26 bipolar pairs covering all 6 UX scales.</div>
+          </button>
+
+          <button type="button" class="version-card" id="card-ver-short" aria-pressed="false">
+            <div class="v-title">UEQ Short (8 Items)</div>
+            <div class="v-desc">Quick 8-item survey for Pragmatic and Hedonic Quality.</div>
+          </button>
+        </div>
+
+        <div class="fields-grid">
+          <div class="field-group">
+            <label for="participant-id">Participant ID <span class="required">*</span></label>
+            <input type="text" id="participant-id" placeholder="e.g., P01" class="form-input" required aria-describedby="participant-id-error" />
+            <span id="participant-id-error" class="field-error"></span>
+          </div>
+
+          <div class="field-group">
+            <label for="condition-id">Condition / Variant <span class="required">*</span></label>
+            <input type="text" id="condition-id" placeholder="e.g., Variant A" class="form-input" required aria-describedby="condition-id-error" />
+            <span id="condition-id-error" class="field-error"></span>
+          </div>
+        </div>
+
+        <ResearchSaveOptions sheetName="UEQ" />
+      </section>
+
+      <!-- Progress Track -->
+      <div class="progress-block">
+        <div class="progress-info">
+          <span class="progress-label">Survey Progress</span>
+          <span id="progress-text" class="progress-count" role="status" aria-live="polite" aria-atomic="true">0 / 26 answered (0%)</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-label="Survey progress" aria-valuemin="0" aria-valuemax="26" aria-valuenow="0">
+          <div id="progress-bar" class="progress-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Alert Box -->
+      <div id="alert-box" class="tool-alert hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+      <!-- Questionnaire Items -->
+      <section class="questions-section">
+        <h2 class="section-heading">Bipolar Rating Scale (1 to 7)</h2>
+        <p class="section-subtext">Choose the circle on the 7-point scale that best describes your impression of the system.</p>
+
+        <div id="ueq-pairs-list" class="pairs-list">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </section>
+
+      <div class="submit-action-row">
+        <button id="submit-ueq-btn" class="submit-btn" type="button">
+          <Sparkles size={18} />
+          <span>Calculate UEQ Scores & Export</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Result Card -->
+    <div id="result-card" class="result-card hidden" tabindex="-1">
+      <div class="result-header">
+        <div class="check-icon-circle">
+          <CheckCircle2 size={36} />
+        </div>
+        <h2>UEQ Assessment Completed!</h2>
+        <p>User experience scores calculated across benchmark scales.</p>
+      </div>
+
+      <div id="ueq-scores-grid" class="ueq-scores-grid">
+        <!-- Dynamically rendered scale scores -->
+      </div>
+
+      <div class="result-actions">
+        <button id="reset-btn" class="reset-btn" type="button">
+          <RotateCcw size={16} />
+          <span>Start New Response</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tool-page-container { max-width: 880px; margin: 0 auto; padding: 3rem 1.5rem 6rem 1.5rem; }
+  .back-nav-row { margin-bottom: 1.5rem; }
+  .back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--accent-blue); transition: transform var(--transition-fast); }
+  .back-link:hover { transform: translateX(-3px); }
+  .tool-header { margin-bottom: 2.5rem; }
+  .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; }
+  .tool-badge { font-size: 0.78rem; font-weight: 600; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.35rem; }
+  .page-title { font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; }
+  .github-link-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--radius-md); background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.88rem; font-weight: 600; transition: all var(--transition-fast); }
+  .github-link-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+  .page-subtitle { font-size: 1.02rem; color: var(--text-muted); line-height: 1.55; }
+
+  .app-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); }
+  .section-heading { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+  .section-subtext { font-size: 0.9rem; color: var(--text-subtle); margin-top: -0.5rem; margin-bottom: 1.5rem; }
+
+  .version-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+  .version-card { padding: 1rem 1.2rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); cursor: pointer; transition: all 0.25s; text-align: left; }
+  .version-card.active { border-color: var(--accent-blue); background-color: rgba(37, 99, 235, 0.06); box-shadow: 0 0 14px rgba(37, 99, 235, 0.25); }
+  .v-title { font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.2rem; }
+  .v-desc { font-size: 0.8rem; color: var(--text-subtle); }
+
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+  .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .field-group.flex-2 { grid-column: span 2; }
+  label { font-size: 0.88rem; font-weight: 600; color: var(--text-main); }
+  .required { color: #ef4444; }
+
+  .form-input { padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); color: var(--text-main); font-size: 0.92rem; box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.06), inset -3px -3px 6px rgba(255, 255, 255, 0.7); transition: all 0.25s; }
+  :global([data-theme='dark']) .form-input { box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.7), inset -4px -4px 10px rgba(255, 255, 255, 0.04); }
+  .form-input:focus { outline: none; border-color: var(--accent-blue); background-color: var(--bg-card); box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(37, 99, 235, 0.25), 0 0 18px rgba(37, 99, 235, 0.45); }
+
+  /* Save Cards */
+  .save-option-block { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 2rem; }
+  .block-label { font-size: 0.88rem; font-weight: 600; color: var(--text-main); }
+  .save-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .save-card { display: flex; align-items: center; gap: 0.85rem; padding: 0.9rem 1.1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); cursor: pointer; box-shadow: 3px 3px 8px rgba(0,0,0,0.04), -3px -3px 8px rgba(255,255,255,0.6); transition: all 0.25s; }
+  .save-card.active { border-color: var(--accent-blue); background-color: rgba(37, 99, 235, 0.06); box-shadow: inset 2px 2px 4px rgba(37,99,235,0.1), 0 0 14px rgba(37, 99, 235, 0.3); }
+  .card-icon-box { color: var(--accent-blue); }
+  .card-title { font-size: 0.92rem; font-weight: 700; color: var(--text-main); }
+  .card-desc { font-size: 0.78rem; color: var(--text-subtle); }
+  .sheets-inputs-row { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-color); }
+
+  /* Progress Block */
+  .progress-block { background-color: var(--bg-pill); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 2rem; }
+  .progress-info { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 0.5rem; }
+  .progress-label { font-weight: 600; color: var(--text-main); }
+  .progress-count { color: var(--accent-blue); font-weight: 600; }
+  .progress-track { width: 100%; height: 8px; background-color: var(--border-color); border-radius: var(--radius-full); overflow: hidden; }
+  .progress-fill { height: 100%; background-color: var(--accent-blue); border-radius: var(--radius-full); transition: width 0.3s ease; }
+
+  /* Pairs List (Dynamically Rendered) */
+  :global(.pairs-list) { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2.5rem; }
+  :global(.pair-row) { min-width: 0; background-color: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+  :global(.pair-legend) { width: 100%; padding: 0; font-size: 0.82rem; font-weight: 700; color: var(--text-subtle); }
+  :global(.pair-legend .sr-only) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+  :global(.p-num) { color: var(--accent-blue); font-weight: 800; }
+  :global(.bipolar-control) {
+    display: grid;
+    grid-template-columns: minmax(7rem, 0.75fr) minmax(0, 2.5fr) minmax(7rem, 0.75fr);
+    grid-template-areas: "left scale right";
+    gap: 0.85rem;
+    align-items: center;
+  }
+  :global(.endpoint-term) {
+    min-width: 0;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 750;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+  :global(.left-term) { grid-area: left; text-align: right; }
+  :global(.right-term) { grid-area: right; text-align: left; }
+
+  /* 7 Bipolar Scale Buttons Row */
+  :global(.scale-radios-7) { grid-area: scale; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.5rem; align-items: center; }
+  :global(.radio-7-pill) { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 0.75rem 0.2rem; 
+    border-radius: var(--radius-md); 
+    border: 1px solid var(--border-color); 
+    background-color: var(--bg-card); 
+    cursor: pointer; 
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.04), -2px -2px 5px rgba(255,255,255,0.5);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+    text-align: center;
+  }
+  :global([data-theme='dark']) :global(.radio-7-pill) { box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.35), -2px -2px 6px rgba(255, 255, 255, 0.02); }
+  :global(.radio-7-pill:hover) { border-color: var(--accent-blue); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+  :global(.radio-7-pill:focus-within) { outline: 3px solid var(--accent-blue); outline-offset: 2px; }
+  :global(.radio-7-pill.active) { 
+    background-color: var(--accent-blue); 
+    border-color: var(--accent-blue); 
+    color: #ffffff; 
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.2), 0 0 16px rgba(37, 99, 235, 0.6); 
+    transform: scale(1.04); 
+  }
+  :global(.radio-7-pill .num-val) { font-size: 1.05rem; font-weight: 800; }
+
+  .submit-action-row { display: flex; justify-content: flex-end; }
+  .submit-btn { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.9rem 2.2rem; border-radius: var(--radius-full); background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-size: 0.96rem; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35); transition: all 0.3s; }
+  .submit-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 24px rgba(37, 99, 235, 0.7); }
+
+  .result-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 3rem 2rem; text-align: center; }
+  .check-icon-circle { width: 4rem; height: 4rem; border-radius: var(--radius-full); background-color: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; }
+  :global(.ueq-scores-grid) { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; max-width: 680px; margin: 0 auto 2rem auto; }
+  :global(.ueq-score-card) { background-color: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; align-items: center; }
+  :global(.s-title) { font-size: 0.85rem; font-weight: 600; color: var(--text-subtle); margin-bottom: 0.3rem; }
+  :global(.s-val) { font-size: 2.2rem; font-weight: 800; color: var(--accent-blue); }
+
+  .result-actions { display: flex; justify-content: center; }
+  .reset-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); background-color: var(--bg-pill); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; cursor: pointer; }
+  .sr-only { position: absolute; width: 1px; height: 1px; clip: rect(0,0,0,0); border: 0; }
+  .hidden { display: none !important; }
+
+  @media (max-width: 640px) {
+    .version-select-grid, .fields-grid, .save-cards-grid, .ueq-scores-grid { grid-template-columns: 1fr; }
+    :global(.pair-row) { padding: 1rem; }
+    :global(.bipolar-control) {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        "left right"
+        "scale scale";
+      gap: 0.75rem;
+    }
+    :global(.left-term) { text-align: left; }
+    :global(.right-term) { text-align: right; }
+    :global(.scale-radios-7) { gap: 0.25rem; }
+    :global(.radio-7-pill) { min-height: 3rem; padding: 0.5rem 0.1rem; }
+  }
+</style>
+
+<script>
+  import {
+    clearToolAlert,
+    initializeResearchSaveOptions,
+    markQuestionGroupInvalid,
+    showRemoteSaveFailure,
+    submitResearchData,
+    validateRequiredFields,
+  } from '../../scripts/researchToolSupport';
+
+  const fullPairs = [
+    { left: "annoying", right: "enjoyable", scale: "Attractiveness" },
+    { left: "not understandable", right: "understandable", scale: "Perspicuity" },
+    { left: "creative", right: "dull", scale: "Novelty", reverse: true },
+    { left: "easy to learn", right: "difficult to learn", scale: "Perspicuity", reverse: true },
+    { left: "valuable", right: "inferior", scale: "Stimulation", reverse: true },
+    { left: "boring", right: "exciting", scale: "Stimulation" },
+    { left: "not interesting", right: "interesting", scale: "Stimulation" },
+    { left: "unpredictable", right: "predictable", scale: "Dependability" },
+    { left: "fast", right: "slow", scale: "Efficiency", reverse: true },
+    { left: "inventive", right: "conventional", scale: "Novelty", reverse: true },
+    { left: "obstructive", right: "supportive", scale: "Efficiency" },
+    { left: "good", right: "bad", scale: "Attractiveness", reverse: true },
+    { left: "complicated", right: "easy", scale: "Perspicuity" },
+    { left: "unlikable", right: "pleasing", scale: "Attractiveness" },
+    { left: "usual", right: "leading edge", scale: "Novelty" },
+    { left: "unpleasant", right: "pleasant", scale: "Attractiveness" },
+    { left: "secure", right: "not secure", scale: "Dependability", reverse: true },
+    { left: "motivating", right: "demotivating", scale: "Stimulation", reverse: true },
+    { left: "meets expectations", right: "does not meet expectations", scale: "Dependability", reverse: true },
+    { left: "inefficient", right: "efficient", scale: "Efficiency" },
+    { left: "clear", right: "confusing", scale: "Perspicuity", reverse: true },
+    { left: "impractical", right: "practical", scale: "Efficiency" },
+    { left: "organized", right: "cluttered", scale: "Dependability", reverse: true },
+    { left: "attractive", right: "unattractive", scale: "Attractiveness", reverse: true },
+    { left: "friendly", right: "unfriendly", scale: "Attractiveness", reverse: true },
+    { left: "conservative", right: "innovative", scale: "Novelty" },
+  ];
+
+  const shortPairs = [
+    { left: "obstructive", right: "supportive", scale: "Pragmatic Quality" },
+    { left: "complicated", right: "easy", scale: "Pragmatic Quality" },
+    { left: "inefficient", right: "efficient", scale: "Pragmatic Quality" },
+    { left: "clear", right: "confusing", scale: "Pragmatic Quality", reverse: true },
+    { left: "boring", right: "exciting", scale: "Hedonic Quality" },
+    { left: "not interesting", right: "interesting", scale: "Hedonic Quality" },
+    { left: "conventional", right: "inventive", scale: "Hedonic Quality" },
+    { left: "usual", right: "leading edge", scale: "Hedonic Quality" },
+  ];
+
+  let currentVer = 'full';
+  let activePairs = fullPairs;
+  const userAnswers: Record<number, number> = {};
+
+  const saveOptions = initializeResearchSaveOptions();
+
+  // Version Toggle
+  const cardFull = document.getElementById('card-ver-full');
+  const cardShort = document.getElementById('card-ver-short');
+  const pairsList = document.getElementById('ueq-pairs-list')!;
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const alertBox = document.getElementById('alert-box');
+
+  cardFull?.addEventListener('click', () => {
+    cardFull.classList.add('active');
+    cardShort?.classList.remove('active');
+    cardFull.setAttribute('aria-pressed', 'true');
+    cardShort?.setAttribute('aria-pressed', 'false');
+    currentVer = 'full';
+    activePairs = fullPairs;
+    renderPairs();
+  });
+
+  cardShort?.addEventListener('click', () => {
+    cardShort.classList.add('active');
+    cardFull?.classList.remove('active');
+    cardShort.setAttribute('aria-pressed', 'true');
+    cardFull?.setAttribute('aria-pressed', 'false');
+    currentVer = 'short';
+    activePairs = shortPairs;
+    renderPairs();
+  });
+
+  function updateProgress() {
+    const answeredCount = Object.keys(userAnswers).length;
+    const total = activePairs.length;
+    const pct = Math.round((answeredCount / total) * 100);
+    if (progressBar) progressBar.style.width = `${pct}%`;
+    if (progressText) progressText.textContent = `${answeredCount} / ${total} answered (${pct}%)`;
+    progressBar?.parentElement?.setAttribute('aria-valuemax', String(total));
+    progressBar?.parentElement?.setAttribute('aria-valuenow', String(answeredCount));
+    progressBar?.parentElement?.setAttribute('aria-valuetext', `${answeredCount} of ${total} questions answered`);
+  }
+
+  function renderPairs() {
+    Object.keys(userAnswers).forEach(k => delete userAnswers[parseInt(k, 10)]);
+    updateProgress();
+    if (alertBox) alertBox.classList.add('hidden');
+
+    pairsList.innerHTML = activePairs.map((p, idx) => `
+      <fieldset class="pair-row" data-idx="${idx}">
+        <legend class="pair-legend">
+          <span class="p-num">Item ${idx + 1}</span>
+          <span class="sr-only">: ${p.left} to ${p.right}</span>
+        </legend>
+        <div class="bipolar-control">
+          <span class="endpoint-term left-term">${p.left}</span>
+          <div class="scale-radios-7">
+            ${[1, 2, 3, 4, 5, 6, 7].map(v => `
+              <label class="radio-7-pill" data-idx="${idx}" data-val="${v}">
+                <input
+                  class="sr-only"
+                  type="radio"
+                  name="ueq-${idx}"
+                  value="${v}"
+                  aria-label="${v} of 7${v === 1 ? `, ${p.left}` : v === 7 ? `, ${p.right}` : ''}"
+                />
+                <span class="num-val" aria-hidden="true">${v}</span>
+              </label>
+            `).join('')}
+          </div>
+          <span class="endpoint-term right-term">${p.right}</span>
+        </div>
+      </fieldset>
+    `).join('');
+
+    const pills = pairsList.querySelectorAll('.radio-7-pill');
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        const row = pill.closest('.pair-row')!;
+        row.querySelectorAll('.radio-7-pill').forEach(el => el.classList.remove('active'));
+        pill.classList.add('active');
+        const idx = parseInt(pill.getAttribute('data-idx') || '0', 10);
+        const val = parseInt(pill.getAttribute('data-val') || '0', 10);
+        const radio = pill.querySelector<HTMLInputElement>('input[type="radio"]');
+        if (radio) radio.checked = true;
+        userAnswers[idx] = val;
+        row.classList.remove('question-group-invalid');
+        row.setAttribute('aria-invalid', 'false');
+        updateProgress();
+      });
+    });
+  }
+
+  renderPairs();
+
+  function downloadUEQCSV(data: any) {
+    let csv = `UEQ_Version,Participant_ID,Condition,Item_Number,Item_Left,Item_Right,Response_Value\n`;
+    activePairs.forEach((p, idx) => {
+      csv += `${currentVer.toUpperCase()},${data.participantId},${data.condition},${idx + 1},"${p.left}","${p.right}",${userAnswers[idx]}\n`;
+    });
+    csv += `\n=== UEQ SCALE AVERAGES (-3 to +3) ===\n`;
+    Object.keys(data.scaleAverages).forEach((scale) => {
+      csv += `${scale},${data.scaleAverages[scale].toFixed(2)}\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${data.participantId}_${data.condition}_UEQ_${currentVer.toUpperCase()}_${Date.now()}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function showResults(data: any) {
+    document.getElementById('ueq-app-card')!.classList.add('hidden');
+    const resultCard = document.getElementById('result-card')!;
+    resultCard.classList.remove('hidden');
+
+    const grid = document.getElementById('ueq-scores-grid')!;
+    grid.innerHTML = Object.keys(data.scaleAverages).map((scale) => `
+      <div class="ueq-score-card">
+        <span class="s-title">${scale}</span>
+        <span class="s-val">${data.scaleAverages[scale] > 0 ? '+' : ''}${data.scaleAverages[scale].toFixed(2)}</span>
+      </div>
+    `).join('');
+
+    resultCard.focus({ preventScroll: true });
+    window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
+  }
+
+  const submitBtn = document.getElementById('submit-ueq-btn');
+
+  async function saveResponse(data: any) {
+    if (saveOptions.currentOption === 'local') {
+      downloadUEQCSV(data);
+      showResults(data);
+      return;
+    }
+
+    const endpoint = (document.getElementById('sheet-url') as HTMLInputElement).value.trim();
+    const sheetName = (document.getElementById('sheet-name') as HTMLInputElement).value.trim() || 'UEQ';
+    submitBtn?.setAttribute('disabled', '');
+    submitBtn?.setAttribute('aria-busy', 'true');
+    try {
+      await submitResearchData({ endpoint, sheetName, tool: 'UEQ', payload: data });
+      clearToolAlert(alertBox);
+      showResults(data);
+    } catch (error) {
+      showRemoteSaveFailure({
+        alertBox,
+        message: error instanceof Error ? error.message : 'The remote save could not be confirmed.',
+        onRetry: () => void saveResponse(data),
+        onDownload: () => {
+          downloadUEQCSV(data);
+          showResults(data);
+        },
+      });
+    } finally {
+      submitBtn?.removeAttribute('disabled');
+      submitBtn?.removeAttribute('aria-busy');
+    }
+  }
+
+  // Submit Handler
+  submitBtn?.addEventListener('click', async () => {
+    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
+
+    if (!validateRequiredFields([
+      { id: 'participant-id', label: 'Participant ID', errorId: 'participant-id-error' },
+      { id: 'condition-id', label: 'Condition', errorId: 'condition-id-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    const answeredCount = Object.keys(userAnswers).length;
+    if (answeredCount < activePairs.length) {
+      const firstMissing = Array.from(pairsList.querySelectorAll('.pair-row')).find((row) => {
+        const index = parseInt(row.getAttribute('data-idx') || '0', 10);
+        return userAnswers[index] === undefined;
+      }) as HTMLElement | undefined;
+      markQuestionGroupInvalid(
+        firstMissing || null,
+        alertBox,
+        `Please complete all ${activePairs.length} bipolar items. You have answered ${answeredCount} of ${activePairs.length}.`,
+      );
+      return;
+    }
+
+    if (saveOptions.currentOption === 'googlesheets' && !validateRequiredFields([
+      { id: 'sheet-url', label: 'Google Apps Script URL', errorId: 'sheet-url-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    clearToolAlert(alertBox);
+
+    // Scale calculation (-3 to +3 transformation)
+    const scaleScores: Record<string, number[]> = {};
+    activePairs.forEach((p, idx) => {
+      let val = userAnswers[idx];
+      let transformed = val - 4; // 1 -> -3, 4 -> 0, 7 -> +3
+      if (p.reverse) transformed = -transformed;
+
+      if (!scaleScores[p.scale]) scaleScores[p.scale] = [];
+      scaleScores[p.scale].push(transformed);
+    });
+
+    const scaleAverages: Record<string, number> = {};
+    Object.keys(scaleScores).forEach(s => {
+      const sum = scaleScores[s].reduce((a, b) => a + b, 0);
+      scaleAverages[s] = sum / scaleScores[s].length;
+    });
+
+    await saveResponse({
+      version: currentVer,
+      participantId: pId,
+      condition: cond,
+      responses: { ...userAnswers },
+      scaleAverages,
+    });
+  });
+
+  document.getElementById('reset-btn')?.addEventListener('click', () => window.location.reload());
+</script>

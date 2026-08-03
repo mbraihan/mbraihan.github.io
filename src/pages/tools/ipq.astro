@@ -1,0 +1,374 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ResearchToolProvenance from '../../components/ResearchToolProvenance.astro';
+import ResearchSaveOptions from '../../components/ResearchSaveOptions.astro';
+import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-astro';
+
+const ipqQuestions = [
+  { id: 1, text: 'In the computer generated world I had a sense of "being there"', leftAnchor: 'Fully disagree', rightAnchor: 'Fully agree', scale: 'General Presence (G1)' },
+  { id: 2, text: 'Somehow I felt that the virtual world surrounded me', leftAnchor: 'Fully disagree', rightAnchor: 'Fully agree', scale: 'Spatial Presence (SP)' },
+  { id: 3, text: 'I felt like I was just perceiving pictures', leftAnchor: 'Fully disagree', rightAnchor: 'Fully agree', scale: 'Spatial Presence (SP)', reverse: true },
+  { id: 4, text: 'I did not feel present in the virtual space', leftAnchor: 'Fully disagree', rightAnchor: 'Fully agree', scale: 'Spatial Presence (SP)', reverse: true },
+  { id: 5, text: 'I had a sense of acting in the virtual space, rather than operating something from outside', leftAnchor: 'Fully disagree', rightAnchor: 'Fully agree', scale: 'Spatial Presence (SP)' },
+  { id: 6, text: 'I felt present in the virtual space', leftAnchor: 'Fully disagree', rightAnchor: 'Fully agree', scale: 'Spatial Presence (SP)' },
+  { id: 7, text: 'How aware were you of the real world surrounding while navigating in the virtual world?', leftAnchor: 'Extremely aware', rightAnchor: 'Not aware at all', scale: 'Involvement (INV)' },
+  { id: 8, text: 'I was not aware of my real environment', leftAnchor: 'Fully disagree', rightAnchor: 'Fully agree', scale: 'Involvement (INV)' },
+  { id: 9, text: 'I still paid attention to the real environment', leftAnchor: 'Fully disagree', rightAnchor: 'Fully agree', scale: 'Involvement (INV)', reverse: true },
+  { id: 10, text: 'I was completely captivated by the virtual world', leftAnchor: 'Fully disagree', rightAnchor: 'Fully agree', scale: 'Involvement (INV)' },
+  { id: 11, text: 'How real did the virtual world seem to you?', leftAnchor: 'Completely unreal', rightAnchor: 'Indistinguishable from reality', scale: 'Experienced Realism (REAL)' },
+  { id: 12, text: 'How much did your experience in the virtual environment seem consistent with your real world experience?', leftAnchor: 'Not consistent', rightAnchor: 'Very consistent', scale: 'Experienced Realism (REAL)' },
+  { id: 13, text: 'How real did the virtual world seem to you?', leftAnchor: 'About as real as an imagined world', rightAnchor: 'Indistinguishable from the real world', scale: 'Experienced Realism (REAL)' },
+  { id: 14, text: 'The virtual world seemed more realistic than the real world', leftAnchor: 'Fully disagree', rightAnchor: 'Fully agree', scale: 'Experienced Realism (REAL)' },
+];
+---
+
+<BaseLayout 
+  title="Igroup Presence Questionnaire (IPQ) | Mohammad Raihanul Bashar"
+  description="Measure user sense of presence in Virtual Reality (VR) and Extended Reality (XR) environments across 14 items."
+>
+  <div class="tool-page-container">
+    <div class="back-nav-row">
+      <a href="/tools" class="back-link">
+        <ArrowLeft size={16} />
+        <span>Back to Tools</span>
+      </a>
+    </div>
+
+    <header class="tool-header">
+      <div class="title-row">
+        <div>
+          <span class="tool-badge">XR & VR Presence Evaluation</span>
+          <h1 class="page-title">Igroup Presence Questionnaire (IPQ)</h1>
+        </div>
+        <a 
+          href="https://github.com/mbraihan/ipq-web-app" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="github-link-btn"
+        >
+          <Github size={18} />
+          <span>GitHub Repository</span>
+          <span class="sr-only">(opens in a new tab)</span>
+        </a>
+      </div>
+      <p class="page-subtitle">
+        Assess Spatial Presence (SP), Involvement (INV), Experienced Realism (REAL), and General Presence (G1).
+      </p>
+    </header>
+
+    <ResearchToolProvenance tool="ipq" supportsGoogleSheets />
+
+    <div id="ipq-app-card" class="app-card">
+      <section class="setup-section">
+        <h2 class="section-heading">Session Details</h2>
+        
+        <div class="fields-grid">
+          <div class="field-group">
+            <label for="participant-id">Participant ID <span class="required">*</span></label>
+            <input type="text" id="participant-id" placeholder="e.g., P01" class="form-input" required aria-describedby="participant-id-error" />
+            <span id="participant-id-error" class="field-error"></span>
+          </div>
+
+          <div class="field-group">
+            <label for="condition-id">Condition / Environment <span class="required">*</span></label>
+            <input type="text" id="condition-id" placeholder="e.g., VR Pass-through" class="form-input" required aria-describedby="condition-id-error" />
+            <span id="condition-id-error" class="field-error"></span>
+          </div>
+        </div>
+
+        <ResearchSaveOptions sheetName="IPQ" />
+      </section>
+
+      <section class="questions-section">
+        <h2 class="section-heading">14 Presence Statements (0 to 6 Scale)</h2>
+        <p class="section-subtext">Rate your agreement or experience for each statement on a 7-point scale (0 = Minimum, 6 = Maximum).</p>
+
+        <div class="questions-list">
+          {ipqQuestions.map((q, qIdx) => (
+            <fieldset class="q-card" data-qidx={qIdx}>
+              <legend class="q-title">
+                <span class="q-num">{q.id}.</span>
+                <span>{q.text}</span>
+              </legend>
+
+              <div class="anchor-labels">
+                <span class="anchor-left">{q.leftAnchor}</span>
+                <span class="anchor-right">{q.rightAnchor}</span>
+              </div>
+
+              <div class="radios-7-grid">
+                {[0, 1, 2, 3, 4, 5, 6].map(v => (
+                  <label class="radio-pill-7" data-qidx={qIdx} data-val={v}>
+                    <input class="sr-only" type="radio" name={`ipq-${qIdx}`} value={v} />
+                    <span>{v}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+      </section>
+
+      <div id="alert-box" class="tool-alert hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+      <div class="submit-action-row">
+        <button id="submit-ipq-btn" class="submit-btn" type="button">
+          <Sparkles size={18} />
+          <span>Calculate Presence Scores & Export</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Result Card -->
+    <div id="result-card" class="result-card hidden" tabindex="-1">
+      <div class="result-header">
+        <div class="check-icon-circle">
+          <CheckCircle2 size={36} />
+        </div>
+        <h2>IPQ Assessment Completed!</h2>
+        <p>Presence subscale scores calculated successfully.</p>
+      </div>
+
+      <div id="ipq-scores-grid" class="ipq-scores-grid">
+        <!-- Populated dynamically -->
+      </div>
+
+      <div class="result-actions">
+        <button id="reset-btn" class="reset-btn" type="button">
+          <RotateCcw size={16} />
+          <span>Start New Response</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tool-page-container { max-width: 880px; margin: 0 auto; padding: 3rem 1.5rem 6rem 1.5rem; }
+  .back-nav-row { margin-bottom: 1.5rem; }
+  .back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--accent-blue); transition: transform var(--transition-fast); }
+  .back-link:hover { transform: translateX(-3px); }
+  .tool-header { margin-bottom: 2.5rem; }
+  .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; }
+  .tool-badge { font-size: 0.78rem; font-weight: 600; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.35rem; }
+  .page-title { font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; }
+  .github-link-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--radius-md); background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.88rem; font-weight: 600; transition: all var(--transition-fast); }
+  .github-link-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+  .page-subtitle { font-size: 1.02rem; color: var(--text-muted); line-height: 1.55; }
+
+  .app-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); }
+  .section-heading { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+  .section-subtext { font-size: 0.9rem; color: var(--text-subtle); margin-top: -0.5rem; margin-bottom: 1.5rem; }
+
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+  .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  label { font-size: 0.88rem; font-weight: 600; color: var(--text-main); }
+  .required { color: #ef4444; }
+
+  .form-input { padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); color: var(--text-main); font-size: 0.92rem; box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.06), inset -3px -3px 6px rgba(255, 255, 255, 0.7); transition: all 0.25s; }
+  :global([data-theme='dark']) .form-input { box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.7), inset -4px -4px 10px rgba(255, 255, 255, 0.04); }
+  .form-input:focus { outline: none; border-color: var(--accent-blue); background-color: var(--bg-card); box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(37, 99, 235, 0.25), 0 0 18px rgba(37, 99, 235, 0.45); }
+
+  .questions-list { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2.5rem; }
+  .q-card { min-width: 0; background-color: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; }
+  .q-title { font-size: 0.98rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.75rem; line-height: 1.45; }
+  .q-num { color: var(--accent-blue); font-weight: 700; margin-right: 0.35rem; }
+  .anchor-labels { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; color: var(--text-subtle); margin-bottom: 0.5rem; }
+
+  .radios-7-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; }
+  .radio-pill-7 { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.65rem 0.2rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-card); cursor: pointer; transition: all 0.25s; font-size: 0.95rem; font-weight: 700; color: var(--text-muted); }
+  .radio-pill-7:hover { border-color: var(--accent-blue); color: var(--text-main); }
+  .radio-pill-7.active { background-color: var(--accent-blue); border-color: var(--accent-blue); color: #ffffff; box-shadow: 0 0 14px rgba(37, 99, 235, 0.5); transform: scale(1.05); }
+
+  .submit-action-row { display: flex; justify-content: flex-end; }
+  .submit-btn { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.9rem 2.2rem; border-radius: var(--radius-full); background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-size: 0.96rem; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35); transition: all 0.3s; }
+  .submit-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 24px rgba(37, 99, 235, 0.7); }
+
+  .result-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 3rem 2rem; text-align: center; }
+  .check-icon-circle { width: 4rem; height: 4rem; border-radius: var(--radius-full); background-color: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; }
+  .ipq-scores-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; max-width: 600px; margin: 0 auto 2rem auto; }
+  .ipq-score-card { background-color: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; align-items: center; }
+  .s-title { font-size: 0.85rem; font-weight: 600; color: var(--text-subtle); margin-bottom: 0.3rem; }
+  .s-val { font-size: 2.2rem; font-weight: 800; color: var(--accent-blue); }
+
+  .result-actions { display: flex; justify-content: center; }
+  .reset-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); background-color: var(--bg-pill); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; cursor: pointer; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+  .hidden { display: none !important; }
+
+  @media (max-width: 640px) {
+    .fields-grid, .ipq-scores-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  import {
+    clearToolAlert,
+    initializeResearchSaveOptions,
+    markQuestionGroupInvalid,
+    showRemoteSaveFailure,
+    submitResearchData,
+    validateRequiredFields,
+  } from '../../scripts/researchToolSupport';
+
+  const ipqQuestions = [
+    { id: 1, text: 'In the computer generated world I had a sense of "being there"', scale: 'General Presence (G1)' },
+    { id: 2, text: 'Somehow I felt that the virtual world surrounded me', scale: 'Spatial Presence (SP)' },
+    { id: 3, text: 'I felt like I was just perceiving pictures', scale: 'Spatial Presence (SP)', reverse: true },
+    { id: 4, text: 'I did not feel present in the virtual space', scale: 'Spatial Presence (SP)', reverse: true },
+    { id: 5, text: 'I had a sense of acting in the virtual space, rather than operating something from outside', scale: 'Spatial Presence (SP)' },
+    { id: 6, text: 'I felt present in the virtual space', scale: 'Spatial Presence (SP)' },
+    { id: 7, text: 'How aware were you of the real world surrounding while navigating in the virtual world?', scale: 'Involvement (INV)' },
+    { id: 8, text: 'I was not aware of my real environment', scale: 'Involvement (INV)' },
+    { id: 9, text: 'I still paid attention to the real environment', scale: 'Involvement (INV)', reverse: true },
+    { id: 10, text: 'I was completely captivated by the virtual world', scale: 'Involvement (INV)' },
+    { id: 11, text: 'How real did the virtual world seem to you?', scale: 'Experienced Realism (REAL)' },
+    { id: 12, text: 'How much did your experience in the virtual environment seem consistent with your real world experience?', scale: 'Experienced Realism (REAL)' },
+    { id: 13, text: 'How real did the virtual world seem to you?', scale: 'Experienced Realism (REAL)' },
+    { id: 14, text: 'The virtual world seemed more realistic than the real world', scale: 'Experienced Realism (REAL)' },
+  ];
+
+  const answers: Record<number, number> = {};
+  const alertBox = document.getElementById('alert-box');
+  const saveOptions = initializeResearchSaveOptions();
+  const submitBtn = document.getElementById('submit-ipq-btn');
+
+  const pills = document.querySelectorAll('.radio-pill-7');
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const qidx = parseInt(pill.getAttribute('data-qidx') || '0', 10);
+      const val = parseInt(pill.getAttribute('data-val') || '0', 10);
+
+      const qCard = pill.closest('.q-card')!;
+      qCard.querySelectorAll('.radio-pill-7').forEach(el => el.classList.remove('active'));
+      pill.classList.add('active');
+      const radio = pill.querySelector<HTMLInputElement>('input[type="radio"]');
+      if (radio) radio.checked = true;
+
+      answers[qidx] = val;
+      qCard.classList.remove('question-group-invalid');
+      qCard.setAttribute('aria-invalid', 'false');
+    });
+  });
+
+  function downloadIPQCSV(data: any) {
+    let csv = `Participant_ID,Condition,Subscale,Mean_Score_0_to_6\n`;
+    Object.keys(data.scaleAverages).forEach((scale) => {
+      csv += `${data.participantId},${data.condition},${scale},${data.scaleAverages[scale].toFixed(2)}\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${data.participantId}_${data.condition}_IPQ_${Date.now()}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function showResults(data: any) {
+    document.getElementById('ipq-app-card')!.classList.add('hidden');
+    const resultCard = document.getElementById('result-card')!;
+    resultCard.classList.remove('hidden');
+
+    const grid = document.getElementById('ipq-scores-grid')!;
+    grid.innerHTML = Object.keys(data.scaleAverages).map((scale) => `
+      <div class="ipq-score-card">
+        <span class="s-title">${scale}</span>
+        <span class="s-val">${data.scaleAverages[scale].toFixed(2)}</span>
+      </div>
+    `).join('');
+    resultCard.focus({ preventScroll: true });
+    window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
+  }
+
+  async function saveResponse(data: any) {
+    if (saveOptions.currentOption === 'local') {
+      downloadIPQCSV(data);
+      showResults(data);
+      return;
+    }
+
+    const endpoint = (document.getElementById('sheet-url') as HTMLInputElement).value.trim();
+    const sheetName = (document.getElementById('sheet-name') as HTMLInputElement).value.trim() || 'IPQ';
+    submitBtn?.setAttribute('disabled', '');
+    submitBtn?.setAttribute('aria-busy', 'true');
+    try {
+      await submitResearchData({ endpoint, sheetName, tool: 'IPQ', payload: data });
+      clearToolAlert(alertBox);
+      showResults(data);
+    } catch (error) {
+      showRemoteSaveFailure({
+        alertBox,
+        message: error instanceof Error ? error.message : 'The remote save could not be confirmed.',
+        onRetry: () => void saveResponse(data),
+        onDownload: () => {
+          downloadIPQCSV(data);
+          showResults(data);
+        },
+      });
+    } finally {
+      submitBtn?.removeAttribute('disabled');
+      submitBtn?.removeAttribute('aria-busy');
+    }
+  }
+
+  submitBtn?.addEventListener('click', async () => {
+    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
+
+    if (!validateRequiredFields([
+      { id: 'participant-id', label: 'Participant ID', errorId: 'participant-id-error' },
+      { id: 'condition-id', label: 'Condition', errorId: 'condition-id-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    if (Object.keys(answers).length < ipqQuestions.length) {
+      const firstMissing = Array.from(document.querySelectorAll('.q-card')).find((card) => {
+        const index = parseInt(card.getAttribute('data-qidx') || '0', 10);
+        return answers[index] === undefined;
+      }) as HTMLElement | undefined;
+      markQuestionGroupInvalid(
+        firstMissing || null,
+        alertBox,
+        `Please answer all 14 presence questions. You have completed ${Object.keys(answers).length} of 14.`,
+      );
+      return;
+    }
+
+    if (saveOptions.currentOption === 'googlesheets' && !validateRequiredFields([
+      { id: 'sheet-url', label: 'Google Apps Script URL', errorId: 'sheet-url-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    clearToolAlert(alertBox);
+    const scaleTotals: Record<string, number[]> = {};
+    ipqQuestions.forEach((q, idx) => {
+      let rawVal = answers[idx];
+      let finalVal = q.reverse ? (6 - rawVal) : rawVal;
+
+      if (!scaleTotals[q.scale]) scaleTotals[q.scale] = [];
+      scaleTotals[q.scale].push(finalVal);
+    });
+
+    const scaleAverages: Record<string, number> = {};
+    Object.keys(scaleTotals).forEach(s => {
+      const sum = scaleTotals[s].reduce((a, b) => a + b, 0);
+      scaleAverages[s] = sum / scaleTotals[s].length;
+    });
+
+    await saveResponse({
+      participantId: pId,
+      condition: cond,
+      responses: { ...answers },
+      scaleAverages,
+    });
+  });
+
+  document.getElementById('reset-btn')?.addEventListener('click', () => window.location.reload());
+</script>

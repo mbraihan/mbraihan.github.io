@@ -1,0 +1,380 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ResearchToolProvenance from '../../components/ResearchToolProvenance.astro';
+import ResearchSaveOptions from '../../components/ResearchSaveOptions.astro';
+import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-astro';
+
+const ssqSymptoms = [
+  'General discomfort', 'Fatigue', 'Headache', 'Eye strain',
+  'Difficulty focusing', 'Increased salivation', 'Sweating', 'Nausea',
+  'Difficulty concentrating', 'Fullness of head', 'Blurred vision',
+  'Dizzy (with eyes open)', 'Dizzy (with eyes closed)', 'Vertigo',
+  'Stomach awareness', 'Burping'
+];
+
+const ssqOptions = [
+  { val: 0, label: 'None' },
+  { val: 1, label: 'Slight' },
+  { val: 2, label: 'Moderate' },
+  { val: 3, label: 'Severe' }
+];
+---
+
+<BaseLayout 
+  title="Simulator Sickness Questionnaire (SSQ) | Mohammad Raihanul Bashar"
+  description="Measure VR and simulator sickness symptoms with SSQ Nausea, Oculomotor, Disorientation, and Total Score calculations."
+>
+  <div class="tool-page-container">
+    <div class="back-nav-row">
+      <a href="/tools" class="back-link">
+        <ArrowLeft size={16} />
+        <span>Back to Tools</span>
+      </a>
+    </div>
+
+    <header class="tool-header">
+      <div class="title-row">
+        <div>
+          <span class="tool-badge">VR / Simulator Sickness Evaluation</span>
+          <h1 class="page-title">Simulator Sickness Questionnaire (SSQ)</h1>
+        </div>
+        <a 
+          href="https://github.com/mbraihan/ssq-web-app" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="github-link-btn"
+        >
+          <Github size={18} />
+          <span>GitHub Repository</span>
+          <span class="sr-only">(opens in a new tab)</span>
+        </a>
+      </div>
+      <p class="page-subtitle">
+        Standard 16-symptom assessment (Kennedy et al., 1993) computing Nausea, Oculomotor, Disorientation, and Total Sickness scores.
+      </p>
+    </header>
+
+    <ResearchToolProvenance tool="ssq" supportsGoogleSheets />
+
+    <div id="ssq-app-card" class="app-card">
+      <section class="setup-section">
+        <h2 class="section-heading">Session Details</h2>
+        
+        <div class="fields-grid">
+          <div class="field-group">
+            <label for="participant-id">Participant ID <span class="required">*</span></label>
+            <input type="text" id="participant-id" placeholder="e.g., P01" class="form-input" required aria-describedby="participant-id-error" />
+            <span id="participant-id-error" class="field-error"></span>
+          </div>
+
+          <div class="field-group">
+            <label for="condition-id">Condition / Variant <span class="required">*</span></label>
+            <input type="text" id="condition-id" placeholder="e.g., Smooth Locomotion" class="form-input" required aria-describedby="condition-id-error" />
+            <span id="condition-id-error" class="field-error"></span>
+          </div>
+        </div>
+
+        <ResearchSaveOptions sheetName="SSQ" />
+      </section>
+
+      <section class="questions-section">
+        <h2 class="section-heading">Symptom Severity Rating (16 Items)</h2>
+        <p class="section-subtext">Rate the current severity of each symptom experienced after using the system.</p>
+
+        <div class="symptoms-grid">
+          {ssqSymptoms.map((sym, idx) => (
+            <fieldset class="sym-card" data-idx={idx}>
+              <legend class="sym-title">
+                <span class="sym-num">{idx + 1}.</span>
+                <span>{sym}</span>
+              </legend>
+
+              <div class="options-4-row">
+                {ssqOptions.map((opt) => (
+                  <label class="opt-pill-4" data-idx={idx} data-val={opt.val}>
+                    <input class="sr-only" type="radio" name={`ssq-${idx}`} value={opt.val} />
+                    <span class="opt-val">{opt.val}</span>
+                    <span class="opt-label">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+      </section>
+
+      <div id="alert-box" class="tool-alert hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+      <div class="submit-action-row">
+        <button id="submit-ssq-btn" class="submit-btn" type="button">
+          <Sparkles size={18} />
+          <span>Calculate SSQ Scores & Export</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Result Card -->
+    <div id="result-card" class="result-card hidden" tabindex="-1">
+      <div class="result-header">
+        <div class="check-icon-circle">
+          <CheckCircle2 size={36} />
+        </div>
+        <h2>SSQ Assessment Completed!</h2>
+        <p>Simulator sickness subscores and total score calculated.</p>
+      </div>
+
+      <div class="score-breakdown-grid">
+        <div class="score-main-box">
+          <span class="score-caption">Total SSQ Score</span>
+          <span id="res-ssq-total" class="score-value">0.0</span>
+          <span class="score-max">Kennedy et al. Scale</span>
+        </div>
+
+        <div class="subscores-list">
+          <div class="subscore-row">
+            <span><strong>Nausea Subscore:</strong></span>
+            <span id="res-nausea" class="subscore-val">0.0</span>
+          </div>
+          <div class="subscore-row">
+            <span><strong>Oculomotor Subscore:</strong></span>
+            <span id="res-oculomotor" class="subscore-val">0.0</span>
+          </div>
+          <div class="subscore-row">
+            <span><strong>Disorientation Subscore:</strong></span>
+            <span id="res-disorientation" class="subscore-val">0.0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button id="reset-btn" class="reset-btn" type="button">
+          <RotateCcw size={16} />
+          <span>Start New Response</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tool-page-container { max-width: 880px; margin: 0 auto; padding: 3rem 1.5rem 6rem 1.5rem; }
+  .back-nav-row { margin-bottom: 1.5rem; }
+  .back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--accent-blue); transition: transform var(--transition-fast); }
+  .back-link:hover { transform: translateX(-3px); }
+  .tool-header { margin-bottom: 2.5rem; }
+  .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; }
+  .tool-badge { font-size: 0.78rem; font-weight: 600; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.35rem; }
+  .page-title { font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; }
+  .github-link-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--radius-md); background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.88rem; font-weight: 600; transition: all var(--transition-fast); }
+  .github-link-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+  .page-subtitle { font-size: 1.02rem; color: var(--text-muted); line-height: 1.55; }
+
+  .app-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); }
+  .section-heading { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+  .section-subtext { font-size: 0.9rem; color: var(--text-subtle); margin-top: -0.5rem; margin-bottom: 1.5rem; }
+
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+  .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  label { font-size: 0.88rem; font-weight: 600; color: var(--text-main); }
+  .required { color: #ef4444; }
+
+  .form-input { padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); color: var(--text-main); font-size: 0.92rem; box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.06), inset -3px -3px 6px rgba(255, 255, 255, 0.7); transition: all 0.25s; }
+  :global([data-theme='dark']) .form-input { box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.7), inset -4px -4px 10px rgba(255, 255, 255, 0.04); }
+  .form-input:focus { outline: none; border-color: var(--accent-blue); background-color: var(--bg-card); box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(37, 99, 235, 0.25), 0 0 18px rgba(37, 99, 235, 0.45); }
+
+  .symptoms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2.5rem; }
+  .sym-card { min-width: 0; background-color: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .sym-title { font-size: 0.95rem; font-weight: 600; color: var(--text-main); }
+  .sym-num { color: var(--accent-blue); font-weight: 700; margin-right: 0.3rem; }
+
+  .options-4-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
+  .opt-pill-4 { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.5rem 0.2rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-card); cursor: pointer; transition: all 0.25s; }
+  .opt-pill-4:hover { border-color: var(--accent-blue); }
+  .opt-pill-4.active { background-color: var(--accent-blue); border-color: var(--accent-blue); color: #ffffff; box-shadow: 0 0 12px rgba(37, 99, 235, 0.4); transform: scale(1.03); }
+  .opt-val { font-size: 0.9rem; font-weight: 800; }
+  .opt-label { font-size: 0.7rem; color: var(--text-subtle); }
+  .opt-pill-4.active .opt-label { color: #ffffff; }
+
+  .submit-action-row { display: flex; justify-content: flex-end; }
+  .submit-btn { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.9rem 2.2rem; border-radius: var(--radius-full); background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-size: 0.96rem; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35); transition: all 0.3s; }
+  .submit-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 24px rgba(37, 99, 235, 0.7); }
+
+  .result-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 3rem 2rem; text-align: center; }
+  .check-icon-circle { width: 4rem; height: 4rem; border-radius: var(--radius-full); background-color: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; }
+  .score-breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; max-width: 600px; margin: 0 auto 2rem auto; }
+  .score-main-box { background-color: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-caption { font-size: 0.85rem; font-weight: 600; color: var(--text-subtle); margin-bottom: 0.25rem; }
+  .score-value { font-size: 3.2rem; font-weight: 800; color: var(--accent-blue); line-height: 1; margin-bottom: 0.25rem; }
+  .score-max { font-size: 0.8rem; color: var(--text-subtle); }
+  .subscores-list { display: flex; flex-direction: column; gap: 0.75rem; justify-content: center; }
+  .subscore-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.92rem; padding: 0.6rem 1rem; background-color: var(--bg-pill); border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+  .subscore-val { font-weight: 800; color: var(--accent-blue); font-size: 1.1rem; }
+
+  .result-actions { display: flex; justify-content: center; }
+  .reset-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); background-color: var(--bg-pill); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; cursor: pointer; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+  .hidden { display: none !important; }
+
+  @media (max-width: 640px) {
+    .fields-grid, .symptoms-grid, .score-breakdown-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  import {
+    clearToolAlert,
+    initializeResearchSaveOptions,
+    markQuestionGroupInvalid,
+    showRemoteSaveFailure,
+    submitResearchData,
+    validateRequiredFields,
+  } from '../../scripts/researchToolSupport';
+
+  const answers: Record<number, number> = {};
+  const alertBox = document.getElementById('alert-box');
+  const saveOptions = initializeResearchSaveOptions();
+  const submitBtn = document.getElementById('submit-ssq-btn');
+
+  const pills = document.querySelectorAll('.opt-pill-4');
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const idx = parseInt(pill.getAttribute('data-idx') || '0', 10);
+      const val = parseInt(pill.getAttribute('data-val') || '0', 10);
+
+      const card = pill.closest('.sym-card')!;
+      card.querySelectorAll('.opt-pill-4').forEach(el => el.classList.remove('active'));
+      pill.classList.add('active');
+      const radio = pill.querySelector<HTMLInputElement>('input[type="radio"]');
+      if (radio) radio.checked = true;
+
+      answers[idx] = val;
+      card.classList.remove('question-group-invalid');
+      card.setAttribute('aria-invalid', 'false');
+    });
+  });
+
+  function downloadSSQCSV(data: any) {
+    let csv = `Participant_ID,Condition,Metric,Score\n`;
+    csv += `${data.participantId},${data.condition},SSQ_Total,${data.totalScore.toFixed(2)}\n`;
+    csv += `${data.participantId},${data.condition},Nausea_Score,${data.nauseaScore.toFixed(2)}\n`;
+    csv += `${data.participantId},${data.condition},Oculomotor_Score,${data.oculomotorScore.toFixed(2)}\n`;
+    csv += `${data.participantId},${data.condition},Disorientation_Score,${data.disorientationScore.toFixed(2)}\n`;
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${data.participantId}_${data.condition}_SSQ_${Date.now()}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function showResults(data: any) {
+    document.getElementById('ssq-app-card')!.classList.add('hidden');
+    const resultCard = document.getElementById('result-card')!;
+    resultCard.classList.remove('hidden');
+
+    document.getElementById('res-ssq-total')!.textContent = data.totalScore.toFixed(1);
+    document.getElementById('res-nausea')!.textContent = data.nauseaScore.toFixed(1);
+    document.getElementById('res-oculomotor')!.textContent = data.oculomotorScore.toFixed(1);
+    document.getElementById('res-disorientation')!.textContent = data.disorientationScore.toFixed(1);
+    resultCard.focus({ preventScroll: true });
+    window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
+  }
+
+  async function saveResponse(data: any) {
+    if (saveOptions.currentOption === 'local') {
+      downloadSSQCSV(data);
+      showResults(data);
+      return;
+    }
+
+    const endpoint = (document.getElementById('sheet-url') as HTMLInputElement).value.trim();
+    const sheetName = (document.getElementById('sheet-name') as HTMLInputElement).value.trim() || 'SSQ';
+    submitBtn?.setAttribute('disabled', '');
+    submitBtn?.setAttribute('aria-busy', 'true');
+    try {
+      await submitResearchData({ endpoint, sheetName, tool: 'SSQ', payload: data });
+      clearToolAlert(alertBox);
+      showResults(data);
+    } catch (error) {
+      showRemoteSaveFailure({
+        alertBox,
+        message: error instanceof Error ? error.message : 'The remote save could not be confirmed.',
+        onRetry: () => void saveResponse(data),
+        onDownload: () => {
+          downloadSSQCSV(data);
+          showResults(data);
+        },
+      });
+    } finally {
+      submitBtn?.removeAttribute('disabled');
+      submitBtn?.removeAttribute('aria-busy');
+    }
+  }
+
+  submitBtn?.addEventListener('click', async () => {
+    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
+
+    if (!validateRequiredFields([
+      { id: 'participant-id', label: 'Participant ID', errorId: 'participant-id-error' },
+      { id: 'condition-id', label: 'Condition', errorId: 'condition-id-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    if (Object.keys(answers).length < 16) {
+      const firstMissing = Array.from(document.querySelectorAll('.sym-card')).find((card) => {
+        const index = parseInt(card.getAttribute('data-idx') || '0', 10);
+        return answers[index] === undefined;
+      }) as HTMLElement | undefined;
+      markQuestionGroupInvalid(
+        firstMissing || null,
+        alertBox,
+        `Please rate all 16 symptoms. You have completed ${Object.keys(answers).length} of 16.`,
+      );
+      return;
+    }
+
+    if (saveOptions.currentOption === 'googlesheets' && !validateRequiredFields([
+      { id: 'sheet-url', label: 'Google Apps Script URL', errorId: 'sheet-url-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    clearToolAlert(alertBox);
+    // SSQ Kennedy et al. Subscore Items (1-indexed mapping to 0-indexed array):
+    // Nausea: items 1, 6, 7, 8, 9, 15, 16 -> indices 0, 5, 6, 7, 8, 14, 15
+    // Oculomotor: items 1, 2, 3, 4, 5, 9, 11 -> indices 0, 1, 2, 3, 4, 8, 10
+    // Disorientation: items 5, 8, 10, 11, 12, 13, 14 -> indices 4, 7, 9, 10, 11, 12, 13
+
+    const nIndices = [0, 5, 6, 7, 8, 14, 15];
+    const oIndices = [0, 1, 2, 3, 4, 8, 10];
+    const dIndices = [4, 7, 9, 10, 11, 12, 13];
+
+    const nRaw = nIndices.reduce((sum, i) => sum + (answers[i] || 0), 0);
+    const oRaw = oIndices.reduce((sum, i) => sum + (answers[i] || 0), 0);
+    const dRaw = dIndices.reduce((sum, i) => sum + (answers[i] || 0), 0);
+
+    const nScore = nRaw * 9.54;
+    const oScore = oRaw * 7.58;
+    const dScore = dRaw * 13.92;
+    const totalScore = (nRaw + oRaw + dRaw) * 3.74;
+
+    await saveResponse({
+      participantId: pId,
+      condition: cond,
+      responses: { ...answers },
+      totalScore,
+      nauseaScore: nScore,
+      oculomotorScore: oScore,
+      disorientationScore: dScore,
+    });
+  });
+
+  document.getElementById('reset-btn')?.addEventListener('click', () => window.location.reload());
+</script>

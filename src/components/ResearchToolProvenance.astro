@@ -1,0 +1,188 @@
+---
+import { BookOpen, ExternalLink, ShieldCheck } from 'lucide-astro';
+
+interface Props {
+  tool: 'sus' | 'ueq' | 'nasa-tlx' | 'ipq' | 'ssq' | 'borg';
+  supportsGoogleSheets?: boolean;
+}
+
+const { tool, supportsGoogleSheets = false } = Astro.props;
+
+const sources = {
+  sus: {
+    version: 'Original 10-item SUS with a five-point agreement scale.',
+    scoring: 'Composite score from 0–100. Grade and adjective labels are interpretation aids, not part of the original instrument.',
+    citations: [
+      {
+        label: 'Brooke (1996), SUS: A Quick and Dirty Usability Scale',
+        href: 'https://hci-studies.org/methods-and-measures/downloads/SUS_Brooke1996.pdf',
+      },
+      {
+        label: 'Lewis & Sauro (2018), The System Usability Scale: Past, Present, and Future',
+        href: 'https://doi.org/10.1080/10447318.2018.1455307',
+      },
+    ],
+  },
+  ueq: {
+    version: 'UEQ Full (26 items) and UEQ-S (8 items), seven-point bipolar scales.',
+    scoring: 'Responses are transformed to −3…+3 and averaged by the published UEQ scale assignments.',
+    citations: [
+      {
+        label: 'Laugwitz, Held, & Schrepp (2008), Construction and Evaluation of a User Experience Questionnaire',
+        href: 'https://doi.org/10.1007/978-3-540-89350-9_6',
+      },
+      {
+        label: 'Official UEQ resources and handbook',
+        href: 'https://www.ueq-online.org/',
+      },
+    ],
+  },
+  'nasa-tlx': {
+    version: 'Raw TLX and weighted NASA-TLX across six workload dimensions.',
+    scoring: 'Raw TLX averages the six ratings; weighted TLX applies the 15 pairwise-comparison weights.',
+    citations: [
+      {
+        label: 'Hart & Staveland (1988), Development of NASA-TLX',
+        href: 'https://hsi.arc.nasa.gov/groups/TLX/downloads/NASA-TLXChapter.pdf',
+      },
+      {
+        label: 'NASA TLX scale materials',
+        href: 'https://hsi.arc.nasa.gov/groups/TLX/downloads/TLXScale.pdf',
+      },
+    ],
+  },
+  ipq: {
+    version: 'Full 14-item Igroup Presence Questionnaire using a seven-point response scale.',
+    scoring: 'Reports General Presence, Spatial Presence, Involvement, and Experienced Realism using the published item groupings.',
+    citations: [
+      {
+        label: 'Official IPQ overview and item guidance',
+        href: 'https://www.igroup.org/pq/ipq/index.php',
+      },
+      {
+        label: 'Schubert, Friedmann, & Regenbrecht (2001), The Experience of Presence',
+        href: 'https://www.igroup.org/schubert/papers/schubert_regenbrecht_friedmann_presence01.pdf',
+      },
+    ],
+  },
+  ssq: {
+    version: '16-item Simulator Sickness Questionnaire with four severity levels.',
+    scoring: 'Uses the published Nausea, Oculomotor, Disorientation, and Total Severity weighting procedure.',
+    citations: [
+      {
+        label: 'Kennedy et al. (1993), Simulator Sickness Questionnaire',
+        href: 'https://doi.org/10.1207/s15327108ijap0303_3',
+      },
+    ],
+  },
+  borg: {
+    version: 'Borg Category-Ratio 10 scale recorded at three task timepoints.',
+    scoring: 'Reports the selected CR10 values and peak exertion; values should be interpreted using Borg scale guidance.',
+    citations: [
+      {
+        label: "Borg (1998), Borg's Perceived Exertion and Pain Scales",
+        href: 'https://psycnet.apa.org/record/1998-07179-000',
+      },
+    ],
+  },
+} as const;
+
+const source = sources[tool];
+---
+
+<details class="provenance-panel">
+  <summary>
+    <BookOpen size={17} aria-hidden="true" />
+    Instrument version, scoring, and data handling
+  </summary>
+  <div class="provenance-content">
+    <p><strong>Version:</strong> {source.version}</p>
+    <p><strong>Scoring:</strong> {source.scoring}</p>
+    <div class="data-handling">
+      <ShieldCheck size={18} aria-hidden="true" />
+      <p>
+        <strong>Data handling:</strong> CSV mode creates a file only on this
+        device; the portfolio server does not receive the response.
+        {supportsGoogleSheets
+          ? ' Google Sheets mode sends the participant ID, condition, item responses, calculated scores, tool name, sheet/tab name, and timestamp to the Google Apps Script /exec URL entered by the researcher. Nothing is sent until the final save action. Completion is shown only when that script returns JSON with success: true (or ok: true) after appending the row.'
+          : ' No response data is sent to a remote service.'}
+      </p>
+    </div>
+    <ul>
+      {source.citations.map((citation) => (
+        <li>
+          <a href={citation.href}>
+            {citation.label}
+            <ExternalLink size={14} aria-hidden="true" />
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</details>
+
+<style>
+  .provenance-panel {
+    margin: -1rem 0 1.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .provenance-content {
+    padding: 0 1rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+
+  .provenance-content > p + p {
+    margin-top: 0.45rem;
+  }
+
+  .data-handling {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    border-left: 3px solid var(--accent-blue);
+    background: var(--accent-blue-light);
+    color: var(--text-main);
+  }
+
+  .data-handling :global(svg) {
+    flex: 0 0 auto;
+    color: var(--accent-blue);
+    margin-top: 0.15rem;
+  }
+
+  ul {
+    margin: 0.8rem 0 0 1.2rem;
+  }
+
+  li + li {
+    margin-top: 0.35rem;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--accent-blue);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+</style>

@@ -1,0 +1,211 @@
+---
+import { getCollection } from 'astro:content';
+import { FileText, Plane, GraduationCap, Trophy, Users, ArrowRight } from 'lucide-astro';
+import { compareNewsDatesNewestFirst, formatNewsDate } from '../utils/newsDate';
+
+const allNews = await getCollection('news');
+const sortedNews = allNews
+  .sort((a, b) => compareNewsDatesNewestFirst(a.data.date, b.data.date))
+  .slice(0, 4);
+
+const iconMap = {
+  document: FileText,
+  plane: Plane,
+  'graduation-cap': GraduationCap,
+  trophy: Trophy,
+  users: Users,
+};
+---
+
+<section id="news" class="news-section">
+  <div class="section-header">
+    <h2 class="section-title">News</h2>
+    <a href="/news" class="view-all-link">
+      <span>View all news</span>
+      <ArrowRight size={16} />
+    </a>
+  </div>
+
+  <div class="news-container">
+    {sortedNews.map((item) => {
+      const IconComponent = iconMap[item.data.icon as keyof typeof iconMap] || FileText;
+      const targetUrl = `/news#${item.id}`;
+      return (
+        <a href={targetUrl} class="news-item">
+          <div class="news-date">{formatNewsDate(item.data.date)}</div>
+          <div class={`news-icon-box icon-${item.data.iconColor}`}>
+            <IconComponent size={18} />
+          </div>
+          <div class="news-content">
+            <h3 class="news-item-title">{item.data.title}</h3>
+            <p class="news-item-desc">{item.data.description}</p>
+          </div>
+          <div class="news-arrow">
+            <ArrowRight size={16} />
+          </div>
+        </a>
+      );
+    })}
+  </div>
+</section>
+
+<style>
+  .news-section {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .view-all-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color var(--transition-fast);
+  }
+
+  .view-all-link:hover {
+    color: var(--accent-blue);
+  }
+
+  .news-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .news-item {
+    display: grid;
+    grid-template-columns: 6rem 2.5rem 1fr 1.5rem;
+    align-items: start;
+    gap: 1rem;
+    padding: 0.75rem 0.75rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: inherit;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+  }
+
+  .news-item:hover {
+    background-color: var(--bg-pill);
+    transform: translateX(2px);
+  }
+
+  .news-date {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-subtle);
+    padding-top: 0.3rem;
+  }
+
+  .news-icon-box {
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+  }
+
+  .news-icon-box :global(svg) {
+    display: block;
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: 0 0 1.125rem;
+  }
+
+  .icon-blue {
+    background-color: #eff6ff;
+    color: #2563eb;
+  }
+  :global([data-theme='dark']) .icon-blue {
+    background-color: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+  }
+
+  .icon-emerald {
+    background-color: #ecfdf5;
+    color: #059669;
+  }
+  :global([data-theme='dark']) .icon-emerald {
+    background-color: rgba(5, 150, 105, 0.2);
+    color: #34d399;
+  }
+
+  .icon-purple {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+  }
+  :global([data-theme='dark']) .icon-purple {
+    background-color: rgba(126, 34, 206, 0.2);
+    color: #c084fc;
+  }
+
+  .icon-amber {
+    background-color: #fffbeb;
+    color: #d97706;
+  }
+  :global([data-theme='dark']) .icon-amber {
+    background-color: rgba(217, 119, 6, 0.2);
+    color: #fbbf24;
+  }
+
+  .news-item-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.2rem;
+  }
+
+  .news-item-desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .news-arrow {
+    color: var(--text-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0.3rem;
+    transition: transform var(--transition-fast), color var(--transition-fast);
+  }
+
+  .news-item:hover .news-arrow {
+    color: var(--accent-blue);
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 640px) {
+    .news-item {
+      grid-template-columns: 2.5rem 1fr;
+      gap: 0.75rem;
+    }
+    .news-date {
+      grid-column: 1 / -1;
+    }
+    .news-arrow {
+      display: none;
+    }
+  }
+</style>

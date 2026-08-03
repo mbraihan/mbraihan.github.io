@@ -1,0 +1,488 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ResearchToolProvenance from '../../components/ResearchToolProvenance.astro';
+import ResearchSaveOptions from '../../components/ResearchSaveOptions.astro';
+import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles, Scale, Sliders } from 'lucide-astro';
+
+const dimensions = [
+  { key: 'Mental', title: 'Mental Demand', desc: 'How much mental and perceptual activity was required? (e.g. thinking, deciding, calculating, remembering, looking, searching)' },
+  { key: 'Physical', title: 'Physical Demand', desc: 'How much physical activity was required? (e.g. pushing, pulling, turning, controlling, activating)' },
+  { key: 'Temporal', title: 'Temporal Demand', desc: 'How much time pressure did you feel due to the rate or pace at which the tasks or task elements occurred?' },
+  { key: 'Performance', title: 'Performance', desc: 'How successful do you think you were in accomplishing the goals of the task set by the experimenter?' },
+  { key: 'Effort', title: 'Effort', desc: 'How hard did you have to work (mentally and physically) to accomplish your level of performance?' },
+  { key: 'Frustration', title: 'Frustration Level', desc: 'How insecure, discouraged, irritated, stressed and annoyed versus secure, gratified, content, relaxed and self-satisfied did you feel?' }
+];
+
+// Pairwise combinations for weighted TLX (15 pairs)
+const dimensionKeys = ['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', 'Frustration'];
+const pairwiseCombos = [];
+for (let i = 0; i < dimensionKeys.length; i++) {
+  for (let j = i + 1; j < dimensionKeys.length; j++) {
+    pairwiseCombos.push([dimensionKeys[i], dimensionKeys[j]]);
+  }
+}
+---
+
+<BaseLayout 
+  title="NASA Task Load Index (NASA-TLX) | Mohammad Raihanul Bashar"
+  description="Assess subjective workload using Raw NASA-TLX or Weighted NASA-TLX with automated scoring and export to CSV or Google Sheets."
+>
+  <div class="tool-page-container">
+    <div class="back-nav-row">
+      <a href="/tools" class="back-link">
+        <ArrowLeft size={16} />
+        <span>Back to Tools</span>
+      </a>
+    </div>
+
+    <header class="tool-header">
+      <div class="title-row">
+        <div>
+          <span class="tool-badge">Workload Assessment Tool</span>
+          <h1 class="page-title">NASA Task Load Index (NASA-TLX)</h1>
+        </div>
+        <a 
+          href="https://github.com/mbraihan/nasa-tlx-web-app" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="github-link-btn"
+        >
+          <Github size={18} />
+          <span>GitHub Repository</span>
+          <span class="sr-only">(opens in a new tab)</span>
+        </a>
+      </div>
+      <p class="page-subtitle">
+        Evaluate multidimensional workload across 6 subscales: Mental, Physical, Temporal, Performance, Effort, and Frustration.
+      </p>
+    </header>
+
+    <ResearchToolProvenance tool="nasa-tlx" supportsGoogleSheets />
+
+    <div id="nasa-app-card" class="app-card">
+      <!-- Mode Selector -->
+      <section class="mode-select-section">
+        <h2 class="section-heading">Select Evaluation Method</h2>
+        <div class="mode-cards-grid">
+          <button id="btn-mode-raw" class="mode-card active" type="button" aria-pressed="true">
+            <Sliders size={22} class="card-icon" />
+            <div class="card-title">Raw NASA-TLX (R-TLX)</div>
+            <div class="card-desc">Unweighted average of 6 workload dimensions (fast & standard for most HCI studies).</div>
+          </button>
+
+          <button id="btn-mode-weighted" class="mode-card" type="button" aria-pressed="false">
+            <Scale size={22} class="card-icon" />
+            <div class="card-title">Weighted NASA-TLX</div>
+            <div class="card-desc">Includes 15 pairwise comparisons to determine personal dimension weights.</div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Session Meta Inputs -->
+      <section class="setup-section">
+        <div class="fields-grid">
+          <div class="field-group">
+            <label for="participant-id">Participant ID <span class="required">*</span></label>
+            <input type="text" id="participant-id" placeholder="e.g., P01" class="form-input" required aria-describedby="participant-id-error" />
+            <span id="participant-id-error" class="field-error"></span>
+          </div>
+
+          <div class="field-group">
+            <label for="condition-id">Condition / Variant <span class="required">*</span></label>
+            <input type="text" id="condition-id" placeholder="e.g., AR HUD / Headset" class="form-input" required aria-describedby="condition-id-error" />
+            <span id="condition-id-error" class="field-error"></span>
+          </div>
+        </div>
+
+        <ResearchSaveOptions sheetName="NASA_TLX" />
+      </section>
+
+      <!-- Pairwise Section (Shown only in Weighted mode) -->
+      <section id="pairwise-section" class="pairwise-section hidden">
+        <h2 id="pairwise-heading" class="section-heading">Pairwise Dimension Comparison (Weights)</h2>
+        <p class="section-subtext">For each pair, click the factor that contributed MORE to the workload of the task.</p>
+        <div id="pairwise-progress" class="pairwise-progress-text" role="status" aria-live="polite" aria-atomic="true">Pair 1 of 15</div>
+        
+        <div class="pairwise-choice-box" role="group" aria-labelledby="pairwise-heading pairwise-progress">
+          <button id="pair-btn-a" class="pairwise-option-btn" type="button">Option A</button>
+          <span class="vs-span">VS</span>
+          <button id="pair-btn-b" class="pairwise-option-btn" type="button">Option B</button>
+        </div>
+      </section>
+
+      <!-- Subscales Rating Section -->
+      <section class="ratings-section">
+        <h2 class="section-heading">Workload Subscale Ratings (0 - 100)</h2>
+        <p class="section-subtext">Move each slider to rate the workload experienced for each dimension.</p>
+
+        <div class="sliders-list">
+          {dimensions.map((dim) => (
+            <fieldset class="slider-card" data-key={dim.key}>
+              <div class="slider-header">
+                <div>
+                  <legend id={`label-${dim.key}`} class="dim-title">{dim.title}</legend>
+                  <p id={`description-${dim.key}`} class="dim-desc">{dim.desc}</p>
+                </div>
+                <span class="slider-val-badge" id={`val-badge-${dim.key}`}>50</span>
+              </div>
+
+              <div class="slider-input-row">
+                <span class="range-anchor">Low (0)</span>
+                <input 
+                  type="range" 
+                  id={`slider-${dim.key}`}
+                  min="0" 
+                  max="100" 
+                  step="5" 
+                  value="50" 
+                  class="tlx-slider" 
+                  data-key={dim.key} 
+                  aria-labelledby={`label-${dim.key}`}
+                  aria-describedby={`description-${dim.key}`}
+                />
+                <span class="range-anchor">High (100)</span>
+              </div>
+            </fieldset>
+          ))}
+        </div>
+      </section>
+
+      <div id="alert-box" class="tool-alert hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+      <div class="submit-action-row">
+        <button id="submit-tlx-btn" class="submit-btn" type="button">
+          <Sparkles size={18} />
+          <span>Calculate Workload & Save Response</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Card -->
+    <div id="result-card" class="result-card hidden" tabindex="-1">
+      <div class="result-header">
+        <div class="check-icon-circle">
+          <CheckCircle2 size={36} />
+        </div>
+        <h2>NASA-TLX Assessment Completed!</h2>
+        <p>Workload scores have been analyzed and recorded.</p>
+      </div>
+
+      <div class="score-breakdown-grid">
+        <div class="score-main-box">
+          <span class="score-caption" id="res-mode-label">Raw TLX Workload Score</span>
+          <span id="res-overall-score" class="score-value">0.0</span>
+          <span class="score-max">out of 100</span>
+        </div>
+
+        <div id="dim-scores-list" class="dim-scores-list">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button id="reset-btn" class="reset-btn" type="button">
+          <RotateCcw size={16} />
+          <span>Start New Response</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tool-page-container { max-width: 880px; margin: 0 auto; padding: 3rem 1.5rem 6rem 1.5rem; }
+  .back-nav-row { margin-bottom: 1.5rem; }
+  .back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--accent-blue); transition: transform var(--transition-fast); }
+  .back-link:hover { transform: translateX(-3px); }
+  .tool-header { margin-bottom: 2.5rem; }
+  .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; }
+  .tool-badge { font-size: 0.78rem; font-weight: 600; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.35rem; }
+  .page-title { font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; }
+  .github-link-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--radius-md); background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.88rem; font-weight: 600; transition: all var(--transition-fast); }
+  .github-link-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+  .page-subtitle { font-size: 1.02rem; color: var(--text-muted); line-height: 1.55; }
+
+  .app-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); }
+  .section-heading { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+  .section-subtext { font-size: 0.9rem; color: var(--text-subtle); margin-top: -0.5rem; margin-bottom: 1.5rem; }
+
+  .mode-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+  .mode-card { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+  .mode-card.active { border-color: var(--accent-blue); background-color: rgba(37, 99, 235, 0.06); box-shadow: 0 0 0 1px var(--accent-blue), 0 0 16px rgba(37, 99, 235, 0.25); }
+  .mode-card .card-icon { color: var(--accent-blue); margin-bottom: 0.5rem; }
+  .mode-card .card-title { font-size: 0.98rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem; }
+  .mode-card .card-desc { font-size: 0.8rem; color: var(--text-subtle); line-height: 1.4; }
+
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+  .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .field-group.flex-2 { grid-column: span 2; }
+  label { font-size: 0.88rem; font-weight: 600; color: var(--text-main); }
+  .required { color: #ef4444; }
+
+  .form-input { padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); color: var(--text-main); font-size: 0.92rem; box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.06), inset -3px -3px 6px rgba(255, 255, 255, 0.7); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+  :global([data-theme='dark']) .form-input { box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.7), inset -4px -4px 10px rgba(255, 255, 255, 0.04); }
+  .form-input:focus { outline: none; border-color: var(--accent-blue); background-color: var(--bg-card); box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(37, 99, 235, 0.25), 0 0 18px rgba(37, 99, 235, 0.45); }
+
+  .save-option-block { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 2rem; }
+  .save-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .save-card { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.9rem 1.1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); cursor: pointer; transition: all 0.25s; }
+  .save-card.active { border-color: var(--accent-blue); background-color: rgba(37, 99, 235, 0.06); box-shadow: 0 0 14px rgba(37, 99, 235, 0.3); }
+
+  .pairwise-section { margin-bottom: 2rem; background-color: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; }
+  .pairwise-progress-text { font-size: 0.85rem; font-weight: 700; color: var(--accent-blue); margin-bottom: 1rem; }
+  .pairwise-choice-box { display: flex; align-items: center; justify-content: center; gap: 1.5rem; }
+  .pairwise-option-btn { flex: 1; max-width: 240px; padding: 1rem 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-card); color: var(--text-main); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.25s; }
+  .pairwise-option-btn:hover { border-color: var(--accent-blue); background-color: var(--accent-blue); color: #ffffff; box-shadow: 0 0 20px rgba(37, 99, 235, 0.4); }
+  .vs-span { font-weight: 800; color: var(--text-subtle); }
+
+  .sliders-list { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2.5rem; }
+  .slider-card { min-width: 0; background-color: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; }
+  .slider-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+  .dim-title { font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.2rem; padding: 0; }
+  .dim-desc { font-size: 0.82rem; color: var(--text-subtle); line-height: 1.4; }
+  .slider-val-badge { font-size: 1.1rem; font-weight: 800; color: var(--accent-blue); background-color: rgba(37, 99, 235, 0.1); padding: 0.3rem 0.8rem; border-radius: var(--radius-full); min-width: 3.2rem; text-align: center; }
+
+  .slider-input-row { display: flex; align-items: center; gap: 1rem; }
+  .range-anchor { font-size: 0.78rem; font-weight: 600; color: var(--text-subtle); min-width: 4rem; text-align: center; }
+  .tlx-slider { flex: 1; accent-color: var(--accent-blue); cursor: pointer; }
+
+  .submit-action-row { display: flex; justify-content: flex-end; }
+  .submit-btn { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.9rem 2.2rem; border-radius: var(--radius-full); background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-size: 0.96rem; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35); transition: all 0.3s; }
+  .submit-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 24px rgba(37, 99, 235, 0.7); }
+
+  .result-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 3rem 2rem; text-align: center; }
+  .check-icon-circle { width: 4rem; height: 4rem; border-radius: var(--radius-full); background-color: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto; }
+  .score-breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; max-width: 640px; margin: 0 auto 2rem auto; }
+  .score-main-box { background-color: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-caption { font-size: 0.85rem; font-weight: 600; color: var(--text-subtle); margin-bottom: 0.25rem; }
+  .score-value { font-size: 3.2rem; font-weight: 800; color: var(--accent-blue); line-height: 1; margin-bottom: 0.25rem; }
+  .score-max { font-size: 0.8rem; color: var(--text-subtle); }
+  .dim-scores-list { display: flex; flex-direction: column; gap: 0.5rem; justify-content: center; }
+  .dim-score-row { display: flex; justify-content: space-between; font-size: 0.88rem; padding: 0.4rem 0.8rem; background-color: var(--bg-pill); border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+  .result-actions { display: flex; justify-content: center; }
+  .reset-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); background-color: var(--bg-pill); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600; cursor: pointer; }
+  .sr-only { position: absolute; width: 1px; height: 1px; clip: rect(0,0,0,0); border: 0; }
+  .hidden { display: none !important; }
+
+  @media (max-width: 640px) {
+    .mode-cards-grid, .fields-grid, .save-cards-grid, .score-breakdown-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  import {
+    clearToolAlert,
+    initializeResearchSaveOptions,
+    markQuestionGroupInvalid,
+    showRemoteSaveFailure,
+    submitResearchData,
+    validateRequiredFields,
+  } from '../../scripts/researchToolSupport';
+
+  let activeMode = 'raw';
+  const pairwiseCombos = [
+    ['Mental', 'Physical'], ['Mental', 'Temporal'], ['Mental', 'Performance'], ['Mental', 'Effort'], ['Mental', 'Frustration'],
+    ['Physical', 'Temporal'], ['Physical', 'Performance'], ['Physical', 'Effort'], ['Physical', 'Frustration'],
+    ['Temporal', 'Performance'], ['Temporal', 'Effort'], ['Temporal', 'Frustration'],
+    ['Performance', 'Effort'], ['Performance', 'Frustration'],
+    ['Effort', 'Frustration']
+  ];
+  let pairIdx = 0;
+  const weights: Record<string, number> = { Mental: 0, Physical: 0, Temporal: 0, Performance: 0, Effort: 0, Frustration: 0 };
+
+  const btnRaw = document.getElementById('btn-mode-raw');
+  const btnWeighted = document.getElementById('btn-mode-weighted');
+  const pairwiseSection = document.getElementById('pairwise-section');
+  const pairProgress = document.getElementById('pairwise-progress');
+  const pairBtnA = document.getElementById('pair-btn-a');
+  const pairBtnB = document.getElementById('pair-btn-b');
+  const alertBox = document.getElementById('alert-box');
+  const saveOptions = initializeResearchSaveOptions();
+
+  btnRaw?.addEventListener('click', () => {
+    btnRaw.classList.add('active');
+    btnWeighted?.classList.remove('active');
+    btnRaw.setAttribute('aria-pressed', 'true');
+    btnWeighted?.setAttribute('aria-pressed', 'false');
+    pairwiseSection?.classList.add('hidden');
+    activeMode = 'raw';
+  });
+
+  btnWeighted?.addEventListener('click', () => {
+    btnWeighted.classList.add('active');
+    btnRaw?.classList.remove('active');
+    btnWeighted.setAttribute('aria-pressed', 'true');
+    btnRaw?.setAttribute('aria-pressed', 'false');
+    pairwiseSection?.classList.remove('hidden');
+    activeMode = 'weighted';
+    pairIdx = 0;
+    Object.keys(weights).forEach(k => weights[k] = 0);
+    renderPair();
+  });
+
+  function renderPair() {
+    if (pairIdx < pairwiseCombos.length) {
+      if (pairProgress) pairProgress.textContent = `Pairwise Weight Comparison: ${pairIdx + 1} of 15`;
+      if (pairBtnA) pairBtnA.textContent = pairwiseCombos[pairIdx][0];
+      if (pairBtnB) pairBtnB.textContent = pairwiseCombos[pairIdx][1];
+    } else {
+      if (pairProgress) pairProgress.textContent = 'Pairwise weights completed.';
+      if (pairBtnA) pairBtnA.style.display = 'none';
+      if (pairBtnB) pairBtnB.style.display = 'none';
+    }
+  }
+
+  pairBtnA?.addEventListener('click', () => {
+    if (pairIdx < pairwiseCombos.length) {
+      weights[pairwiseCombos[pairIdx][0]]++;
+      pairIdx++;
+      renderPair();
+    }
+  });
+
+  pairBtnB?.addEventListener('click', () => {
+    if (pairIdx < pairwiseCombos.length) {
+      weights[pairwiseCombos[pairIdx][1]]++;
+      pairIdx++;
+      renderPair();
+    }
+  });
+
+  // Slider Badges
+  const sliders = document.querySelectorAll<HTMLInputElement>('.tlx-slider');
+  sliders.forEach(slider => {
+    slider.addEventListener('input', () => {
+      const key = slider.getAttribute('data-key');
+      const badge = document.getElementById(`val-badge-${key}`);
+      if (badge) badge.textContent = slider.value;
+    });
+  });
+
+  // Submit Handler
+  const submitBtn = document.getElementById('submit-tlx-btn');
+
+  function downloadTLXCSV(data: any) {
+    let csv = `Participant_ID,Condition,Mode,Dimension,Score,Weight\n`;
+    Object.keys(data.ratings).forEach((key) => {
+      csv += `${data.participantId},${data.condition},${data.mode},${key},${data.ratings[key]},${data.weights[key] || 0}\n`;
+    });
+    csv += `${data.participantId},${data.condition},${data.mode},Overall_Workload,${data.overallScore.toFixed(2)},${data.mode === 'weighted' ? 15 : 0}\n`;
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${data.participantId}_${data.condition}_NASA_TLX_${Date.now()}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function showResults(data: any) {
+    document.getElementById('nasa-app-card')!.classList.add('hidden');
+    const resultCard = document.getElementById('result-card')!;
+    resultCard.classList.remove('hidden');
+    document.getElementById('res-mode-label')!.textContent = `${data.mode.toUpperCase()} TLX Workload Score`;
+    document.getElementById('res-overall-score')!.textContent = data.overallScore.toFixed(1);
+
+    const dimList = document.getElementById('dim-scores-list')!;
+    dimList.innerHTML = Object.keys(data.ratings).map((key) => `
+      <div class="dim-score-row">
+        <span><strong>${key}:</strong> ${data.ratings[key]} / 100</span>
+        ${data.mode === 'weighted' ? `<span>(Weight: ${data.weights[key]}/15)</span>` : ''}
+      </div>
+    `).join('');
+    resultCard.focus({ preventScroll: true });
+    window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
+  }
+
+  async function saveResponse(data: any) {
+    if (saveOptions.currentOption === 'local') {
+      downloadTLXCSV(data);
+      showResults(data);
+      return;
+    }
+
+    const endpoint = (document.getElementById('sheet-url') as HTMLInputElement).value.trim();
+    const sheetName = (document.getElementById('sheet-name') as HTMLInputElement).value.trim() || 'NASA_TLX';
+    submitBtn?.setAttribute('disabled', '');
+    submitBtn?.setAttribute('aria-busy', 'true');
+    try {
+      await submitResearchData({ endpoint, sheetName, tool: 'NASA-TLX', payload: data });
+      clearToolAlert(alertBox);
+      showResults(data);
+    } catch (error) {
+      showRemoteSaveFailure({
+        alertBox,
+        message: error instanceof Error ? error.message : 'The remote save could not be confirmed.',
+        onRetry: () => void saveResponse(data),
+        onDownload: () => {
+          downloadTLXCSV(data);
+          showResults(data);
+        },
+      });
+    } finally {
+      submitBtn?.removeAttribute('disabled');
+      submitBtn?.removeAttribute('aria-busy');
+    }
+  }
+
+  submitBtn?.addEventListener('click', async () => {
+    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
+
+    if (!validateRequiredFields([
+      { id: 'participant-id', label: 'Participant ID', errorId: 'participant-id-error' },
+      { id: 'condition-id', label: 'Condition', errorId: 'condition-id-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    if (activeMode === 'weighted' && pairIdx < 15) {
+      markQuestionGroupInvalid(
+        pairwiseSection as HTMLElement | null,
+        alertBox,
+        `Please complete all 15 pairwise comparisons. You have completed ${pairIdx} of 15.`,
+      );
+      return;
+    }
+
+    if (saveOptions.currentOption === 'googlesheets' && !validateRequiredFields([
+      { id: 'sheet-url', label: 'Google Apps Script URL', errorId: 'sheet-url-error' },
+    ], alertBox)) {
+      return;
+    }
+
+    clearToolAlert(alertBox);
+
+    const ratings: Record<string, number> = {};
+    sliders.forEach(slider => {
+      ratings[slider.getAttribute('data-key') || ''] = parseInt(slider.value, 10);
+    });
+
+    let overallScore = 0;
+    if (activeMode === 'raw') {
+      const sum = Object.values(ratings).reduce((a, b) => a + b, 0);
+      overallScore = sum / 6;
+    } else {
+      let weightedSum = 0;
+      Object.keys(ratings).forEach(k => {
+        weightedSum += ratings[k] * weights[k];
+      });
+      overallScore = weightedSum / 15;
+    }
+
+    await saveResponse({
+      participantId: pId,
+      condition: cond,
+      mode: activeMode,
+      ratings,
+      weights: { ...weights },
+      overallScore,
+    });
+  });
+
+  document.getElementById('reset-btn')?.addEventListener('click', () => window.location.reload());
+</script>

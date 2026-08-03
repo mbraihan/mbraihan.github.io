@@ -1,0 +1,850 @@
+---
+import 'maplibre-gl/dist/maplibre-gl.css';
+import {
+  Building2,
+  GraduationCap,
+  Home,
+  House,
+  Plane,
+  Presentation,
+} from 'lucide-astro';
+---
+
+<section id="where-ive-been" class="map-section">
+  <div class="map-header">
+    <h2 class="section-title">Places I've Been</h2>
+    <p class="map-subtitle">
+      Here's an interactive map of places I've lived, studied or traveled to. Feel free to explore!
+    </p>
+
+    <!-- Map Category Legend Bar -->
+    <div class="map-legend-bar" aria-label="Map category legend">
+      <span class="legend-badge badge-hometown"><House size={14} aria-hidden="true" /> Hometown</span>
+      <span class="legend-badge badge-home"><Home size={14} aria-hidden="true" /> Home</span>
+      <span class="legend-badge badge-undergrad"><GraduationCap size={14} aria-hidden="true" /> Undergrad</span>
+      <span class="legend-badge badge-grad"><Building2 size={14} aria-hidden="true" /> Graduate</span>
+      <span class="legend-badge badge-conference">
+        <Presentation size={14} aria-hidden="true" />
+        Conference
+      </span>
+      <span class="legend-badge badge-visit"><Plane size={14} aria-hidden="true" /> Travel</span>
+    </div>
+
+  </div>
+
+  <div class="map-card">
+    <div class="map-view-switch" role="group" aria-label="Map view">
+      <button type="button" class="map-view-btn" data-map-view="normal" aria-pressed="false">
+        Normal
+      </button>
+      <button type="button" class="map-view-btn is-active" data-map-view="satellite" aria-pressed="true">
+        Satellite
+      </button>
+    </div>
+    <div id="where-ive-been-map" class="maplibre-map-container" aria-label="Interactive map of places I've been"></div>
+  </div>
+</section>
+
+<style>
+  .map-section {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .map-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.35rem;
+  }
+
+  .map-subtitle {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 0.85rem;
+  }
+
+  /* Legend Pills Bar */
+  .map-legend-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .legend-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    font-size: 0.76rem;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-pill);
+    color: var(--text-muted);
+    transition: transform var(--transition-fast);
+  }
+
+  .legend-badge:hover {
+    transform: translateY(-1px);
+  }
+
+  .badge-hometown { background-color: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+  .badge-home { background-color: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+  .badge-undergrad { background-color: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
+  .badge-grad { background-color: #fff1f2; color: #be123c; border-color: #fecdd3; }
+  .badge-conference { background-color: #fff7ed; color: #c2410c; border-color: #ffedd5; }
+  .badge-visit { background-color: #ecfeff; color: #0e7490; border-color: #cff4fc; }
+
+  :global([data-theme='dark']) .badge-hometown { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3); }
+  :global([data-theme='dark']) .badge-home { background-color: rgba(37, 99, 235, 0.15); color: #60a5fa; border-color: rgba(96, 165, 250, 0.3); }
+  :global([data-theme='dark']) .badge-undergrad { background-color: rgba(139, 92, 246, 0.15); color: #c084fc; border-color: rgba(192, 132, 252, 0.3); }
+  :global([data-theme='dark']) .badge-grad { background-color: rgba(225, 29, 72, 0.15); color: #fb7185; border-color: rgba(251, 113, 133, 0.3); }
+  :global([data-theme='dark']) .badge-conference { background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3); }
+  :global([data-theme='dark']) .badge-visit { background-color: rgba(6, 182, 212, 0.15); color: #22d3ee; border-color: rgba(34, 211, 238, 0.3); }
+
+  .map-card {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .map-view-switch {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    z-index: 5;
+    display: flex;
+    padding: 0.2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+  }
+
+  .map-view-btn {
+    border: 0;
+    border-radius: 7px;
+    padding: 0.38rem 0.68rem;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color var(--transition-fast),
+      color var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  .map-view-btn.is-active {
+    background: var(--accent-blue);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+  }
+
+  .map-view-btn:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+  }
+
+  .maplibre-map-container {
+    width: 100%;
+    height: 480px;
+    background-color: var(--bg-primary);
+    z-index: 1;
+  }
+
+  .maplibre-map-container.map-theme-dark {
+    background: #020617;
+    box-shadow: inset 0 0 32px rgba(34, 211, 238, 0.12);
+  }
+
+  /* MapLibre controls and popup styling */
+  :global(.maplibregl-ctrl-group) {
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18) !important;
+  }
+
+  :global([data-theme='dark'] .maplibregl-ctrl-group button) {
+    background-color: #111827;
+  }
+
+  :global([data-theme='dark'] .maplibregl-ctrl-icon) {
+    filter: invert(1);
+  }
+
+  :global(.maplibregl-popup-content) {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    border-radius: 12px !important;
+    padding: 0.4rem 0.6rem !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  :global(.maplibregl-popup-tip) {
+    border-top-color: var(--bg-card) !important;
+    border-bottom-color: var(--bg-card) !important;
+  }
+
+  :global(.maplibregl-popup-close-button) {
+    color: var(--text-muted);
+    padding: 0.2rem 0.45rem;
+    font-size: 1.1rem;
+  }
+
+  :global(.map-popup-card) {
+    padding: 0.5rem;
+    max-width: 270px;
+  }
+
+  :global(.map-popup-card .popup-tag) {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  :global(.map-popup-card .popup-title) {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.2rem;
+    line-height: 1.3;
+  }
+
+  :global(.map-popup-card .popup-location) {
+    font-size: 0.85rem;
+    color: var(--text-subtle);
+    font-weight: 600;
+  }
+
+  :global(.map-popup-card .popup-date) {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  :global(.map-popup-card .popup-text) {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  :global(.map-popup-card .popup-link) {
+    color: var(--accent-blue);
+    text-decoration: underline;
+  }
+
+  /* Distinct HTML Markers with Icons */
+  :global(.custom-pin-marker) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  :global(.pin-bubble) {
+    width: 30px;
+    height: 30px;
+    border-radius: 50% 50% 50% 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 14px;
+    border: 2.5px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transform: rotate(-45deg);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  :global(.marker-core) {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.25);
+    transform: rotate(45deg);
+  }
+
+  :global(.pin-bubble:hover) {
+    transform: rotate(-45deg) scale(1.2) translate(2px, -2px);
+  }
+
+  /* Compact conference scene: presenter, presentation board, and audience. */
+  :global(.conference-scene) {
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 25px;
+    height: 17px;
+    color: currentColor;
+  }
+
+  :global(.scene-presenter) {
+    position: absolute;
+    left: 1px;
+    top: 6px;
+    width: 6px;
+    height: 9px;
+    border-radius: 3px 3px 2px 2px;
+    background: currentColor;
+  }
+
+  :global(.scene-presenter::before) {
+    content: '';
+    position: absolute;
+    left: 1px;
+    top: -5px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  :global(.scene-presenter::after) {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 6px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transform: rotate(-24deg);
+    transform-origin: left center;
+  }
+
+  :global(.scene-board) {
+    position: absolute;
+    left: 10px;
+    top: 0;
+    width: 14px;
+    height: 9px;
+    border: 1.5px solid currentColor;
+    border-radius: 2px;
+  }
+
+  :global(.scene-board::before) {
+    content: '';
+    position: absolute;
+    left: 2px;
+    bottom: 2px;
+    width: 8px;
+    height: 4px;
+    border-left: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: skewY(-22deg);
+  }
+
+  :global(.scene-audience) {
+    position: absolute;
+    bottom: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 50% 50% 2px 2px;
+    background: currentColor;
+  }
+
+  :global(.scene-audience::before) {
+    content: '';
+    position: absolute;
+    left: 1px;
+    top: -3px;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  :global(.scene-audience-one) { left: 12px; }
+  :global(.scene-audience-two) { left: 19px; }
+
+  :global(.pin-conference .conference-scene) {
+    transform: scale(0.78);
+  }
+
+  :global(.pin-hometown) { background-color: #10b981; box-shadow: 0 0 14px rgba(16, 185, 129, 0.7); }
+  :global(.pin-home) { background-color: #2563eb; box-shadow: 0 0 14px rgba(37, 99, 235, 0.7); }
+  :global(.pin-undergrad) { background-color: #8b5cf6; box-shadow: 0 0 14px rgba(139, 92, 246, 0.7); }
+  :global(.pin-grad) { background-color: #e11d48; box-shadow: 0 0 14px rgba(225, 29, 72, 0.7); }
+  :global(.pin-conference) { background-color: #f59e0b; box-shadow: 0 0 14px rgba(245, 158, 11, 0.7); }
+  :global(.pin-visit) { background-color: #06b6d4; box-shadow: 0 0 14px rgba(6, 182, 212, 0.7); }
+
+  @media (max-width: 768px) {
+    .maplibre-map-container {
+      height: 360px;
+    }
+
+    :global(.maplibregl-popup) {
+      inset: auto 0 0 0 !important;
+      width: 100% !important;
+      max-width: none !important;
+      transform: none !important;
+      z-index: 4;
+    }
+
+    :global(.maplibregl-popup-content) {
+      width: 100% !important;
+      max-height: 58%;
+      overflow-y: auto;
+      border-radius: 12px 12px 0 0 !important;
+      padding: 0.75rem 1rem !important;
+    }
+
+    :global(.maplibregl-popup-tip) {
+      display: none;
+    }
+
+    :global(.map-popup-card) {
+      max-width: none;
+      padding: 0.25rem 2rem 0.25rem 0;
+    }
+
+    :global(.maplibregl-popup-close-button) {
+      min-width: 44px;
+      min-height: 44px;
+      font-size: 1.4rem;
+    }
+  }
+</style>
+
+<script>
+  import maplibregl from 'maplibre-gl';
+
+  const places = [
+    {
+      title: 'Dhaka, Bangladesh',
+      location: 'Hometown & Roots',
+      date: 'Born & Raised',
+      lat: 23.8069,
+      lng: 90.3574,
+      text: 'My hometown where I grew up and developed my passion for technology and computer science.',
+      type: 'hometown',
+      tagColor: '#10b981',
+      tagBg: '#ecfdf5'
+    },
+    {
+      title: 'Montreal, QC, Canada',
+      location: 'Current Residence',
+      date: '2024 – Present',
+      lat: 45.4740,
+      lng: -73.6239,
+      text: 'Currently living in Montreal while conducting Ph.D. research at Concordia University.',
+      type: 'home',
+      tagColor: '#2563eb',
+      tagBg: '#eff6ff'
+    },
+    {
+      title: 'Independent University, Bangladesh (IUB)',
+      location: 'Dhaka, Bangladesh',
+      date: 'Undergraduate Studies',
+      lat: 23.8166,
+      lng: 90.4270,
+      text: 'Completed B.Sc. in Computer Science.',
+      type: 'undergrad',
+      tagColor: '#8b5cf6',
+      tagBg: '#f3e8ff'
+    },
+    {
+      title: 'Concordia University (Gina Cody School)',
+      location: 'Montreal, QC, Canada',
+      date: '2024 – Present',
+      lat: 45.4972,
+      lng: -73.5789,
+      text: 'Ph.D. Candidate in HCI & Extended Reality.',
+      type: 'grad',
+      tagColor: '#e11d48',
+      tagBg: '#fff1f2'
+    },
+    {
+      title: 'IEEE VR 2025',
+      location: 'Saint Malo, Brittany, France',
+      date: 'March 2025',
+      lat: 48.648102,
+      lng: -2.007500,
+      text: 'Presented research at IEEE ISMAR. <a href="/publications" class="popup-link">Conference paper</a>.',
+      type: 'conference',
+      tagColor: '#d97706',
+      tagBg: '#fff7ed'
+    },
+    {
+      title: 'ACM CHI 2025',
+      location: 'Yokohama, Japan',
+      date: 'May 2025',
+      lat: 35.4437,
+      lng: 139.638,
+      text: 'Presented paper on sketching in immersive environments.',
+      type: 'conference',
+      tagColor: '#d97706',
+      tagBg: '#fff7ed'
+    },
+    {
+      title: 'ACM CHI 2026',
+      location: 'Barcelona, Spain',
+      date: 'April 2026',
+      lat: 41.3851,
+      lng: 2.1734,
+      text: 'Presented papers on multi-selection in XR.',
+      type: 'conference',
+      tagColor: '#d97706',
+      tagBg: '#fff7ed'
+    },
+    // {
+    //   title: 'MIT CSAIL & Harvard Visit',
+    //   location: 'Boston / Cambridge, MA, USA',
+    //   date: 'October 2025',
+    //   lat: 42.3601,
+    //   lng: -71.0589,
+    //   text: 'Academic lab visits, collaboration discussions, and spatial interaction demos.',
+    //   type: 'visit',
+    //   iconEmoji: '✈️',
+    //   tagColor: '#0891b2',
+    //   tagBg: '#ecfeff'
+    // },
+    // {
+    //   title: 'Tokyo Tech & ISMAR Tour',
+    //   location: 'Tokyo, Japan',
+    //   date: 'October 2024',
+    //   lat: 35.6762,
+    //   lng: 139.6503,
+    //   text: 'Visited immersive tech research labs and explored Tokyo city.',
+    //   type: 'visit',
+    //   iconEmoji: '✈️',
+    //   tagColor: '#0891b2',
+    //   tagBg: '#ecfeff'
+    // },
+    // {
+    //   title: 'University of Cambridge',
+    //   location: 'Cambridge, UK',
+    //   date: 'September 2015',
+    //   lat: 52.2053,
+    //   lng: 0.1218,
+    //   text: "Academic visit and geometric engineering exploration at Queens' College.",
+    //   type: 'visit',
+    //   iconEmoji: '✈️',
+    //   tagColor: '#0891b2',
+    //   tagBg: '#ecfeff'
+    // }
+  ];
+
+  const mapContainer = document.getElementById('where-ive-been-map');
+
+  async function initializeMap() {
+    if (!mapContainer || mapContainer.dataset.initialized === 'true') return;
+    const styleUrls = {
+      light: 'https://tiles.openfreemap.org/styles/positron',
+      dark: 'https://tiles.openfreemap.org/styles/dark',
+    };
+
+    const getActiveTheme = () =>
+      document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+
+    const createSatelliteStyle = (theme: 'light' | 'dark') => ({
+        version: 8 as const,
+        sources: {
+          satellite: {
+            type: 'raster' as const,
+            tiles: [
+              'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            ],
+            tileSize: 256,
+            attribution: 'Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+          },
+          reference: {
+            type: 'raster' as const,
+            tiles: [
+              'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+            ],
+            tileSize: 256,
+            attribution: 'Esri reference labels',
+          },
+        },
+        layers: [
+          {
+            id: 'satellite-imagery',
+            type: 'raster' as const,
+            source: 'satellite',
+            minzoom: 0,
+            maxzoom: 19,
+            paint: {
+              'raster-brightness-max': theme === 'dark' ? 0.72 : 1,
+              'raster-contrast': theme === 'dark' ? 0.08 : 0,
+            },
+          },
+          {
+            id: 'satellite-reference-labels',
+            type: 'raster' as const,
+            source: 'reference',
+            minzoom: 0,
+            maxzoom: 19,
+          },
+        ],
+      });
+
+    let activeMapTheme: 'light' | 'dark' = getActiveTheme() === 'dark' ? 'dark' : 'light';
+    let activeMapView: 'normal' | 'satellite' = 'satellite';
+    mapContainer.classList.toggle('map-theme-dark', activeMapTheme === 'dark');
+
+    const map = new maplibregl.Map({
+      container: mapContainer!,
+      style: createSatelliteStyle(activeMapTheme),
+      center: [10, 28],
+      zoom: 1.35,
+      minZoom: 1.2,
+      maxZoom: 14,
+      renderWorldCopies: true,
+    });
+    mapContainer.dataset.initialized = 'true';
+
+    map.scrollZoom.disable();
+    mapContainer.addEventListener('mouseenter', () => map.scrollZoom.enable());
+    mapContainer.addEventListener('mouseleave', () => map.scrollZoom.disable());
+    map.dragRotate.disable();
+    map.touchZoomRotate.disableRotation();
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
+
+    function configureLabelHierarchy() {
+      if (!map.isStyleLoaded()) return;
+
+      const layers = map.getStyle().layers || [];
+
+      layers.forEach((layer) => {
+        if (layer.type !== 'symbol') return;
+        const id = layer.id.toLowerCase();
+        const existingMinZoom = layer.minzoom ?? 0;
+
+        if (/country/.test(id)) {
+          map.setLayerZoomRange(layer.id, Math.max(existingMinZoom, 2.35), 7);
+        } else if (/state|province|admin[_ -]?1|region/.test(id)) {
+          map.setLayerZoomRange(layer.id, Math.max(existingMinZoom, 3.5), 9);
+        } else if (/city|town|village|place/.test(id)) {
+          map.setLayerZoomRange(layer.id, Math.max(existingMinZoom, 4.5), 14);
+        } else if (/road|street|highway|motorway|poi|housenumber/.test(id)) {
+          map.setLayerZoomRange(layer.id, Math.max(existingMinZoom, 6), 14);
+        }
+      });
+
+      map.addSource('continent-labels', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [
+            { type: 'Feature', properties: { name: 'North America' }, geometry: { type: 'Point', coordinates: [-105, 48] } },
+            { type: 'Feature', properties: { name: 'South America' }, geometry: { type: 'Point', coordinates: [-60, -18] } },
+            { type: 'Feature', properties: { name: 'Europe' }, geometry: { type: 'Point', coordinates: [15, 52] } },
+            { type: 'Feature', properties: { name: 'Africa' }, geometry: { type: 'Point', coordinates: [20, 7] } },
+            { type: 'Feature', properties: { name: 'Asia' }, geometry: { type: 'Point', coordinates: [88, 43] } },
+            { type: 'Feature', properties: { name: 'Oceania' }, geometry: { type: 'Point', coordinates: [135, -25] } },
+          ],
+        },
+      });
+
+      map.addLayer({
+        id: 'continent-labels',
+        type: 'symbol',
+        source: 'continent-labels',
+        minzoom: 0,
+        maxzoom: 2.35,
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 0, 13, 2.35, 18],
+          'text-letter-spacing': 0.12,
+          'text-transform': 'uppercase',
+          'text-allow-overlap': false,
+        },
+        paint: {
+          'text-color': activeMapTheme === 'dark' ? '#67e8f9' : '#334155',
+          'text-halo-color': activeMapTheme === 'dark' ? '#020617' : '#ffffff',
+          'text-halo-width': 1.5,
+          'text-halo-blur': 0.5,
+        },
+      });
+    }
+
+    function applyNeonVectorStyle() {
+      if (activeMapTheme !== 'dark' || !map.isStyleLoaded()) return;
+
+      const layers = map.getStyle().layers || [];
+
+      layers.forEach((layer) => {
+        const id = layer.id.toLowerCase();
+
+        try {
+          if (layer.type === 'background') {
+            map.setPaintProperty(layer.id, 'background-color', '#020617');
+          }
+
+          if (layer.type === 'fill') {
+            let fillColor = '#082f3b';
+            if (/water|ocean|river|lake/.test(id)) fillColor = '#020817';
+            else if (/building/.test(id)) fillColor = '#123746';
+            else if (/park|wood|forest|landcover|landuse|grass/.test(id)) fillColor = '#064e59';
+            else if (/earth|land|continent/.test(id)) fillColor = '#0e4a5a';
+
+            map.setPaintProperty(layer.id, 'fill-color', fillColor);
+            map.setPaintProperty(layer.id, 'fill-opacity', 0.96);
+            if ('fill-outline-color' in (layer.paint || {})) {
+              map.setPaintProperty(layer.id, 'fill-outline-color', '#22d3ee');
+            }
+          }
+
+          if (layer.type === 'line') {
+            const isBoundary = /boundary|border|admin/.test(id);
+            const isWater = /water|river|stream/.test(id);
+            const isRoad = /road|street|highway|motorway|transport/.test(id);
+
+            map.setPaintProperty(
+              layer.id,
+              'line-color',
+              isBoundary ? '#67e8f9' : isWater ? '#0ea5e9' : isRoad ? '#155e75' : '#0e7490',
+            );
+            map.setPaintProperty(layer.id, 'line-opacity', isBoundary ? 0.95 : 0.72);
+            if (isBoundary) map.setPaintProperty(layer.id, 'line-blur', 0.7);
+          }
+
+          if (layer.type === 'symbol') {
+            if ('text-color' in (layer.paint || {})) {
+              map.setPaintProperty(layer.id, 'text-color', '#d5faff');
+              map.setPaintProperty(layer.id, 'text-halo-color', '#020617');
+              map.setPaintProperty(layer.id, 'text-halo-width', 1.5);
+              map.setPaintProperty(layer.id, 'text-halo-blur', 0.5);
+            }
+          }
+        } catch {
+          // Some provider layers use expressions that do not expose every
+          // optional paint property. Other layers can still be themed.
+        }
+      });
+    }
+
+    function setMapTheme(theme: string) {
+      const nextTheme: 'light' | 'dark' = theme === 'dark' ? 'dark' : 'light';
+      mapContainer!.classList.toggle('map-theme-dark', nextTheme === 'dark');
+      if (nextTheme === activeMapTheme) {
+        if (nextTheme === 'dark' && activeMapView === 'normal') applyNeonVectorStyle();
+        return;
+      }
+
+      activeMapTheme = nextTheme;
+      if (activeMapView === 'satellite') {
+        map.setStyle(createSatelliteStyle(activeMapTheme));
+        return;
+      }
+
+      map.setStyle(styleUrls[nextTheme]);
+      map.once('style.load', () => {
+        configureLabelHierarchy();
+        if (activeMapTheme === 'dark') applyNeonVectorStyle();
+      });
+    }
+
+    function updateMapViewButtons() {
+      document.querySelectorAll<HTMLButtonElement>('[data-map-view]').forEach((button) => {
+        const isActive = button.dataset.mapView === activeMapView;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+    }
+
+    function setMapView(view: 'normal' | 'satellite') {
+      if (view === activeMapView) return;
+      activeMapView = view;
+      updateMapViewButtons();
+
+      map.setStyle(
+        view === 'satellite'
+          ? createSatelliteStyle(activeMapTheme)
+          : styleUrls[activeMapTheme],
+      );
+      map.once('style.load', () => {
+        if (activeMapView === 'normal') {
+          configureLabelHierarchy();
+          if (activeMapTheme === 'dark') applyNeonVectorStyle();
+        }
+      });
+    }
+
+    document.querySelectorAll<HTMLButtonElement>('[data-map-view]').forEach((button) => {
+      button.addEventListener('click', () => {
+        setMapView(button.dataset.mapView === 'satellite' ? 'satellite' : 'normal');
+      });
+    });
+
+    places.forEach((place) => {
+      const markerElement = document.createElement('button');
+      markerElement.type = 'button';
+      markerElement.className = 'custom-pin-marker';
+      markerElement.setAttribute('aria-label', `Open details for ${place.title}`);
+      markerElement.innerHTML =
+        `<span class="pin-bubble pin-${place.type}"><span class="marker-core" aria-hidden="true"></span></span>`;
+
+      const popupHtml = `
+        <div class="map-popup-card">
+          <span class="popup-tag" style="background-color: ${place.tagBg}; color: ${place.tagColor};">${place.type.replace('_', ' ')}</span>
+          <h3 class="popup-title">${place.title}</h3>
+          <div class="popup-location">${place.location}</div>
+          <div class="popup-date">${place.date}</div>
+          <p class="popup-text">${place.text}</p>
+        </div>
+      `;
+
+      const popup = new maplibregl.Popup({ offset: 20, maxWidth: '300px' }).setHTML(popupHtml);
+
+      new maplibregl.Marker({
+        element: markerElement,
+        anchor: 'bottom',
+      })
+        .setLngLat([place.lng, place.lat])
+        .setPopup(popup)
+        .addTo(map);
+
+    });
+
+    map.on('load', () => {
+      if (activeMapView === 'normal') {
+        configureLabelHierarchy();
+        if (activeMapTheme === 'dark') applyNeonVectorStyle();
+      }
+    });
+
+    window.addEventListener('themeChanged', (event: Event) => {
+      const customEvent = event as CustomEvent<{ theme?: string }>;
+      setMapTheme(customEvent.detail?.theme || getActiveTheme());
+    });
+
+    const observer = new MutationObserver(() => setMapTheme(getActiveTheme()));
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+  }
+
+  void initializeMap();
+</script>

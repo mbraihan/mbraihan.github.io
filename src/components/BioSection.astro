@@ -1,0 +1,314 @@
+---
+import {
+  FileText,
+  Mail,
+  User,
+  RectangleGoggles,
+  Eye,
+  Brain,
+  BriefcaseBusiness,
+} from 'lucide-astro';
+
+const interests = [
+  { name: 'Human-Computer Interaction', icon: User },
+  { name: 'Human-AI Interaction', icon: Brain },
+  { name: 'Extended Reality', icon: RectangleGoggles },
+  { name: 'Multimodal Interaction', icon: Eye },
+  // { name: 'Interactive Systems', icon: Layers },
+];
+---
+
+<section class="bio-section" aria-labelledby="researcher-name">
+  <div class="identity-layout">
+    <img
+      src="/prof_pic.jpg"
+      alt=""
+      class="mobile-portrait"
+      width="800"
+      height="800"
+      decoding="async"
+    />
+
+    <div class="identity-copy">
+      <p class="role-kicker">Ph.D. Candidate · HCI and Extended Reality</p>
+      <h1 id="researcher-name">Mohammad Raihanul Bashar</h1>
+      <p class="research-agenda">
+        My name is Mohammad Raihanul Bashar — I publish under this full name,
+        but please feel free to call me <strong>Raihan</strong>. I am a Ph.D.
+        candidate at <a
+          href="https://www.concordia.ca/"
+          target="_blank"
+          rel="noopener noreferrer">Concordia University</a
+        >, supervised by <a
+          href="https://users.encs.concordia.ca/~abatmaz/"
+          target="_blank"
+          rel="noopener noreferrer">Dr.&nbsp;Anil&nbsp;Ufuk&nbsp;Batmaz</a
+        >. I fast-tracked to the Ph.D. program from my Master's in January 2024.
+        Prior to that, I received my Bachelor's degree in Computer Science from
+        the <a
+          href="https://www.iub.edu.bd/"
+          target="_blank"
+          rel="noopener noreferrer">Independent University, Bangladesh (IUB)</a
+        >.
+      </p>
+      <p class="research-contribution">
+        I design and empirically evaluate adaptive, context-aware interaction
+        techniques — spanning multimodal, constraint-aware, and intelligent
+        interfaces — that help people create, learn, and collaborate across
+        physical and extended-reality environments.
+      </p>
+    </div>
+  </div>
+
+  <div class="seeking-box">
+    <BriefcaseBusiness size={18} class="seeking-icon" />
+    <p class="seeking-text">
+      On the job market seeking a Post-doc/Tenure-track Faculty position or
+      full-time industry research or engineering positions.
+    </p>
+  </div>
+
+  <div class="primary-actions">
+    <a href="mailto:m.bashar@concordia.ca" class="btn-primary">
+      <Mail size={17} />
+      <span>Email me</span>
+    </a>
+    <a href="/CV.pdf" class="secondary-action">
+      <FileText size={17} />
+      <span>View CV</span>
+    </a>
+  </div>
+
+  <div class="interests-container">
+    <p class="interests-heading">
+      My current research interests include (but are not limited to):
+    </p>
+    <div class="interests-grid">
+      {
+        interests.map((interest) => {
+          const IconComponent = interest.icon;
+          return (
+            <div class="interest-pill">
+              <IconComponent size={16} class="pill-icon" />
+              <span>{interest.name}</span>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .bio-section {
+    padding: 0.4rem 0 1.8rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .identity-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-portrait {
+    display: none;
+  }
+
+  .role-kicker {
+    color: var(--accent-blue);
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+  }
+
+  h1 {
+    font-size: 2.75rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .research-agenda {
+    width: 100%;
+    max-width: 100%;
+    font-size: 1.05rem;
+    color: var(--text-main);
+    line-height: 1.7;
+    margin-bottom: 0.65rem;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+  }
+
+  .research-agenda a,
+  .research-contribution a {
+    color: var(--accent-blue);
+    text-decoration: underline;
+    text-decoration-color: var(--accent-blue-border);
+    text-underline-offset: 2px;
+    transition: text-decoration-color var(--transition-fast);
+  }
+
+  .research-agenda a:hover,
+  .research-contribution a:hover {
+    text-decoration-color: var(--accent-blue);
+  }
+
+  .research-contribution {
+    width: 100%;
+    max-width: 100%;
+    color: var(--text-muted);
+    font-size: 0.98rem;
+    line-height: 1.65;
+    margin-bottom: 1.2rem;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+  }
+
+  .seeking-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1.25rem;
+    border-radius: var(--radius-sm);
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-left: 3px solid #059669;
+    margin-bottom: 1rem;
+  }
+
+  :global([data-theme='dark']) .seeking-box {
+    background: rgba(5, 150, 105, 0.14);
+    border-color: rgba(52, 211, 153, 0.32);
+    border-left-color: #34d399;
+  }
+
+  .seeking-icon {
+    color: #047857;
+    flex-shrink: 0;
+  }
+
+  :global([data-theme='dark']) .seeking-icon {
+    color: #6ee7b7;
+  }
+
+  .seeking-text {
+    font-size: 0.92rem;
+    color: var(--text-main);
+    line-height: 1.45;
+    font-weight: 600;
+  }
+
+  .primary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .secondary-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.6rem 1.1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-weight: 600;
+  }
+
+  .secondary-action:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  .interests-heading {
+    font-size: 0.88rem;
+    color: var(--text-subtle);
+    margin-bottom: 0.75rem;
+  }
+
+  .interests-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .interest-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
+  }
+
+  .interest-pill:hover {
+    background-color: var(--accent-blue-light);
+    color: var(--accent-blue);
+    border-color: var(--accent-blue-border);
+    transform: translateY(-1px);
+  }
+
+  .pill-icon {
+    color: var(--accent-blue);
+  }
+
+  @media (max-width: 1024px) {
+    .bio-section {
+      padding-top: 0;
+    }
+
+    .identity-layout {
+      grid-template-columns: 88px 1fr;
+      align-items: start;
+      gap: 1rem;
+    }
+
+    .mobile-portrait {
+      display: block;
+      width: 88px;
+      height: 88px;
+      object-fit: cover;
+      object-position: center top;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .identity-layout {
+      grid-template-columns: 64px 1fr;
+      gap: 0.8rem;
+    }
+
+    .mobile-portrait {
+      width: 64px;
+      height: 64px;
+    }
+
+    h1 {
+      font-size: 1.72rem;
+    }
+
+    .role-kicker {
+      font-size: 0.78rem;
+    }
+
+    .research-agenda {
+      grid-column: 1 / -1;
+      font-size: 1rem;
+    }
+
+    .primary-actions > a {
+      flex: 1 1 140px;
+      justify-content: center;
+    }
+  }
+</style>

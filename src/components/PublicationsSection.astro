@@ -1,0 +1,359 @@
+---
+import { getCollection } from 'astro:content';
+import { 
+  FileText, Globe, Video, Presentation, Code2, Database, ExternalLink, Quote, Copy, Check, ArrowRight 
+} from 'lucide-astro';
+import LoopingPreviewVideo from './LoopingPreviewVideo.astro';
+import {
+  getPublicationPreviewVideo,
+  shouldContainPublicationMedia,
+} from '../data/publicationMedia';
+
+const allPubs = await getCollection('publications');
+const selectedPubs = allPubs
+  .filter((pub) => pub.data.selected)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 4);
+---
+
+<section id="publications" class="pubs-section">
+  <div class="section-header">
+    <h2 class="section-title">Recent Publications</h2>
+    <a href="/publications" class="view-all-link">
+      <span>View all publications</span>
+      <ArrowRight size={16} />
+    </a>
+  </div>
+
+  <div class="pubs-grid">
+    {selectedPubs.map((pub, idx) => {
+      const { data, id } = pub;
+      const bibId = `bibtex-${id.replace(/[^a-zA-Z0-9]/g, '-')}`;
+      const previewVideo = getPublicationPreviewVideo(id);
+      const containMedia = shouldContainPublicationMedia(id);
+      return (
+        <div class="pub-card">
+          {(previewVideo || data.image) && (
+            <div class:list={[
+              'pub-image-wrapper',
+              { 'has-looping-video': previewVideo, 'has-contained-media': containMedia },
+            ]}>
+              {previewVideo ? (
+                <LoopingPreviewVideo
+                  src={previewVideo}
+                  className="pub-img"
+                  label={`Looping preview of ${data.title}`}
+                />
+              ) : (
+                <img
+                  src={data.image}
+                  alt={data.title}
+                  class="pub-img"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+            </div>
+          )}
+
+          <div class="pub-body">
+            <h3 class="pub-title">
+              <a href={`/publications/${id}`} class="paper-title-link">{data.title}</a>
+            </h3>
+
+            <p class="pub-authors">
+              {data.authors.map((author, aIdx) => (
+                <span>
+                  {author === 'Mohammad Raihanul Bashar' ? (
+                    <strong class="highlight-author">{author}</strong>
+                  ) : (
+                    <span>{author}</span>
+                  )}
+                  {aIdx < data.authors.length - 1 ? ', ' : ''}
+                </span>
+              ))}
+            </p>
+
+            <div class="pub-venue-badge" title={data.venue}>
+              <span>{data.venueShort || data.venue}</span>
+            </div>
+
+            <div class="pub-resource-links">
+              {data.pdf && (
+                <a href={data.pdf} target="_blank" rel="noopener noreferrer" class="res-link" aria-label="PDF (opens in a new tab)">
+                  <FileText size={12} />
+                  <span>PDF</span>
+                </a>
+              )}
+              <a href={`/publications/${id}`} class="res-link" title="Publication details">
+                <Globe size={12} />
+                <span>Website</span>
+              </a>
+              {data.video && (
+                <a href={data.video} target="_blank" rel="noopener noreferrer" class="res-link" aria-label="Video (opens in a new tab)">
+                  <Video size={12} />
+                  <span>Video</span>
+                </a>
+              )}
+              {data.code && (
+                <a href={data.code} target="_blank" rel="noopener noreferrer" class="res-link" aria-label="Code (opens in a new tab)">
+                  <Code2 size={12} />
+                  <span>Code</span>
+                </a>
+              )}
+              {data.presentation && (
+                <a href={data.presentation} target="_blank" rel="noopener noreferrer" class="res-link" aria-label="Presentation (opens in a new tab)">
+                  <Presentation size={12} />
+                  <span>Presentation</span>
+                </a>
+              )}
+              {data.doi && (
+                <a href={data.doi} target="_blank" rel="noopener noreferrer" class="res-link" aria-label="DOI (opens in a new tab)">
+                  <ExternalLink size={12} />
+                  <span>DOI</span>
+                </a>
+              )}
+              {data.bibtex && (
+                <button 
+                  class="res-link bibtex-toggle-btn" 
+                  data-target={bibId}
+                  title="Toggle BibTeX"
+                >
+                  <Quote size={12} />
+                  <span>BibTeX</span>
+                </button>
+              )}
+            </div>
+
+            {data.bibtex && (
+              <div id={bibId} class="bibtex-box hidden">
+                <button class="copy-btn" data-bib={data.bibtex}>
+                  <Copy size={12} class="copy-icon" />
+                  <Check size={12} class="check-icon hidden" />
+                  <span class="copy-text">Copy</span>
+                </button>
+                <code>{data.bibtex}</code>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</section>
+
+<style>
+  .pubs-section {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .view-all-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color var(--transition-fast);
+  }
+
+  .view-all-link:hover {
+    color: var(--accent-blue);
+  }
+
+  .pubs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .pub-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-card);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .pub-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .pub-image-wrapper {
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
+    background-color: #0f172a;
+  }
+
+  .pub-image-wrapper.has-looping-video {
+    height: auto;
+    aspect-ratio: 16 / 9;
+    background-color: #000;
+  }
+
+  .pub-image-wrapper.has-contained-media .pub-img {
+    object-fit: contain;
+  }
+
+  .pub-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .pub-body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .pub-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 0.4rem;
+    color: var(--text-main);
+  }
+
+  .paper-title-link:hover {
+    color: var(--accent-blue);
+    text-decoration: underline;
+  }
+
+  .pub-authors {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-bottom: 0.45rem;
+  }
+
+  .highlight-author {
+    color: var(--text-main);
+    font-weight: 600;
+  }
+
+  .pub-venue-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(147, 51, 234, 0.12));
+    border: 1px solid rgba(37, 99, 235, 0.35);
+    color: var(--accent-blue);
+    font-size: 0.72rem;
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.2);
+    margin-bottom: 0.6rem;
+    transition: all var(--transition-fast);
+  }
+
+  :global([data-theme='dark']) .pub-venue-badge {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(147, 51, 234, 0.25));
+    border-color: rgba(96, 165, 250, 0.45);
+    color: #60a5fa;
+    box-shadow: 0 0 14px rgba(37, 99, 235, 0.4);
+  }
+
+  /* Compact inline resource links row — matches reference image style */
+  .pub-resource-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.55rem;
+    margin-top: auto;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .res-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.22rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-subtle);
+    padding: 0.15rem 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+    white-space: nowrap;
+  }
+
+  .res-link:hover {
+    color: var(--accent-blue);
+  }
+
+  .bibtex-box.hidden {
+    display: none;
+  }
+
+  .check-icon.hidden {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .pubs-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // BibTeX Drawer Toggle & Copy Functionality
+  document.querySelectorAll('.bibtex-toggle-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      if (targetId) {
+        const box = document.getElementById(targetId);
+        box?.classList.toggle('hidden');
+      }
+    });
+  });
+
+  document.querySelectorAll('.copy-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const textToCopy = btn.getAttribute('data-bib');
+      if (textToCopy) {
+        await navigator.clipboard.writeText(textToCopy);
+        const copyIcon = btn.querySelector('.copy-icon');
+        const checkIcon = btn.querySelector('.check-icon');
+        const copyText = btn.querySelector('.copy-text');
+
+        copyIcon?.classList.add('hidden');
+        checkIcon?.classList.remove('hidden');
+        if (copyText) copyText.textContent = 'Copied!';
+
+        setTimeout(() => {
+          copyIcon?.classList.remove('hidden');
+          checkIcon?.classList.add('hidden');
+          if (copyText) copyText.textContent = 'Copy';
+        }, 2000);
+      }
+    });
+  });
+</script>

@@ -1,0 +1,219 @@
+/* body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #121212;
+  color: #eaeaea;
+}
+
+.container {
+  max-width: 720px;
+  margin: 2rem auto;
+  background: #1e1e1e;
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+h1 {
+  text-align: center;
+}
+
+.question {
+  margin-bottom: 1.5rem;
+}
+
+.scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.scale label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.scale input {
+  margin-bottom: 0.25rem;
+}
+
+.pid {
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: none;
+}
+
+button {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #1976d2;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+} */
+
+
+
+
+
+
+
+
+
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #121212;
+  color: #eaeaea;
+}
+
+.container {
+  max-width: 820px;
+  margin: 2rem auto;
+  background: #1e1e1e;
+  padding: 2.2rem 2.4rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+/* ─────────────────  header inputs  ───────────────── */
+.inputs-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4rem;
+  margin-bottom: 2.4rem;
+}
+
+.input-group {
+  flex: 1 1 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  margin-bottom: 0.35rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+}
+
+input[type="text"] {
+  padding: 0.7rem 0.9rem;
+  border-radius: 9px;
+  border: 1px solid #3f3f3f;
+  background: #202020;
+  color: #eee;
+  font-size: 0.95rem;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 1.8rem;
+  font-weight: 600;
+}
+
+/* ─────────────────  question blocks  ───────────────── */
+.question {
+  background: #181818;
+  border-radius: 12px;
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 1.7rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.question p {
+  font-size: 1.15rem;
+  line-height: 1.55;
+  margin: 0 0 0.9rem 0;
+  font-weight: 500;
+}
+
+.scale {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.4rem;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  opacity: 0.9;
+  transition: color 120ms ease;
+}
+
+.radio-label:hover {
+  color: #ffffff;
+}
+
+/* larger, consistent radio buttons */
+input[type="radio"] {
+  transform: scale(1.25);
+  accent-color: #2196f3;
+}
+
+/* ─────────────────  submit button  ───────────────── */
+button {
+  width: 100%;
+  padding: 1.05rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.15rem;
+  background: #2196f3;
+  color: #fff;
+  cursor: pointer;
+  margin-top: 0.8rem;
+  font-weight: 500;
+  transition: background 140ms ease, transform 140ms ease;
+}
+
+button:hover {
+  background: #29a1ff;
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* ─────────────────  mobile tweaks  ───────────────── */
+@media (max-width: 600px) {
+  .container {
+    padding: 1.4rem 1.2rem 1.8rem;
+  }
+
+  .question {
+    padding: 1.2rem 1rem;
+  }
+
+  .question p {
+    font-size: 1.05rem;
+  }
+
+  .radio-label {
+    font-size: 0.9rem;
+  }
+
+  .scale {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

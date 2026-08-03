@@ -1,0 +1,102 @@
+---
+import { Eye } from 'lucide-astro';
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer-container">
+    <p class="footer-copy">
+      &copy;{currentYear} Mohammad Raihanul Bashar. All rights reserved.
+    </p>
+    <div class="footer-visitor-count" title="Total site visitors">
+      <Eye size={14} class="visitor-eye-icon" />
+      <span id="visitor-count" class="visitor-number">—</span>
+      <span class="visitor-label"></span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--border-color);
+    padding: 2rem 0;
+    margin-top: 4rem;
+    background-color: var(--bg-card);
+    transition:
+      background-color var(--transition-normal),
+      border-color var(--transition-normal);
+  }
+
+  .footer-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  .footer-copy {
+    margin: 0;
+  }
+
+  .footer-visitor-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    font-size: 0.8rem;
+    color: var(--text-subtle);
+    transition: all var(--transition-fast);
+  }
+
+  .visitor-eye-icon {
+    color: var(--accent-blue);
+    opacity: 0.8;
+  }
+
+  .visitor-number {
+    font-weight: 700;
+    color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .visitor-label {
+    font-weight: 500;
+  }
+</style>
+
+<script>
+  // Fetch visitor count from GoatCounter API
+  async function fetchVisitorCount() {
+    const countEl = document.getElementById('visitor-count');
+    if (!countEl) return;
+
+    try {
+      // GoatCounter provides a no-JS pixel endpoint that also returns JSON count data
+      // Replace 'YOUR_GOATCOUNTER_CODE' with the actual GoatCounter site code once set up
+      const gcCode = (window as any).__goatcounter_code;
+      if (!gcCode) {
+        countEl.textContent = '—';
+        return;
+      }
+      const res = await fetch(
+        `https://${gcCode}.goatcounter.com/counter/${encodeURIComponent('/')}.json`,
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const count = data.count_unique ?? data.count ?? 0;
+        countEl.textContent = Number(count).toLocaleString();
+      }
+    } catch {
+      // Silently fail — just show dash
+      countEl.textContent = '—';
+    }
+  }
+
+  fetchVisitorCount();
+</script>

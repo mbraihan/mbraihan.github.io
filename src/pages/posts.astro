@@ -1,0 +1,517 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-astro';
+import { siteSections } from '../config/siteSections';
+
+if (!siteSections.posts) {
+  return Astro.redirect('/');
+}
+
+const allPosts = (await getCollection('posts')).filter((post) => !post.data.draft);
+const sortedPosts = allPosts.sort((a, b) => (a.data.order || 0) - (b.data.order || 0));
+
+const categories = ['All', 'Research', 'Updates', 'Thoughts', 'Technical', 'Journey'];
+---
+
+<BaseLayout 
+  title="Posts | Mohammad Raihanul Bashar"
+  description="Thoughts, research updates, journey logs, and technical notes from my PhD journey in HCI and XR."
+>
+  <div class="posts-page-wrapper">
+    <!-- Header -->
+    <header class="posts-header">
+      <h1 class="page-title">Posts</h1>
+      <p class="page-subtitle">
+        Thoughts, research updates, journey logs, and technical notes from my PhD journey in HCI and XR.
+      </p>
+
+      <!-- Category Filter Pills -->
+      <div class="filter-pills-row">
+        {categories.map((cat, idx) => (
+          <button 
+            type="button"
+            class={`filter-pill ${idx === 0 ? 'active' : ''}`}
+            data-category={cat}
+            aria-pressed={idx === 0 ? 'true' : 'false'}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+    </header>
+
+    <!-- Posts List -->
+    <div class="posts-list">
+      {sortedPosts.map((post) => {
+        const { data, id } = post;
+        return (
+          <article class="post-card-row" data-category={data.category}>
+            {data.image && (
+              <a href={`/posts/${id}`} class="thumb-link">
+                <div class="thumb-wrapper">
+                  <img
+                    src={data.image}
+                    alt={data.title}
+                    class="thumb-img"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              </a>
+            )}
+
+            <div class="card-details">
+              <div class="meta-line">
+                <span class="meta-date">{data.date}</span>
+                <span class="meta-dot">•</span>
+                <span class="meta-category">{data.category}</span>
+              </div>
+
+              <h2 class="card-title">
+                <a href={`/posts/${id}`}>{data.title}</a>
+              </h2>
+
+              {data.excerpt && <p class="card-excerpt">{data.excerpt}</p>}
+
+              <a href={`/posts/${id}`} class="read-more-link">
+                <span>Read more</span>
+                <ArrowRight size={14} />
+              </a>
+
+              {data.tags && data.tags.length > 0 && (
+                <div class="tags-row">
+                  {data.tags.map((tag) => (
+                    <span class="tag-pill">{tag}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+
+    <!-- Dynamic Pagination Bar -->
+    <div id="pagination-bar" class="pagination-bar">
+      <button id="prev-page-btn" class="page-btn nav-btn" aria-label="Previous page" title="Previous page">
+        <ChevronLeft size={16} />
+      </button>
+
+      <div id="page-numbers-container" class="page-numbers-group"></div>
+
+      <button id="next-page-btn" class="page-btn next-label-btn" aria-label="Next page" title="Next page">
+        <span>Next</span>
+        <ChevronRight size={16} />
+      </button>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .posts-page-wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem 1.5rem;
+  }
+
+  .posts-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+  }
+
+  .page-subtitle {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    max-width: 680px;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+
+  /* Filter Pills */
+  .filter-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+  }
+
+  .filter-pill {
+    padding: 0.4rem 1rem;
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    transition: all var(--transition-fast);
+  }
+
+  .filter-pill:hover {
+    color: var(--text-main);
+    background-color: var(--bg-pill);
+  }
+
+  .filter-pill.active {
+    color: var(--accent-blue);
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent-blue);
+    border-radius: 0;
+  }
+
+  /* Posts Row Layout */
+  .posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .post-card-row {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 1.75rem;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .post-card-row:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-blue);
+    box-shadow: var(--shadow-md);
+  }
+
+  .thumb-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 150px;
+  }
+
+  .thumb-wrapper {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background-color: var(--bg-pill);
+  }
+
+  .thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Card Content */
+  .card-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .meta-line {
+    font-size: 0.85rem;
+    color: var(--text-subtle);
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .meta-category {
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-title a {
+    color: var(--text-main);
+    transition: color var(--transition-fast);
+  }
+
+  .card-title a:hover {
+    color: var(--accent-blue);
+  }
+
+  .card-excerpt {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 0.85rem;
+  }
+
+  .read-more-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    margin-bottom: 0.85rem;
+    transition: gap var(--transition-fast);
+  }
+
+  .read-more-link:hover {
+    gap: 0.55rem;
+  }
+
+  /* Tags */
+  .tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag-pill {
+    font-size: 0.76rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-pill);
+    color: var(--text-subtle);
+    border: 1px solid var(--border-color);
+  }
+
+  /* Pagination Bar */
+  .pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    margin-top: 2.5rem;
+  }
+
+  .page-numbers-group {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  :global(.page-btn) {
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    color: #334155;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.92rem;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+  }
+
+  :global([data-theme='dark'] .page-btn) {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-main);
+  }
+
+  :global(.page-btn:hover:not(.disabled):not(.active)) {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+    background-color: #f8fafc;
+  }
+
+  :global(.page-btn.active) {
+    background-color: #1d61f2 !important;
+    color: #ffffff !important;
+    border-color: #1d61f2 !important;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(29, 97, 242, 0.25);
+  }
+
+  :global(.page-btn.disabled) {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+  }
+
+  :global(.next-label-btn) {
+    padding: 0 0.95rem;
+    gap: 0.35rem;
+  }
+
+  :global(.dots) {
+    color: #64748b;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0 0.2rem;
+    user-select: none;
+  }
+
+  @media (max-width: 768px) {
+    .post-card-row {
+      grid-template-columns: 1fr;
+    }
+    .thumb-link {
+      height: 180px;
+    }
+  }
+</style>
+
+<script>
+  const PAGE_SIZE = 5; // Posts per page limit
+  const pills = document.querySelectorAll('.filter-pill');
+  const postCards = Array.from(document.querySelectorAll<HTMLElement>('.post-card-row'));
+  
+  const paginationBar = document.getElementById('pagination-bar');
+  const prevBtn = document.getElementById('prev-page-btn') as HTMLButtonElement;
+  const nextBtn = document.getElementById('next-page-btn') as HTMLButtonElement;
+  const pageNumbersContainer = document.getElementById('page-numbers-container');
+
+  let currentCategory = 'All';
+  let currentPage = 1;
+
+  function updatePagination() {
+    // 1. Get matching posts for current category
+    const matchingPosts = postCards.filter((card) => {
+      const cardCat = card.getAttribute('data-category');
+      return currentCategory === 'All' || cardCat === currentCategory;
+    });
+
+    const totalMatching = matchingPosts.length;
+    const totalPages = Math.ceil(totalMatching / PAGE_SIZE);
+
+    // Always calculate totalPages dynamically based on current filtered posts
+    const maxPages = totalPages > 0 ? totalPages : 1;
+    if (currentPage > maxPages) currentPage = maxPages;
+    if (currentPage < 1) currentPage = 1;
+
+    // Show cards for active page
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    const endIndex = startIndex + PAGE_SIZE;
+
+    postCards.forEach((card) => {
+      card.style.display = 'none';
+    });
+
+    matchingPosts.forEach((card, idx) => {
+      if (idx >= startIndex && idx < endIndex) {
+        card.style.display = 'grid';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    // Render dynamic page numbers inside page-numbers-group
+    if (pageNumbersContainer) {
+      pageNumbersContainer.innerHTML = '';
+
+      if (maxPages <= 5) {
+        // Show all page numbers 1..maxPages
+        for (let i = 1; i <= maxPages; i++) {
+          const numBtn = document.createElement('button');
+          numBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+          numBtn.textContent = String(i);
+          numBtn.addEventListener('click', () => {
+            currentPage = i;
+            updatePagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+          pageNumbersContainer.appendChild(numBtn);
+        }
+      } else {
+        // Show truncated range with ellipsis (...) if maxPages > 5
+        const pagesToShow = [1];
+        if (currentPage > 2) pagesToShow.push(currentPage - 1);
+        if (currentPage !== 1 && currentPage !== maxPages) pagesToShow.push(currentPage);
+        if (currentPage < maxPages - 1) pagesToShow.push(currentPage + 1);
+        if (!pagesToShow.includes(maxPages)) pagesToShow.push(maxPages);
+
+        let lastPage = 0;
+        pagesToShow.forEach((p) => {
+          if (lastPage && p - lastPage > 1) {
+            const dots = document.createElement('span');
+            dots.className = 'dots';
+            dots.textContent = '...';
+            pageNumbersContainer.appendChild(dots);
+          }
+
+          const numBtn = document.createElement('button');
+          numBtn.className = `page-btn ${p === currentPage ? 'active' : ''}`;
+          numBtn.textContent = String(p);
+          numBtn.addEventListener('click', () => {
+            currentPage = p;
+            updatePagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+          pageNumbersContainer.appendChild(numBtn);
+          lastPage = p;
+        });
+      }
+    }
+
+    // Enable/Disable Prev & Next buttons
+    if (prevBtn) {
+      if (currentPage <= 1) {
+        prevBtn.classList.add('disabled');
+      } else {
+        prevBtn.classList.remove('disabled');
+      }
+    }
+
+    if (nextBtn) {
+      if (currentPage >= maxPages) {
+        nextBtn.classList.add('disabled');
+      } else {
+        nextBtn.classList.remove('disabled');
+      }
+    }
+  }
+
+  // Prev / Next click handlers
+  prevBtn?.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      updatePagination();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+
+  nextBtn?.addEventListener('click', () => {
+    currentPage++;
+    updatePagination();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Filter Pills Click Handlers
+  pills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      pills.forEach((p) => {
+        p.classList.remove('active');
+        p.setAttribute('aria-pressed', 'false');
+      });
+      pill.classList.add('active');
+      pill.setAttribute('aria-pressed', 'true');
+
+      currentCategory = pill.getAttribute('data-category') || 'All';
+      currentPage = 1; // Reset to page 1 on filter change
+      updatePagination();
+    });
+  });
+
+  // Initial setup
+  updatePagination();
+</script>

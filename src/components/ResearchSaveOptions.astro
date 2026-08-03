@@ -1,0 +1,190 @@
+---
+import { Download, FileSpreadsheet } from 'lucide-astro';
+
+interface Props {
+  sheetName: string;
+}
+
+const { sheetName } = Astro.props;
+---
+
+<div class="save-option-block">
+  <span class="block-label">Data Save Option</span>
+  <div class="save-cards-grid">
+    <label class="save-card active" id="card-option-sheets">
+      <input type="radio" name="saveOption" value="googlesheets" checked class="sr-only" />
+      <span class="card-icon-box"><FileSpreadsheet size={20} aria-hidden="true" /></span>
+      <span class="card-text-content">
+        <span class="card-title">Google Sheets</span>
+        <span class="card-desc">Append data using your saved Apps Script URL</span>
+      </span>
+    </label>
+
+    <label class="save-card" id="card-option-csv">
+      <input type="radio" name="saveOption" value="local" class="sr-only" />
+      <span class="card-icon-box"><Download size={20} aria-hidden="true" /></span>
+      <span class="card-text-content">
+        <span class="card-title">Download CSV</span>
+        <span class="card-desc">Save responses to a local CSV file</span>
+      </span>
+    </label>
+  </div>
+
+  <div id="sheets-inputs-row" class="sheets-inputs-row">
+    <div class="field-group">
+      <label for="sheet-name">Sheet / Tab Name</label>
+      <input
+        type="text"
+        id="sheet-name"
+        value={sheetName}
+        class="form-input"
+      />
+    </div>
+    <div class="field-group flex-2">
+      <label for="sheet-url">Google Apps Script Web App URL</label>
+      <input
+        type="url"
+        id="sheet-url"
+        placeholder="https://script.google.com/macros/s/.../exec"
+        class="form-input"
+        aria-describedby="sheet-url-storage-note sheet-url-error"
+      />
+      <span id="sheet-url-error" class="field-error"></span>
+    </div>
+  </div>
+  <p id="sheet-url-storage-note" class="storage-note">
+    This URL is remembered only in this browser on this device.
+  </p>
+</div>
+
+<style>
+  .save-option-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+  }
+
+  .block-label {
+    color: var(--text-main);
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .save-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .save-card {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-height: 64px;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-pill);
+    color: var(--text-main);
+    cursor: pointer;
+    transition:
+      border-color var(--transition-fast),
+      background-color var(--transition-fast),
+      box-shadow var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .save-card:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-1px);
+  }
+
+  .save-card.active {
+    border-color: var(--accent-blue);
+    background: var(--accent-blue-light);
+    box-shadow: 0 0 0 1px var(--accent-blue);
+  }
+
+  .card-icon-box {
+    display: inline-flex;
+    color: var(--accent-blue);
+  }
+
+  .card-text-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+  }
+
+  .card-desc,
+  .storage-note {
+    color: var(--text-subtle);
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  .sheets-inputs-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border-color);
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .field-group.flex-2 {
+    grid-column: span 1;
+  }
+
+  label {
+    color: var(--text-main);
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .form-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-pill);
+    color: var(--text-main);
+    font: inherit;
+    font-size: 0.92rem;
+  }
+
+  .form-input:focus {
+    border-color: var(--accent-blue);
+    outline: none;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+
+  @media (max-width: 640px) {
+    .save-cards-grid,
+    .sheets-inputs-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

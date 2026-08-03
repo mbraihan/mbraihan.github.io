@@ -1,0 +1,385 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { FileText, Plane, GraduationCap, Trophy, Users, ChevronDown, ChevronUp } from 'lucide-astro';
+import { compareNewsDatesNewestFirst, formatNewsDate } from '../utils/newsDate';
+
+const allNews = await getCollection('news');
+const sortedNews = await Promise.all(
+  allNews
+    .sort((a, b) => compareNewsDatesNewestFirst(a.data.date, b.data.date))
+    .map(async (item) => {
+      const { Content } = await render(item);
+      return { item, Content };
+    })
+);
+
+const categories = ['All', 'Milestone', 'Publication', 'Grant', 'Service', 'Travel', 'Other'];
+
+const iconMap = {
+  document: FileText,
+  plane: Plane,
+  'graduation-cap': GraduationCap,
+  trophy: Trophy,
+  users: Users,
+};
+---
+
+<BaseLayout 
+  title="News & Updates | Mohammad Raihanul Bashar"
+  description="Updates on recent achievements, research milestones, awards, and academic activities."
+>
+  <div class="container news-page-container">
+    <header class="news-header">
+      <h1 class="news-title">News</h1>
+      <p class="news-subtitle">Updates on my recent achievements, milestones, and activities.</p>
+    </header>
+
+    <!-- Category Filter Bar -->
+    <div class="filter-bar">
+      {categories.map((cat, index) => (
+        <button 
+          type="button"
+          class={`filter-pill ${cat.toLowerCase()}-pill ${index === 0 ? 'active' : ''}`}
+          data-category={cat}
+          aria-pressed={index === 0 ? 'true' : 'false'}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+
+    <!-- News List -->
+    <div class="news-list">
+      {sortedNews.map(({ item, Content }) => {
+        const IconComponent = iconMap[item.data.icon as keyof typeof iconMap] || FileText;
+        return (
+          <article 
+            id={item.id} 
+            class="news-card" 
+            data-category={item.data.category}
+          >
+            <div
+              class="card-summary"
+              data-toggle={item.id}
+              role="button"
+              tabindex="0"
+              aria-expanded="false"
+              aria-controls={`details-${item.id}`}
+            >
+              <div class="card-date">{formatNewsDate(item.data.date)}</div>
+              
+              <div class={`card-icon-circle icon-${item.data.iconColor}`}>
+                <IconComponent size={18} />
+              </div>
+
+              <div class="card-main">
+                <h2 class="card-title">{item.data.title}</h2>
+                <p class="card-desc">{item.data.description}</p>
+              </div>
+
+              <div class="card-expand-action">
+                <span class="action-text expand-text">Click to expand</span>
+                <span class="action-text collapse-text hidden">Click to collapse</span>
+                <ChevronDown size={16} class="chevron-down-icon" />
+                <ChevronUp size={16} class="chevron-up-icon hidden" />
+              </div>
+            </div>
+
+            <!-- Expanded Details Drawer -->
+            <div id={`details-${item.id}`} class="card-details hidden">
+              <div class="details-box">
+                <Content />
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .news-page-container {
+    padding-top: 3rem;
+    padding-bottom: 5rem;
+    max-width: 900px;
+  }
+
+  .news-header {
+    margin-bottom: 2rem;
+  }
+
+  .news-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+  }
+
+  .news-subtitle {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+  }
+
+  /* Filter Bar */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-bottom: 2rem;
+  }
+
+  .filter-pill {
+    padding: 0.4rem 1.1rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
+  }
+
+  .filter-pill:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  .filter-pill.active {
+    background-color: #eff6ff;
+    border-color: #3b82f6;
+    color: #2563eb;
+    font-weight: 600;
+  }
+
+  :global([data-theme='dark']) .filter-pill.active {
+    background-color: rgba(37, 99, 235, 0.2);
+    border-color: #60a5fa;
+    color: #60a5fa;
+  }
+
+  /* Specific Pill Accents */
+  .milestone-pill:hover { background-color: #fffbeb; color: #d97706; border-color: #fde68a; }
+  .publication-pill:hover { background-color: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+  .grant-pill:hover { background-color: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+  .service-pill:hover { background-color: #faf5ff; color: #9333ea; border-color: #e9d5ff; }
+  .travel-pill:hover { background-color: #ecfeff; color: #0891b2; border-color: #a5f3fc; }
+
+  /* News List */
+  .news-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .news-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .news-card:hover {
+    border-color: var(--accent-blue-border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card-summary {
+    display: grid;
+    grid-template-columns: 6.5rem 2.75rem 1fr auto;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .card-date {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-subtle);
+  }
+
+  .card-icon-circle {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon-blue { background-color: #eff6ff; color: #2563eb; }
+  :global([data-theme='dark']) .icon-blue { background-color: rgba(37, 99, 235, 0.2); color: #60a5fa; }
+
+  .icon-emerald { background-color: #ecfdf5; color: #059669; }
+  :global([data-theme='dark']) .icon-emerald { background-color: rgba(5, 150, 105, 0.2); color: #34d399; }
+
+  .icon-purple { background-color: #f3e8ff; color: #7e22ce; }
+  :global([data-theme='dark']) .icon-purple { background-color: rgba(126, 34, 206, 0.2); color: #c084fc; }
+
+  .icon-amber { background-color: #fffbeb; color: #d97706; }
+  :global([data-theme='dark']) .icon-amber { background-color: rgba(217, 119, 6, 0.2); color: #fbbf24; }
+
+  .card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+  }
+
+  .card-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .card-expand-action {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--text-subtle);
+    font-weight: 500;
+    transition: color var(--transition-fast);
+  }
+
+  .card-summary:hover .card-expand-action {
+    color: var(--accent-blue);
+  }
+
+  .card-details {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+  }
+
+  .card-details.hidden {
+    display: none;
+  }
+
+  .details-box {
+    background-color: var(--accent-blue-light);
+    border: 1px solid var(--accent-blue-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--text-main);
+  }
+
+  .details-box :global(p) {
+    margin-bottom: 0.75rem;
+  }
+
+  .details-box :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 640px) {
+    .card-summary {
+      grid-template-columns: 2.75rem 1fr;
+      gap: 0.75rem;
+    }
+    .card-date {
+      grid-column: 1 / -1;
+    }
+    .card-expand-action {
+      grid-column: 1 / -1;
+      justify-content: flex-end;
+    }
+  }
+</style>
+
+<script>
+  // Category Filter Functionality
+  const filterPills = document.querySelectorAll('.filter-pill');
+  const newsCards = document.querySelectorAll('.news-card');
+
+  filterPills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      filterPills.forEach((p) => {
+        p.classList.remove('active');
+        p.setAttribute('aria-pressed', 'false');
+      });
+      pill.classList.add('active');
+      pill.setAttribute('aria-pressed', 'true');
+
+      const selectedCat = pill.getAttribute('data-category');
+
+      newsCards.forEach((card) => {
+        const cardCat = card.getAttribute('data-category');
+        if (selectedCat === 'All' || cardCat === selectedCat) {
+          (card as HTMLElement).style.display = 'block';
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+    });
+  });
+
+  function setCardExpanded(card: HTMLElement, shouldExpand: boolean) {
+    const details = card.querySelector<HTMLElement>('.card-details');
+    const summary = card.querySelector<HTMLElement>('.card-summary');
+    const expandText = card.querySelector('.expand-text');
+    const collapseText = card.querySelector('.collapse-text');
+    const chevronDown = card.querySelector('.chevron-down-icon');
+    const chevronUp = card.querySelector('.chevron-up-icon');
+    if (!details || !summary) return;
+
+    details.classList.toggle('hidden', !shouldExpand);
+    expandText?.classList.toggle('hidden', shouldExpand);
+    collapseText?.classList.toggle('hidden', !shouldExpand);
+    chevronDown?.classList.toggle('hidden', shouldExpand);
+    chevronUp?.classList.toggle('hidden', !shouldExpand);
+    summary.setAttribute('aria-expanded', String(shouldExpand));
+  }
+
+  // Expand / Collapse Drawer Logic
+  function toggleCard(cardId: string) {
+    const selectedCard = document.getElementById(cardId);
+    if (!selectedCard) return;
+
+    const selectedDetails = selectedCard.querySelector('.card-details');
+    const shouldExpand = selectedDetails?.classList.contains('hidden') ?? false;
+
+    if (shouldExpand) {
+      document.querySelectorAll<HTMLElement>('.news-card').forEach((card) => {
+        if (card !== selectedCard) setCardExpanded(card, false);
+      });
+    }
+
+    setCardExpanded(selectedCard, shouldExpand);
+  }
+
+  document.querySelectorAll('.card-summary').forEach((summary) => {
+    summary.addEventListener('click', () => {
+      const toggleId = summary.getAttribute('data-toggle');
+      if (toggleId) toggleCard(toggleId);
+    });
+
+    summary.addEventListener('keydown', (event) => {
+      if (!(event instanceof KeyboardEvent)) return;
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      const toggleId = summary.getAttribute('data-toggle');
+      if (toggleId) toggleCard(toggleId);
+    });
+  });
+
+  // Auto-expand & scroll if URL hash exists (e.g. /news#ismar-2026-tvcg)
+  window.addEventListener('DOMContentLoaded', () => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+      const targetCard = document.getElementById(hash);
+      if (targetCard) {
+        toggleCard(hash);
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  });
+</script>

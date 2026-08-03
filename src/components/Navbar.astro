@@ -1,0 +1,561 @@
+---
+import { FileText, Sun, Moon, Menu, X } from 'lucide-astro';
+import { siteSections } from '../config/siteSections';
+
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { name: 'About', href: '/' },
+  { name: 'News', href: '/news' },
+  { name: 'Publications', href: '/publications' },
+  ...(siteSections.posts ? [{ name: 'Posts', href: '/posts' }] : []),
+  { name: 'Tools', href: '/tools' },
+  ...(siteSections.gallery ? [{ name: 'Gallery', href: '/gallery' }] : []),
+];
+---
+
+<header class="navbar">
+  <div class="container navbar-container">
+    <a href="/" class="brand">
+      <!-- <div class="brand-avatar">MR</div> -->
+      <span class="brand-name">Mohammad Raihanul Bashar</span>
+    </a>
+
+    <!-- Desktop Nav -->
+    <nav class="nav-links desktop-nav">
+      {
+        navItems.map((item) => {
+          const isActive =
+            item.href === '/'
+              ? currentPath === '/'
+              : currentPath.startsWith(item.href);
+          return (
+            <a href={item.href} class={`nav-link ${isActive ? 'active' : ''}`}>
+              {item.name}
+            </a>
+          );
+        })
+      }
+
+      <a
+        href="/CV.pdf"
+        class="btn-primary cv-btn"
+      >
+        <FileText size={16} />
+        <span>View CV</span>
+      </a>
+
+      <button
+        id="theme-toggle"
+        class="theme-toggle-pill"
+        type="button"
+        aria-label="Switch to dark theme"
+        aria-pressed="false"
+        title="Toggle day/night theme"
+      >
+        <span class="theme-toggle-sky" aria-hidden="true"></span>
+        <span class="toggle-thumb" aria-hidden="true">
+          <Sun class="sun-icon" size={15} />
+          <Moon class="moon-icon" size={15} />
+        </span>
+      </button>
+    </nav>
+
+    <!-- Mobile Controls -->
+    <div class="mobile-controls">
+      <button
+        id="theme-toggle-mobile"
+        class="theme-toggle-pill"
+        type="button"
+        aria-label="Switch to dark theme"
+        aria-pressed="false"
+        title="Toggle day/night theme"
+      >
+        <span class="theme-toggle-sky" aria-hidden="true"></span>
+        <span class="toggle-thumb" aria-hidden="true">
+          <Sun class="sun-icon" size={14} />
+          <Moon class="moon-icon" size={14} />
+        </span>
+      </button>
+
+      <button
+        id="hamburger-btn"
+        class="hamburger-btn"
+        aria-label="Open navigation menu"
+        aria-expanded="false"
+      >
+        <Menu class="hamburger-open-icon" size={22} />
+        <X class="hamburger-close-icon" size={22} />
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Nav -->
+  <div id="mobile-nav" class="mobile-nav">
+    <div class="mobile-nav-inner">
+      {
+        navItems.map((item) => {
+          const isActive =
+            item.href === '/'
+              ? currentPath === '/'
+              : currentPath.startsWith(item.href);
+          return (
+            <a
+              href={item.href}
+              class={`mobile-nav-link ${isActive ? 'active' : ''}`}
+            >
+              {item.name}
+            </a>
+          );
+        })
+      }
+      <a
+        href="/CV.pdf"
+        class="btn-primary cv-btn-mobile"
+      >
+        <FileText size={16} />
+        <span>View CV</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    transition:
+      background-color var(--transition-normal),
+      border-color var(--transition-normal);
+  }
+
+  :global([data-theme='dark']) .navbar {
+    background-color: rgba(21, 28, 44, 0.85);
+  }
+
+  .navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 4.25rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    flex-shrink: 0;
+  }
+
+  .brand-avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background-color: var(--accent-blue);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Desktop Nav */
+  .desktop-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0.25rem 0;
+    position: relative;
+    transition: color var(--transition-fast);
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--accent-blue);
+  }
+
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.75rem;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--accent-blue);
+    border-radius: 2px;
+  }
+
+  .cv-btn {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.9rem;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ───── Animated Day/Night Toggle ───── */
+  .theme-toggle-pill {
+    --toggle-padding: 0.16rem;
+    --toggle-thumb-size: 1.46rem;
+    width: 3.5rem;
+    height: 1.95rem;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(37, 99, 235, 0.22);
+    background: linear-gradient(180deg, #7dd3fc 0%, #dbeafe 100%);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+      0 6px 16px rgba(37, 99, 235, 0.12);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    padding: var(--toggle-padding);
+    position: relative;
+    transition:
+      background 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 300ms ease,
+      box-shadow 300ms ease;
+  }
+
+  :global([data-theme='dark']) .theme-toggle-pill {
+    background: linear-gradient(180deg, #111827 0%, #1e293b 100%);
+    border-color: rgba(96, 165, 250, 0.45);
+    box-shadow:
+      inset 0 0 0 1px rgba(148, 163, 184, 0.16),
+      0 8px 18px rgba(2, 6, 23, 0.28);
+  }
+
+  .theme-toggle-pill:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 3px;
+  }
+
+  .theme-toggle-sky,
+  .theme-toggle-sky::before,
+  .theme-toggle-sky::after {
+    content: '';
+    position: absolute;
+    border-radius: var(--radius-full);
+    transition:
+      opacity 300ms ease,
+      transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .theme-toggle-sky {
+    inset: 0;
+  }
+
+  .theme-toggle-sky::before {
+    width: 0.42rem;
+    height: 0.42rem;
+    left: 0.52rem;
+    top: 0.35rem;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow:
+      0.48rem 0.34rem 0 -0.12rem rgba(255, 255, 255, 0.72),
+      1.88rem 0.5rem 0 -0.16rem rgba(255, 255, 255, 0.65);
+  }
+
+  .theme-toggle-sky::after {
+    width: 0.18rem;
+    height: 0.18rem;
+    right: 0.58rem;
+    top: 0.42rem;
+    background: #ffffff;
+    box-shadow:
+      -0.62rem 0.22rem 0 #ffffff,
+      -1.02rem 0.72rem 0 rgba(255, 255, 255, 0.82),
+      0.24rem 0.7rem 0 rgba(255, 255, 255, 0.74);
+    opacity: 0;
+    transform: translateY(0.45rem);
+  }
+
+  :global([data-theme='dark']) .theme-toggle-sky::before {
+    opacity: 0;
+    transform: translateY(-0.45rem);
+  }
+
+  :global([data-theme='dark']) .theme-toggle-sky::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toggle-thumb {
+    width: var(--toggle-thumb-size);
+    height: var(--toggle-thumb-size);
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 35% 30%,
+      #fff7ad 0 21%,
+      #facc15 22% 58%,
+      #f59e0b 100%
+    );
+    box-shadow:
+      0 2px 7px rgba(15, 23, 42, 0.25),
+      0 0 10px rgba(250, 204, 21, 0.48);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transform: translateX(0) rotate(0deg);
+    transition:
+      background 340ms ease,
+      box-shadow 340ms ease,
+      transform 480ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1;
+  }
+
+  :global([data-theme='dark']) .toggle-thumb {
+    background: radial-gradient(
+      circle at 60% 38%,
+      #f8fafc 0 18%,
+      #cbd5e1 19% 100%
+    );
+    box-shadow:
+      0 2px 8px rgba(2, 6, 23, 0.45),
+      0 0 12px rgba(147, 197, 253, 0.28);
+    transform: translateX(
+        calc(3.5rem - (var(--toggle-padding) * 2) - var(--toggle-thumb-size))
+      )
+      rotate(360deg);
+  }
+
+  .sun-icon {
+    color: #ffffff;
+    filter: drop-shadow(0 1px 1px rgba(146, 64, 14, 0.4));
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    transition:
+      opacity 220ms ease,
+      transform 300ms ease;
+  }
+
+  .moon-icon {
+    color: #1e293b;
+    opacity: 0;
+    position: absolute;
+    transform: scale(0.65) rotate(-120deg);
+    transition:
+      opacity 220ms ease,
+      transform 300ms ease;
+  }
+
+  :global([data-theme='dark']) .sun-icon {
+    opacity: 0;
+    transform: scale(0.65) rotate(120deg);
+  }
+
+  :global([data-theme='dark']) .moon-icon {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-toggle-pill,
+    .theme-toggle-sky,
+    .theme-toggle-sky::before,
+    .theme-toggle-sky::after,
+    .toggle-thumb,
+    .sun-icon,
+    .moon-icon {
+      transition-duration: 1ms;
+    }
+  }
+
+  /* ───── Mobile Controls ───── */
+  .mobile-controls {
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .hamburger-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main);
+    background: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
+  }
+
+  .hamburger-btn:hover {
+    background: var(--bg-pill-hover);
+  }
+
+  .hamburger-close-icon {
+    display: none;
+  }
+
+  .hamburger-btn[aria-expanded='true'] .hamburger-open-icon {
+    display: none;
+  }
+
+  .hamburger-btn[aria-expanded='true'] .hamburger-close-icon {
+    display: block;
+  }
+
+  /* ───── Mobile Dropdown Nav ───── */
+  .mobile-nav {
+    display: none;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition:
+      max-height 350ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 250ms ease;
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .mobile-nav.open {
+    max-height: 420px;
+    opacity: 1;
+  }
+
+  .mobile-nav-inner {
+    padding: 0.75rem 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .mobile-nav-link {
+    display: block;
+    padding: 0.7rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+  }
+
+  .mobile-nav-link:hover,
+  .mobile-nav-link.active {
+    color: var(--accent-blue);
+    background-color: var(--bg-pill);
+  }
+
+  .mobile-nav-link.active {
+    font-weight: 600;
+  }
+
+  .cv-btn-mobile {
+    margin-top: 0.5rem;
+    justify-content: center;
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+    border-radius: var(--radius-sm);
+    width: 100%;
+  }
+
+  /* ───── Responsive Breakpoints ───── */
+  @media (max-width: 900px) {
+    .desktop-nav {
+      display: none;
+    }
+
+    .mobile-controls {
+      display: flex;
+    }
+
+    .mobile-nav {
+      display: block;
+    }
+
+    .brand-name {
+      font-size: 0.95rem;
+    }
+  }
+</style>
+
+<script>
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  const mobileNav = document.getElementById('mobile-nav');
+  const storageKey = 'theme';
+
+  function getInitialTheme() {
+    let savedTheme = null;
+    try {
+      savedTheme = localStorage.getItem(storageKey);
+    } catch {
+      savedTheme = null;
+    }
+    if (savedTheme === 'dark' || savedTheme === 'light') return savedTheme;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
+  }
+
+  function setTheme(theme: string) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.style.colorScheme = theme;
+
+    [themeToggle, themeToggleMobile].forEach((btn) => {
+      btn?.setAttribute('aria-pressed', String(theme === 'dark'));
+      btn?.setAttribute(
+        'aria-label',
+        theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme',
+      );
+    });
+
+    try {
+      localStorage.setItem(storageKey, theme);
+    } catch {
+      // Ignore storage failures
+    }
+    window.dispatchEvent(
+      new CustomEvent('themeChanged', { detail: { theme } }),
+    );
+  }
+
+  function toggleTheme() {
+    const currentTheme =
+      document.documentElement.getAttribute('data-theme') || 'light';
+    setTheme(currentTheme === 'light' ? 'dark' : 'light');
+  }
+
+  setTheme(getInitialTheme());
+
+  themeToggle?.addEventListener('click', toggleTheme);
+  themeToggleMobile?.addEventListener('click', toggleTheme);
+
+  // Hamburger toggle
+  hamburgerBtn?.addEventListener('click', () => {
+    const isOpen = mobileNav?.classList.toggle('open');
+    hamburgerBtn.setAttribute('aria-expanded', String(!!isOpen));
+    hamburgerBtn.setAttribute(
+      'aria-label',
+      isOpen ? 'Close navigation menu' : 'Open navigation menu',
+    );
+  });
+
+  // Close mobile nav when a link is clicked
+  mobileNav?.querySelectorAll('.mobile-nav-link').forEach((link) => {
+    link.addEventListener('click', () => {
+      mobileNav.classList.remove('open');
+      hamburgerBtn?.setAttribute('aria-expanded', 'false');
+      hamburgerBtn?.setAttribute('aria-label', 'Open navigation menu');
+    });
+  });
+</script>
