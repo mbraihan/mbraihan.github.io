@@ -182,24 +182,24 @@ const publicationStructuredData = {
         <p class="corresponding-note">Corresponding author: {data.correspondingAuthor}</p>
       )}
 
-      <!-- Action Chips Buttons (Dark Pills with Custom Icons matching screenshot) -->
+      <!-- Action Chips Buttons (Theme Adaptive Pills with Custom SVG Logos) -->
       <div class="action-buttons-group">
         {data.pdf && (
           <a href={data.pdf} target="_blank" rel="noopener noreferrer" class="chip-btn chip-pdf" aria-label="Paper PDF">
-            <svg class="chip-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="chip-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
               <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="4" y1="15" x2="20" y2="15"></line>
-              <path d="M7 11.5h1.5a1.25 1.25 0 0 0 0-2.5H7v5"></path>
-              <path d="M12 9v5.5a1.75 1.75 0 0 0 1.75-1.75v-2A1.75 1.75 0 0 0 12 9z"></path>
-              <path d="M17 9h3M17 11.5h2M17 9v5.5"></path>
+              <path d="M7.8 16.2c1.8-2.2 3.8-5 4.3-6.8.5-1.4.2-2.4-.7-2.4s-1.4.9-.9 2.4c.8 2.3 2.8 4.8 4.7 6.1 1.4.9 2.6 1.3 3.1.7.5-.7 0-1.5-1.4-1.5-1.9 0-4.3 1-6.2 1.9" stroke-width="1.8"></path>
             </svg>
             <span>Paper</span>
           </a>
         )}
         {data.arxiv && (
           <a href={data.arxiv} target="_blank" rel="noopener noreferrer" class="chip-btn chip-arxiv" aria-label="arXiv preprint">
-            <BookOpen size={16} class="chip-icon" />
+            <svg class="chip-icon arxiv-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M 18.5,3.5 L 12.2,11.8 C 11.2,12.8 11.5,14.5 12.8,14.9 L 19,21" stroke="currentColor" class="arxiv-strand-grey" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M 5.5,3.5 L 12.5,12.5 C 13.5,13.5 12.6,15.2 11.2,15.4 L 5.5,21" stroke="currentColor" class="arxiv-strand-red" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
             <span>arXiv</span>
           </a>
         )}
@@ -727,7 +727,7 @@ const publicationStructuredData = {
     margin-bottom: 1.5rem;
   }
 
-  /* Action Chips - Modern Sleek Dark Pill Design (matching user screenshot) */
+  /* Action Chips - Theme Adaptive Pill Design */
   .action-buttons-group {
     display: flex;
     justify-content: center;
@@ -740,38 +740,92 @@ const publicationStructuredData = {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1.25rem;
-    border-radius: 9999px;
+    padding: 0.48rem 1.25rem;
+    border-radius: var(--radius-full);
     font-size: 0.88rem;
-    font-weight: 500;
-    line-height: 1.2;
-    background-color: #2b2c2d;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #f3f4f6;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    font-weight: 600;
+    line-height: 1.25;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     text-decoration: none;
   }
 
   .action-buttons-group .chip-btn:hover {
-    background-color: #3b3c3e;
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    transform: translateY(-1.5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background-color: var(--bg-pill-hover);
+    border-color: var(--accent-blue-border);
+    color: var(--text-main);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
   }
 
   .action-buttons-group .chip-icon {
     flex-shrink: 0;
     width: 16px;
     height: 16px;
-    color: #e5e7eb;
     transition: transform 0.2s ease;
   }
 
   .action-buttons-group .chip-btn:hover .chip-icon {
-    color: #ffffff;
-    transform: scale(1.08);
+    transform: scale(1.1);
+  }
+
+  /* Custom Colors for Icons in Light & Dark Themes */
+  .chip-pdf .chip-icon {
+    color: #dc2626;
+  }
+  :global([data-theme='dark']) .chip-pdf .chip-icon {
+    color: #f87171;
+  }
+
+  .chip-arxiv .arxiv-strand-red {
+    stroke: #b31b1b;
+  }
+  .chip-arxiv .arxiv-strand-grey {
+    stroke: #6b7280;
+  }
+  :global([data-theme='dark']) .chip-arxiv .arxiv-strand-red {
+    stroke: #f87171;
+  }
+  :global([data-theme='dark']) .chip-arxiv .arxiv-strand-grey {
+    stroke: #9ca3af;
+  }
+
+  .chip-video .chip-icon {
+    color: #ea580c;
+  }
+  :global([data-theme='dark']) .chip-video .chip-icon {
+    color: #fb923c;
+  }
+
+  .chip-github .chip-icon {
+    color: #181717;
+  }
+  :global([data-theme='dark']) .chip-github .chip-icon {
+    color: #f0f6fc;
+  }
+
+  .chip-data .chip-icon {
+    color: #059669;
+  }
+  :global([data-theme='dark']) .chip-data .chip-icon {
+    color: #34d399;
+  }
+
+  .chip-poster .chip-icon {
+    color: #7c3aed;
+  }
+  :global([data-theme='dark']) .chip-poster .chip-icon {
+    color: #a78bfa;
+  }
+
+  .chip-doi .chip-icon {
+    color: #2563eb;
+  }
+  :global([data-theme='dark']) .chip-doi .chip-icon {
+    color: #60a5fa;
   }
 
   /* Hero Banner */

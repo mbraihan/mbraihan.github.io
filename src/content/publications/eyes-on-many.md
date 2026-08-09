@@ -34,7 +34,7 @@ methodologyVideos:
     embedSrc: "https://player.cloudinary.com/embed/?cloud_name=dqkxtivbq&public_id=Voice_S_tbgkfb"
     description: "Participants use a spoken command (e.g., \"group\", \"multi\") to activate multi-selection, and a distinct term (e.g., \"done\", \"finish\") to deactivate and finalize. This provides a hands-free persistent mode-switching option."
 resultsImages:
-  - "https://res.cloudinary.com/dqkxtivbq/image/upload/v1785692016/IE_RR_N_qkxbym.png"
+  - "https://res.cloudinary.com/dqkxtivbq/image/upload/v1786300708/IE_RR_N_d9hcj6.png"
   - "https://res.cloudinary.com/dqkxtivbq/image/upload/v1785692020/Subjective_RR_N_krtytq.png"
 resultsCaptions:
   - "Inverse Efficiency (IE) across subselection techniques, mode-switching methods, and target counts."
