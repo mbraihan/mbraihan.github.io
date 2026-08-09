@@ -21,8 +21,8 @@ import {
   Users,
 } from 'lucide-astro';
 
-const today = '2026-07-26';
-const reviewedDate = '2026-07-26';
+const today = new Date().toISOString().slice(0, 10);
+const reviewedDate = new Date().toISOString().slice(0, 10);
 
 const dateFormatter = new Intl.DateTimeFormat('en-CA', {
   month: 'short',
@@ -63,18 +63,37 @@ const upcomingMilestones = conferenceVenues
   )
   .sort((a, b) => a.date.localeCompare(b.date));
 
+const maxUpcomingDate = new Date(Date.now() + 45 * 24 * 60 * 60 * 1000)
+  .toISOString()
+  .slice(0, 10);
+
 const deadlineMilestones = upcomingMilestones.filter(
-  (milestone) => milestone.kind === 'Abstract' || milestone.kind === 'Paper',
+  (milestone) =>
+    (milestone.kind === 'Abstract' || milestone.kind === 'Paper') &&
+    milestone.date <= maxUpcomingDate &&
+    !milestone.label.toLowerCase().includes('revised') &&
+    !milestone.label.toLowerCase().includes('resubmission'),
 );
 
-const timelineMilestones = upcomingMilestones.slice(0, 18);
+const timelineMilestones = upcomingMilestones;
 
 const categories = [
   'Core HCI',
   'XR / 3D Interaction',
   'Design / UbiComp',
 ] as const;
-const statuses = ['Open', 'In Review', 'Closed', 'TBA'] as const;
+const statuses = [
+  'Submission',
+  'Abstract',
+  'Paper',
+  'Review',
+  'Rebuttal',
+  'Notification',
+  'Camera',
+  'Registration',
+  'In session',
+  'TBA',
+] as const;
 
 const statItems = [
   {
@@ -84,22 +103,29 @@ const statItems = [
     color: 'blue',
   },
   {
-    label: 'Open',
-    value: conferenceVenues.filter((venue) => venue.status === 'Open').length,
+    label: 'Active deadlines',
+    value: conferenceVenues.filter((venue) =>
+      ['Submission', 'Abstract', 'Paper', 'Rebuttal', 'Camera'].includes(
+        venue.status,
+      ),
+    ).length,
     icon: CheckCircle2,
     color: 'green',
   },
   {
     label: 'In review',
-    value: conferenceVenues.filter((venue) => venue.status === 'In Review')
-      .length,
+    value: conferenceVenues.filter((venue) =>
+      ['Review', 'Notification'].includes(venue.status),
+    ).length,
     icon: Hourglass,
     color: 'amber',
   },
   {
-    label: 'Dates TBA',
-    value: conferenceVenues.filter((venue) => venue.status === 'TBA').length,
-    icon: CircleHelp,
+    label: 'Registration open',
+    value: conferenceVenues.filter((venue) =>
+      ['Registration', 'In session'].includes(venue.status),
+    ).length,
+    icon: BellRing,
     color: 'violet',
   },
 ];
@@ -109,7 +135,9 @@ const getNextDeadline = (venue: (typeof conferenceVenues)[number]) =>
     .filter(
       (milestone) =>
         milestone.date >= today &&
-        (milestone.kind === 'Abstract' || milestone.kind === 'Paper'),
+        milestone.kind !== 'Conference' &&
+        !milestone.label.toLowerCase().includes('revised') &&
+        !milestone.label.toLowerCase().includes('resubmission'),
     )
     .sort((a, b) => a.date.localeCompare(b.date))[0];
 
@@ -203,7 +231,7 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
         <div class="reviewed-date">
           <CalendarDays size={16} aria-hidden="true" />
           <span
-            >Last reviewed: <time datetime={reviewedDate}
+            >Last updated: <time datetime={reviewedDate}
               >{formatDate(reviewedDate)}</time
             ></span
           >
@@ -293,15 +321,15 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
                         <span class="timeline-dot" aria-hidden="true" />
                         <span class="timeline-stage-copy">
                           <span class="timeline-event">{milestone.label}</span>
-                          {
-                            milestone.timeZone && (
-                              <small>{getCutoffLabel(milestone)}</small>
-                            )
-                          }
+                          {milestone.timeZone && (
+                            <small>{getCutoffLabel(milestone)}</small>
+                          )}
                         </span>
                       </span>
                     </td>
-                    <th scope="row" class="timeline-venue">{milestone.venue}</th>
+                    <th scope="row" class="timeline-venue">
+                      {milestone.venue}
+                    </th>
                   </tr>
                 ))
               }
@@ -338,7 +366,19 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
                   />
                   <strong>{milestone.venue}</strong>
                   <span class="upcoming-stage">
-                    <span>{milestone.kind}</span>
+                    <span>
+                      {milestone.label.toLowerCase().includes('camera')
+                        ? 'Camera-ready'
+                        : milestone.label
+                              .toLowerCase()
+                              .includes('submission site')
+                          ? 'Submission site'
+                          : milestone.label
+                                .toLowerCase()
+                                .includes('presentation video')
+                            ? 'Presentation video'
+                            : milestone.kind}
+                    </span>
                     <small>{getCutoffLabel(milestone)}</small>
                   </span>
                   <time datetime={milestone.date}>
@@ -405,7 +445,8 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
                               {target.deadline && target.days !== null ? (
                                 <>
                                   <span>
-                                    {target.days} {target.days === 1 ? 'day' : 'days'} ·{' '}
+                                    {target.days}{' '}
+                                    {target.days === 1 ? 'day' : 'days'} ·{' '}
                                     {formatShortDate(target.deadline.date)}
                                   </span>
                                   <em>{target.risk?.label}</em>
@@ -425,8 +466,8 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
           </div>
           <p class="planner-note">
             <Info size={15} aria-hidden="true" />
-            Tight means fewer than 14 calendar days. Check scope, fit, and the
-            official call before resubmitting.
+            Tight means fewer than 14 calendar days. Check scope, fit, and the official
+            call before resubmitting.
           </p>
         </article>
       </div>
@@ -1413,6 +1454,10 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
     text-transform: uppercase;
   }
 
+  [hidden] {
+    display: none !important;
+  }
+
   .filter-chip {
     min-height: 40px;
     padding: 0.45rem 0.8rem;
@@ -1581,38 +1626,97 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
     padding: 0.2rem 0.5rem;
   }
 
-  .status-open {
-    background: #dcfce7;
-    color: #166534;
+  /* Status Badge Colors for Light & Dark Themes */
+  .status-submission {
+    background: #d1fae5;
+    color: #065f46;
   }
-  .status-in-review {
+  .status-abstract {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .status-paper {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  .status-review {
     background: #ffedd5;
     color: #9a3412;
   }
-  .status-closed {
-    background: #f1f5f9;
-    color: #475569;
+  .status-rebuttal {
+    background: #fce7f3;
+    color: #9d174d;
+  }
+  .status-notification {
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+  .status-camera {
+    background: #fae8ff;
+    color: #86198f;
+  }
+  .status-registration {
+    background: #ccfbf1;
+    color: #115e59;
+  }
+  .status-in-session {
+    background: #dcfce7;
+    color: #166534;
   }
   .status-tba {
     background: #f3e8ff;
     color: #7e22ce;
   }
 
-  :global([data-theme='dark']) .status-open {
-    background: rgba(22, 101, 52, 0.34);
-    color: #86efac;
+  :global([data-theme='dark']) .status-submission {
+    background: rgba(6, 95, 70, 0.38);
+    color: #6ee7b7;
+    border: 1px solid rgba(110, 231, 183, 0.25);
   }
-  :global([data-theme='dark']) .status-in-review {
-    background: rgba(154, 52, 18, 0.34);
+  :global([data-theme='dark']) .status-abstract {
+    background: rgba(146, 64, 14, 0.38);
+    color: #fcd34d;
+    border: 1px solid rgba(252, 211, 77, 0.25);
+  }
+  :global([data-theme='dark']) .status-paper {
+    background: rgba(30, 64, 175, 0.38);
+    color: #93c5fd;
+    border: 1px solid rgba(147, 197, 253, 0.25);
+  }
+  :global([data-theme='dark']) .status-review {
+    background: rgba(154, 52, 18, 0.38);
     color: #fdba74;
+    border: 1px solid rgba(253, 186, 116, 0.25);
   }
-  :global([data-theme='dark']) .status-closed {
-    background: #334155;
-    color: #cbd5e1;
+  :global([data-theme='dark']) .status-rebuttal {
+    background: rgba(157, 23, 77, 0.38);
+    color: #f472b6;
+    border: 1px solid rgba(244, 114, 182, 0.25);
+  }
+  :global([data-theme='dark']) .status-notification {
+    background: rgba(55, 48, 163, 0.38);
+    color: #a5b4fc;
+    border: 1px solid rgba(165, 180, 252, 0.25);
+  }
+  :global([data-theme='dark']) .status-camera {
+    background: rgba(134, 25, 143, 0.38);
+    color: #f0abfc;
+    border: 1px solid rgba(240, 171, 252, 0.25);
+  }
+  :global([data-theme='dark']) .status-registration {
+    background: rgba(17, 94, 89, 0.38);
+    color: #5eead4;
+    border: 1px solid rgba(94, 234, 212, 0.25);
+  }
+  :global([data-theme='dark']) .status-in-session {
+    background: rgba(22, 101, 52, 0.38);
+    color: #86efac;
+    border: 1px solid rgba(134, 239, 172, 0.25);
   }
   :global([data-theme='dark']) .status-tba {
-    background: rgba(126, 34, 206, 0.3);
+    background: rgba(126, 34, 206, 0.35);
     color: #d8b4fe;
+    border: 1px solid rgba(216, 180, 254, 0.25);
   }
 
   .conference-facts {
@@ -1870,7 +1974,9 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
     }
 
     .upcoming-list li {
-      grid-template-columns: 10px minmax(72px, 0.8fr) minmax(66px, 1fr) 56px 44px;
+      grid-template-columns:
+        10px minmax(72px, 0.8fr) minmax(66px, 1fr)
+        56px 44px;
       gap: 0.32rem;
       min-height: 52px;
     }
@@ -2005,10 +2111,16 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
   const sortCards = () => {
     const mode = sortSelect?.value || 'deadline';
     const statusOrder: Record<string, number> = {
-      Open: 0,
-      'In Review': 1,
-      TBA: 2,
-      Closed: 3,
+      Submission: 0,
+      Abstract: 1,
+      Paper: 2,
+      Review: 3,
+      Rebuttal: 4,
+      Notification: 5,
+      Camera: 6,
+      Registration: 7,
+      'In session': 8,
+      TBA: 9,
     };
     const rankOrder: Record<string, number> = {
       'A*': 0,
@@ -2101,7 +2213,9 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
 
   const updateTimeline = () => {
     const months = timelineRange?.value || '6';
-    const start = new Date('2026-07-26T00:00:00Z');
+    const start = new Date(
+      `${new Date().toISOString().slice(0, 10)}T00:00:00Z`,
+    );
     const end = new Date(start);
     if (months !== 'all') end.setUTCMonth(end.getUTCMonth() + Number(months));
 
