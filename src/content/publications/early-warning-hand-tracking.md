@@ -9,6 +9,7 @@ year: 2025
 type: "Journal"
 tags: ["Virtual Reality", "Hand Tracking", "Visual Feedback", "Usability"]
 selected: false
+acceptanceNewsId: "ieee-vr-2025-tvcg"
 image: "https://res.cloudinary.com/dqkxtivbq/image/upload/v1751596636/With_Ball_w3fhia.gif"
 bannerCaption: "The early-warning system provides visual feedback before light-based hand tracking fails during VR interaction."
 pdf: "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10918865"

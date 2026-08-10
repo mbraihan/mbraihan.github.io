@@ -11,6 +11,7 @@ const newsCollection = defineCollection({
     iconColor: z.string().optional().default('blue'),
     category: z.enum(['Milestone', 'Publication', 'Grant', 'Service', 'Travel', 'Other']).default('Other'),
     link: z.string().optional(),
+    relatedPublicationId: z.string().optional(),
   }),
 });
 
@@ -58,6 +59,7 @@ const publicationsCollection = defineCollection({
     applicationVideo: z.string().optional(),
     designGuidelines: z.array(z.string()).optional(),
     relatedPaperIds: z.array(z.string()).optional(),
+    acceptanceNewsId: z.string().optional(),
     order: z.number().default(0),
   }),
 });

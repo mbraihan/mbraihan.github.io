@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { 
-  FileText, Github, ExternalLink, Copy, Check, ChevronLeft, ChevronRight, Database, BookOpen, Layers, Video, ArrowLeft, ArrowRight
+  FileText, Github, ExternalLink, Copy, Check, ChevronLeft, ChevronRight, Database, BookOpen, Layers, Video, ArrowLeft, ArrowRight, Trophy
 } from 'lucide-astro';
 import LoopingPreviewVideo from '../../components/LoopingPreviewVideo.astro';
 import {
@@ -64,6 +64,18 @@ const relatedPubs = (data.relatedPaperIds && data.relatedPaperIds.length > 0
   ? allPubs.filter((p) => data.relatedPaperIds!.includes(p.id))
   : allPubs.filter((p) => p.id !== id).slice(0, 3)
 ).sort((a, b) => b.data.year - a.data.year);
+
+// Fetch linked paper acceptance news entry
+const allNews = await getCollection('news');
+const acceptanceNews = data.acceptanceNewsId
+  ? allNews.find((n) => n.id === data.acceptanceNewsId)
+  : allNews.find(
+      (n) =>
+        n.data.relatedPublicationId === id ||
+        (n.data.category === 'Publication' &&
+          (n.id.includes(id) ||
+            n.data.title.toLowerCase().includes(data.title.toLowerCase().slice(0, 15)))),
+    );
 
 const affiliationEntries = uniqueAffiliations.map((name, idx) => ({
   name,
@@ -826,6 +838,13 @@ const publicationStructuredData = {
   }
   :global([data-theme='dark']) .chip-doi .chip-icon {
     color: #60a5fa;
+  }
+
+  .chip-news-acceptance .chip-icon {
+    color: #d97706;
+  }
+  :global([data-theme='dark']) .chip-news-acceptance .chip-icon {
+    color: #fbbf24;
   }
 
   /* Hero Banner */

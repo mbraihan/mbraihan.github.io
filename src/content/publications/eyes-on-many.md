@@ -11,6 +11,7 @@ year: 2026
 type: "Conference"
 tags: ["HCI", "Extended Reality", "Eye Gaze", "Multimodal Interaction", "3D Interaction"]
 selected: true
+acceptanceNewsId: "chi-2026-paper"
 pdf: "https://dl.acm.org/doi/pdf/10.1145/3772318.3790513"
 arxiv: "https://arxiv.org/abs/2602.12406"
 doi: "https://doi.org/10.1145/3772318.3790513"

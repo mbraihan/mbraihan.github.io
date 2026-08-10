@@ -3,6 +3,7 @@ date: "2025-02-21"
 title: "\"Depth3DSketch\" Accepted to CHI 2025 Late-Breaking Work"
 description: "Our work on freehand VR sketching beyond arm’s reach has been accepted to CHI 2025 Late-Breaking Work."
 category: "Publication"
+relatedPublicationId: "depth3dsketch"
 icon: "document"
 iconColor: "emerald"
 ---

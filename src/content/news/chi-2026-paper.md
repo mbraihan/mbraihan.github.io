@@ -3,6 +3,7 @@ date: "2026-01-15"
 title: "\"Eyes on Many\" Accepted at CHI 2026"
 description: "Our paper comparing gaze, hand, and voice for multi-object selection in XR has been accepted at CHI 2026."
 category: "Publication"
+relatedPublicationId: "eyes-on-many"
 icon: "trophy"
 iconColor: "amber"
 ---

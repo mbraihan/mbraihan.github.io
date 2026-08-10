@@ -13,6 +13,7 @@ year: 2026
 type: "Journal"
 tags: ["HCI", "Extended Reality", "Eye Gaze", "3D Interaction", "Vergence-Accommodation Conflict", "Fitts' Law"]
 selected: true
+acceptanceNewsId: "ismar-2026-tvcg"
 arxiv: "https://arxiv.org/abs/2607.27369"
 bannerCaption: "Experimental task and depth configuration. (Left) Targets were placed at multiple depths spaced in diopters while maintaining constant perceived size. α (orange) denotes angular target distance and ω (blue) the angular target width. A dagger (†) marks the HMDs' focal plane. (Right) Participants selected targets using the controller or gaze (cursor highlighted)."
 tldr: "Demonstrates that vergence-accommodation conflict degrades gaze-based 3D selection as targets move away from an HMD's focal region and that a diopter-aware Fitts' law model predicts this effect more accurately."

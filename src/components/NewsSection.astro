@@ -1,12 +1,20 @@
 ---
 import { getCollection } from 'astro:content';
-import { FileText, Plane, GraduationCap, Trophy, Users, ArrowRight } from 'lucide-astro';
+import { FileText, Plane, GraduationCap, Trophy, Users, ArrowRight, BookOpen } from 'lucide-astro';
 import { compareNewsDatesNewestFirst, formatNewsDate } from '../utils/newsDate';
 
 const allNews = await getCollection('news');
+const allPubs = await getCollection('publications');
+
 const sortedNews = allNews
   .sort((a, b) => compareNewsDatesNewestFirst(a.data.date, b.data.date))
-  .slice(0, 4);
+  .slice(0, 4)
+  .map((item) => {
+    const relatedPub = item.data.relatedPublicationId
+      ? allPubs.find((p) => p.id === item.data.relatedPublicationId)
+      : allPubs.find((p) => p.data.acceptanceNewsId === item.id);
+    return { item, relatedPub };
+  });
 
 const iconMap = {
   document: FileText,
@@ -27,9 +35,9 @@ const iconMap = {
   </div>
 
   <div class="news-container">
-    {sortedNews.map((item) => {
+    {sortedNews.map(({ item, relatedPub }) => {
       const IconComponent = iconMap[item.data.icon as keyof typeof iconMap] || FileText;
-      const targetUrl = `/news#${item.id}`;
+      const targetUrl = relatedPub ? `/publications/${relatedPub.id}` : `/news#${item.id}`;
       return (
         <a href={targetUrl} class="news-item">
           <div class="news-date">{formatNewsDate(item.data.date)}</div>
@@ -39,6 +47,12 @@ const iconMap = {
           <div class="news-content">
             <h3 class="news-item-title">{item.data.title}</h3>
             <p class="news-item-desc">{item.data.description}</p>
+            {relatedPub && (
+              <span class="news-pub-link-tag">
+                <BookOpen size={12} aria-hidden="true" />
+                <span>Publication Project Page ({relatedPub.data.venueShort || relatedPub.data.venue}) →</span>
+              </span>
+            )}
           </div>
           <div class="news-arrow">
             <ArrowRight size={16} />
@@ -177,9 +191,24 @@ const iconMap = {
   }
 
   .news-item-desc {
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     color: var(--text-muted);
     line-height: 1.4;
+  }
+
+  .news-pub-link-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    transition: color var(--transition-fast);
+  }
+
+  .news-item:hover .news-pub-link-tag {
+    text-decoration: underline;
   }
 
   .news-arrow {

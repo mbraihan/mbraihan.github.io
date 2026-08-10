@@ -1,16 +1,21 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { FileText, Plane, GraduationCap, Trophy, Users, ChevronDown, ChevronUp } from 'lucide-astro';
+import { FileText, Plane, GraduationCap, Trophy, Users, ChevronDown, ChevronUp, BookOpen } from 'lucide-astro';
 import { compareNewsDatesNewestFirst, formatNewsDate } from '../utils/newsDate';
 
 const allNews = await getCollection('news');
+const allPubs = await getCollection('publications');
+
 const sortedNews = await Promise.all(
   allNews
     .sort((a, b) => compareNewsDatesNewestFirst(a.data.date, b.data.date))
     .map(async (item) => {
       const { Content } = await render(item);
-      return { item, Content };
+      const relatedPub = item.data.relatedPublicationId
+        ? allPubs.find((p) => p.id === item.data.relatedPublicationId)
+        : allPubs.find((p) => p.data.acceptanceNewsId === item.id);
+      return { item, Content, relatedPub };
     })
 );
 
@@ -51,7 +56,7 @@ const iconMap = {
 
     <!-- News List -->
     <div class="news-list">
-      {sortedNews.map(({ item, Content }) => {
+      {sortedNews.map(({ item, Content, relatedPub }) => {
         const IconComponent = iconMap[item.data.icon as keyof typeof iconMap] || FileText;
         return (
           <article 
@@ -76,6 +81,18 @@ const iconMap = {
               <div class="card-main">
                 <h2 class="card-title">{item.data.title}</h2>
                 <p class="card-desc">{item.data.description}</p>
+                {relatedPub && (
+                  <div class="card-pub-link-container">
+                    <a
+                      href={`/publications/${relatedPub.id}`}
+                      class="card-pub-direct-link"
+                      onclick="event.stopPropagation()"
+                    >
+                      <BookOpen size={13} aria-hidden="true" />
+                      <span>Publication Project Page ({relatedPub.data.venueShort || relatedPub.data.venue}) →</span>
+                    </a>
+                  </div>
+                )}
               </div>
 
               <div class="card-expand-action">
@@ -90,6 +107,14 @@ const iconMap = {
             <div id={`details-${item.id}`} class="card-details hidden">
               <div class="details-box">
                 <Content />
+                {relatedPub && (
+                  <div class="news-pub-link-wrapper">
+                    <a href={`/publications/${relatedPub.id}`} class="news-pub-link-btn">
+                      <BookOpen size={16} aria-hidden="true" />
+                      <span>View Publication Details Page ({relatedPub.data.venueShort || relatedPub.data.venue}) →</span>
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </article>
@@ -236,6 +261,26 @@ const iconMap = {
     line-height: 1.4;
   }
 
+  .card-pub-link-container {
+    margin-top: 0.4rem;
+  }
+
+  .card-pub-direct-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.81rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+  }
+
+  .card-pub-direct-link:hover {
+    color: var(--accent-blue-hover);
+    text-decoration: underline;
+  }
+
   .card-expand-action {
     display: flex;
     align-items: center;
@@ -274,6 +319,34 @@ const iconMap = {
 
   .details-box :global(p:last-child) {
     margin-bottom: 0;
+  }
+
+  .news-pub-link-wrapper {
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px dashed var(--accent-blue-border);
+  }
+
+  .news-pub-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.48rem 1rem;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-card);
+    border: 1px solid var(--accent-blue-border);
+    color: var(--accent-blue);
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+  }
+
+  .news-pub-link-btn:hover {
+    background-color: var(--accent-blue);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
   }
 
   .hidden {

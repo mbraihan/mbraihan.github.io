@@ -3,6 +3,7 @@ date: "2026-07-28"
 title: "\"Evaluating Vergence–Accommodation Conflict\" Accepted at IEEE ISMAR 2026"
 description: "Our paper on vergence–accommodation conflict in gaze-based 3D target selection has been accepted to the IEEE ISMAR 2026 TVCG track."
 category: "Publication"
+relatedPublicationId: "vergence-accommodation-gaze-selection"
 icon: "trophy"
 iconColor: "amber"
 ---

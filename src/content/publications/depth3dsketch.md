@@ -14,6 +14,7 @@ year: 2025
 type: "Poster"
 tags: ["HCI", "Virtual Reality", "Eye Gaze", "3D Interaction", "3D Sketching", "Multimodal Interaction"]
 selected: false
+acceptanceNewsId: "depth3dsketch-chi-2025"
 image: "https://res.cloudinary.com/dqkxtivbq/image/upload/v1751598099/CHI_depth3DSketch_f1hs5y.gif"
 bannerCaption: "(a) Depth selection interaction methods used in the study: RayCursor, Conductor, and Gaze+Controller. (b) Example sketching results showing shape quality across interaction methods."
 pdf: "https://dl.acm.org/doi/pdf/10.1145/3706599.3719717"

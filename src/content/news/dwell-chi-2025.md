@@ -3,6 +3,7 @@ date: "2025-01-16"
 title: "Multi-Threshold Dwell Paper Accepted at CHI 2025"
 description: "Our work toward better gaze-based text entry through multi-threshold dwell has been accepted at CHI 2025."
 category: "Publication"
+relatedPublicationId: "multi-threshold-dwell"
 icon: "trophy"
 iconColor: "amber"
 ---

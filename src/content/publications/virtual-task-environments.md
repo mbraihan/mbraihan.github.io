@@ -9,6 +9,7 @@ year: 2024
 type: "Conference"
 tags: ["HCI", "Extended Reality", "3D Interaction", "Selection Techniques", "Literature Review"]
 selected: false
+acceptanceNewsId: "segah-2026-vr-medical"
 image: "https://res.cloudinary.com/dqkxtivbq/image/upload/v1751596332/GI_24_uhr206.png"
 doi: "https://doi.org/10.1145/3670947.3670983"
 website: "https://dl.acm.org/doi/abs/10.1145/3670947.3670983"

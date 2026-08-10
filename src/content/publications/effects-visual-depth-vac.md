@@ -13,6 +13,7 @@ year: 2026
 type: "Poster"
 tags: ["HCI", "Virtual Reality", "Eye Gaze", "3D Interaction", "Vergence-Accommodation Conflict"]
 selected: true
+acceptanceNewsId: "chi-2026-poster"
 pdf: "https://dl.acm.org/doi/pdf/10.1145/3772363.3798344"
 doi: "https://doi.org/10.1145/3772363.3798344"
 poster: "https://res.cloudinary.com/dqkxtivbq/image/upload/v1785702913/Pos_qnidxn.jpg"

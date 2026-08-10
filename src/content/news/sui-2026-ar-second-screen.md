@@ -3,6 +3,7 @@ date: "2026-07-22"
 title: "\"Crossing Realities Has a Cost\" Accepted at ACM SUI 2026"
 description: "Our paper evaluating AR second screens for AI-assisted desktop authoring has been accepted at ACM SUI 2026."
 category: "Publication"
+relatedPublicationId: "crossing-realities-sui"
 icon: "trophy"
 iconColor: "amber"
 ---

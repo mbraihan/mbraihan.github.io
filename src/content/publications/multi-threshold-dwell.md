@@ -12,6 +12,7 @@ year: 2025
 type: "Conference"
 tags: ["HCI", "Eye Gaze", "Text Entry", "Dwell Interaction"]
 selected: true
+acceptanceNewsId: "dwell-chi-2025"
 image: "https://res.cloudinary.com/dqkxtivbq/image/upload/v1751598100/CHI_dwell_kaberp.gif"
 pdf: "https://dl.acm.org/doi/pdf/10.1145/3706598.3713781"
 doi: "https://doi.org/10.1145/3706598.3713781"

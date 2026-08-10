@@ -3,6 +3,7 @@ date: "2026-04-03"
 title: "\"Play and Learn\" Accepted at IEEE SEGAH 2026"
 description: "The paper developed from my Mitacs internship on gamified VR catheter-insertion training has been accepted at IEEE SEGAH 2026."
 category: "Publication"
+relatedPublicationId: "virtual-task-environments"
 icon: "trophy"
 iconColor: "emerald"
 ---

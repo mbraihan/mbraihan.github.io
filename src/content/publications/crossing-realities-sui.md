@@ -12,6 +12,7 @@ year: 2026
 type: "Conference"
 tags: ["HCI", "Extended Reality", "Augmented Reality", "Human-AI Interaction", "Multi-Display Interaction"]
 selected: true
+acceptanceNewsId: "sui-2026-ar-second-screen"
 pdf: "https://mucahitgemici.github.io/papers/crossing-realities-sui.pdf"
 doi: "https://doi.org/10.1145/3822518.3830046"
 website: "https://dl.acm.org/doi/10.1145/3822518.3830046"
