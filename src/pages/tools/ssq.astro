@@ -227,6 +227,7 @@ const ssqOptions = [
 <script>
   import {
     clearToolAlert,
+    formatParticipantId,
     initializeResearchSaveOptions,
     markQuestionGroupInvalid,
     showRemoteSaveFailure,
@@ -258,11 +259,11 @@ const ssqOptions = [
   });
 
   function downloadSSQCSV(data: any) {
-    let csv = `Participant_ID,Condition,Metric,Score\n`;
-    csv += `${data.participantId},${data.condition},SSQ_Total,${data.totalScore.toFixed(2)}\n`;
-    csv += `${data.participantId},${data.condition},Nausea_Score,${data.nauseaScore.toFixed(2)}\n`;
-    csv += `${data.participantId},${data.condition},Oculomotor_Score,${data.oculomotorScore.toFixed(2)}\n`;
-    csv += `${data.participantId},${data.condition},Disorientation_Score,${data.disorientationScore.toFixed(2)}\n`;
+    const headers = ['ParticipantID', 'Condition', 'Symptom', 'Response', 'Subscore'];
+    let csv = headers.join(',') + '\n';
+    data.rows.forEach((r: any) => {
+      csv += `"${r.ParticipantID}","${r.Condition}","${r.Symptom}",${r.Response},"${r.Subscore}"\n`;
+    });
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -301,7 +302,14 @@ const ssqOptions = [
     submitBtn?.setAttribute('disabled', '');
     submitBtn?.setAttribute('aria-busy', 'true');
     try {
-      await submitResearchData({ endpoint, sheetName, tool: 'SSQ', payload: data });
+      await submitResearchData({
+        endpoint,
+        sheetName,
+        tool: 'SSQ',
+        payload: {
+          rows: data.rows,
+        },
+      });
       clearToolAlert(alertBox);
       showResults(data);
     } catch (error) {
@@ -321,7 +329,7 @@ const ssqOptions = [
   }
 
   submitBtn?.addEventListener('click', async () => {
-    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const rawPId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
     const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
 
     if (!validateRequiredFields([
@@ -351,6 +359,9 @@ const ssqOptions = [
     }
 
     clearToolAlert(alertBox);
+
+    const normPId = formatParticipantId(rawPId);
+
     // SSQ Kennedy et al. Subscore Items (1-indexed mapping to 0-indexed array):
     // Nausea: items 1, 6, 7, 8, 9, 15, 16 -> indices 0, 5, 6, 7, 8, 14, 15
     // Oculomotor: items 1, 2, 3, 4, 5, 9, 11 -> indices 0, 1, 2, 3, 4, 8, 10
@@ -369,14 +380,64 @@ const ssqOptions = [
     const dScore = dRaw * 13.92;
     const totalScore = (nRaw + oRaw + dRaw) * 3.74;
 
+    // Build 5-column rows array: ParticipantID, Condition, Symptom, Response, Subscore
+    const rows: any[] = [];
+    ssqSymptoms.forEach((sym, idx) => {
+      const isN = nIndices.includes(idx);
+      const isO = oIndices.includes(idx);
+      const isD = dIndices.includes(idx);
+      const subCategories = [isN ? 'Nausea' : '', isO ? 'Oculomotor' : '', isD ? 'Disorientation' : ''].filter(Boolean).join(', ');
+
+      rows.push({
+        ParticipantID: normPId,
+        Condition: cond,
+        Symptom: `Symptom ${idx + 1} (${sym})`,
+        Response: answers[idx],
+        Subscore: subCategories,
+      });
+    });
+
+    rows.push({
+      ParticipantID: normPId,
+      Condition: cond,
+      Symptom: 'Nausea Subscore',
+      Response: Number(nScore.toFixed(2)),
+      Subscore: 'Nausea',
+    });
+
+    rows.push({
+      ParticipantID: normPId,
+      Condition: cond,
+      Symptom: 'Oculomotor Subscore',
+      Response: Number(oScore.toFixed(2)),
+      Subscore: 'Oculomotor',
+    });
+
+    rows.push({
+      ParticipantID: normPId,
+      Condition: cond,
+      Symptom: 'Disorientation Subscore',
+      Response: Number(dScore.toFixed(2)),
+      Subscore: 'Disorientation',
+    });
+
+    rows.push({
+      ParticipantID: normPId,
+      Condition: cond,
+      Symptom: 'Total SSQ Score',
+      Response: Number(totalScore.toFixed(2)),
+      Subscore: 'Overall',
+    });
+
     await saveResponse({
-      participantId: pId,
+      participantId: normPId,
       condition: cond,
       responses: { ...answers },
       totalScore,
       nauseaScore: nScore,
       oculomotorScore: oScore,
       disorientationScore: dScore,
+      rows,
     });
   });
 
