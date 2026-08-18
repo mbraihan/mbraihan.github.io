@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ResearchToolProvenance from '../../components/ResearchToolProvenance.astro';
 import ResearchSaveOptions from '../../components/ResearchSaveOptions.astro';
+import ToolReferences from '../../components/ToolReferences.astro';
 import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-astro';
 
 const ssqSymptoms = [
@@ -153,6 +154,9 @@ const ssqOptions = [
         </button>
       </div>
     </div>
+
+    <!-- Academic References -->
+    <ToolReferences tool="ssq" />
   </div>
 </BaseLayout>
 
@@ -341,7 +345,7 @@ const ssqOptions = [
     }
 
     if (saveOptions.currentOption === 'googlesheets' && !validateRequiredFields([
-      { id: 'sheet-url', label: 'Google Apps Script URL', errorId: 'sheet-url-error' },
+      { id: 'sheet-url', label: 'Google Sheet Web App URL', errorId: 'sheet-url-error' },
     ], alertBox)) {
       return;
     }

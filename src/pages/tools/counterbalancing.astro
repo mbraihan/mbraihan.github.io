@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ToolReferences from '../../components/ToolReferences.astro';
 import {
   ArrowLeft,
   Check,
@@ -7,9 +8,12 @@ import {
   Download,
   ExternalLink,
   Info,
+  Layers,
+  Plus,
   RefreshCw,
   RotateCcw,
   Shuffle,
+  Trash2,
 } from 'lucide-astro';
 ---
 
@@ -89,8 +93,23 @@ import {
           </div>
         </div>
 
+        <!-- Condition Mode Toggle: Single Variable vs Multi-Factor / Nested Factors -->
+        <div class="condition-mode-bar">
+          <label class="mode-bar-label">Input Type:</label>
+          <div class="mode-toggle-group">
+            <button id="btn-input-single" type="button" class="mode-toggle-btn active" aria-pressed="true">
+              Single Factor List
+            </button>
+            <button id="btn-input-factorial" type="button" class="mode-toggle-btn" aria-pressed="false">
+              <Layers size={14} aria-hidden="true" />
+              Factorial / Nested Factors Design
+            </button>
+          </div>
+        </div>
+
         <div class="setup-grid">
-          <div class="field-group conditions-field">
+          <!-- Single Factor Mode Field -->
+          <div id="single-factor-box" class="field-group conditions-field">
             <label for="condition-list">
               Conditions <span aria-hidden="true">*</span>
             </label>
@@ -104,9 +123,46 @@ Gaze
 Controller
 Hand tracking</textarea>
             <p id="conditions-help" class="field-help">
-              Between 2 and 12 unique conditions.
+              Between 2 and 12 unique conditions (one per line).
             </p>
             <p id="conditions-error" class="field-error"></p>
+          </div>
+
+          <!-- Multi-Factor / Nested Factors Builder Field -->
+          <div id="factorial-builder-box" class="field-group conditions-field hidden">
+            <div class="factorial-header">
+              <label>Define Factors & Levels</label>
+              <span class="field-help">e.g. Factor 1: Dwell Time (200, 300) × Factor 2: Wait Time (0, 100, 200, 300)</span>
+            </div>
+
+            <div id="factors-container" class="factors-container">
+              <!-- Factor 1 Row -->
+              <div class="factor-row" data-factor-idx="0">
+                <div class="factor-field-row">
+                  <input type="text" class="factor-name-input form-input" placeholder="Factor 1 Name (e.g. Dwell Time)" value="Dwell Time" />
+                  <textarea class="factor-levels-input form-input" rows="2" placeholder="Levels (comma or newline separated e.g. 200ms, 300ms)">200ms, 300ms</textarea>
+                </div>
+              </div>
+              <!-- Factor 2 Row -->
+              <div class="factor-row" data-factor-idx="1">
+                <div class="factor-field-row">
+                  <input type="text" class="factor-name-input form-input" placeholder="Factor 2 Name (e.g. Wait Time)" value="Wait Time" />
+                  <textarea class="factor-levels-input form-input" rows="2" placeholder="Levels (e.g. 0ms, 100ms, 200ms, 300ms)">0ms, 100ms, 200ms, 300ms</textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="factorial-actions">
+              <button id="add-factor-btn" type="button" class="secondary-button icon-btn-sm">
+                <Plus size={15} />
+                <span>Add Factor</span>
+              </button>
+            </div>
+
+            <div id="factorial-preview-box" class="factorial-preview-box">
+              <span class="preview-title">Generated Combinations Preview (8 Conditions):</span>
+              <div id="factorial-combinations-list" class="combinations-tags"></div>
+            </div>
           </div>
 
           <div class="study-fields">
@@ -325,20 +381,22 @@ Hand tracking</textarea>
               <p id="schedule-count">24 assignments</p>
             </div>
           </div>
-          <div class="schedule-scroll">
-            <table id="schedule-table">
-              <caption class="sr-only">Generated participant assignment schedule</caption>
+          <div class="schedule-table-wrapper">
+            <table class="schedule-table" aria-label="Assignment schedule table">
               <thead>
-                <tr>
+                <tr id="schedule-table-head">
                   <th scope="col">Participant</th>
                   <th scope="col">Sequence</th>
-                  <th scope="col">Condition order or assignment</th>
+                  <th scope="col">Condition Order / Assignment</th>
                 </tr>
               </thead>
               <tbody id="schedule-body"></tbody>
             </table>
           </div>
         </section>
+
+        <!-- Academic References -->
+        <ToolReferences tool="counterbalancing" />
 
         <p class="privacy-note">
           All planning and randomization happen in this browser. Nothing is uploaded;
@@ -527,9 +585,119 @@ Hand tracking</textarea>
     text-transform: uppercase;
   }
 
+  .condition-mode-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .mode-bar-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .mode-toggle-group {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .mode-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .mode-toggle-btn.active {
+    border-color: var(--accent-blue);
+    background: var(--accent-blue-light);
+    color: var(--accent-blue);
+  }
+
+  .factorial-header { margin-bottom: 0.5rem; }
+  .factors-container { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 0.75rem; }
+  .factor-row { background: var(--bg-pill); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; }
+  .factor-field-row { display: grid; grid-template-columns: 1fr 1.5fr; gap: 0.75rem; }
+  .factor-name-input { font-weight: 700 !important; }
+  .factor-levels-input { min-height: 52px !important; }
+
+  .factorial-actions { margin-bottom: 0.75rem; }
+  .icon-btn-sm { min-height: 34px !important; padding: 0.3rem 0.65rem !important; font-size: 0.76rem !important; }
+
+  .factorial-preview-box {
+    background: var(--bg-card);
+    border: 1px solid var(--accent-blue-border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem;
+  }
+
+  .preview-title { font-size: 0.76rem; font-weight: 700; color: var(--accent-blue); display: block; margin-bottom: 0.4rem; }
+  .combinations-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .combination-tag { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.55rem; border-radius: var(--radius-full); background: var(--accent-blue-light); border: 1px solid var(--accent-blue-border); color: var(--text-main); font-size: 0.75rem; font-weight: 600; }
+  .factor-chip { padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem; font-weight: 700; background: rgba(37, 99, 235, 0.12); color: var(--accent-blue); }
+
+  .factor-super-hdr {
+    text-align: center;
+    background: #000000 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.02em;
+    padding: 0.5rem 1rem !important;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .pos-num-hdr {
+    text-align: center;
+    background: #000000 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    min-width: 4.5rem;
+    padding: 0.4rem 0.5rem !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .participant-col-hdr {
+    text-align: center;
+    background: #000000 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    vertical-align: middle;
+    padding: 0.6rem 1rem !important;
+  }
+
+  .participant-cell {
+    font-weight: 800 !important;
+    color: var(--accent-blue) !important;
+    text-align: center;
+    background: var(--bg-card);
+  }
+
+  .factorial-cell {
+    text-align: center;
+    font-family: inherit;
+    font-size: 0.86rem;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem !important;
+    border-right: 1px solid var(--border-color);
+    background: var(--bg-pill);
+    color: var(--text-main);
+  }
+
   .setup-grid {
     display: grid;
-    grid-template-columns: minmax(260px, 1fr) minmax(320px, 1.2fr);
+    grid-template-columns: minmax(260px, 1.2fr) minmax(300px, 1fr);
     gap: 1.25rem;
   }
 
@@ -1428,15 +1596,131 @@ Hand tracking</textarea>
     }
   };
 
+  let inputMode = 'single';
+  let factorList: { name: string; levels: string[] }[] = [];
+
+  const btnSingle = document.getElementById('btn-input-single');
+  const btnFactorial = document.getElementById('btn-input-factorial');
+  const singleBox = document.getElementById('single-factor-box');
+  const factorialBox = document.getElementById('factorial-builder-box');
+  const factorsContainer = document.getElementById('factors-container');
+  const addFactorBtn = document.getElementById('add-factor-btn');
+
+  btnSingle?.addEventListener('click', () => {
+    inputMode = 'single';
+    btnSingle.classList.add('active');
+    btnFactorial?.classList.remove('active');
+    btnSingle.setAttribute('aria-pressed', 'true');
+    btnFactorial?.setAttribute('aria-pressed', 'false');
+    singleBox?.classList.remove('hidden');
+    factorialBox?.classList.add('hidden');
+    const plan = createPlan();
+    if (plan) renderPlan(plan);
+  });
+
+  btnFactorial?.addEventListener('click', () => {
+    inputMode = 'factorial';
+    btnFactorial.classList.add('active');
+    btnSingle?.classList.remove('active');
+    btnFactorial.setAttribute('aria-pressed', 'true');
+    btnSingle?.setAttribute('aria-pressed', 'false');
+    factorialBox?.classList.remove('hidden');
+    singleBox?.classList.add('hidden');
+    updateFactorialCombinations();
+    const plan = createPlan();
+    if (plan) renderPlan(plan);
+  });
+
+  function updateFactorialCombinations(): string[] {
+    const rows = document.querySelectorAll<HTMLElement>('.factor-row');
+    const factors: { name: string; levels: string[] }[] = [];
+
+    rows.forEach((row) => {
+      const nameInput = row.querySelector<HTMLInputElement>('.factor-name-input');
+      const levelsInput = row.querySelector<HTMLTextAreaElement>('.factor-levels-input');
+      const name = nameInput?.value.trim() || 'Factor';
+      const levels = (levelsInput?.value || '')
+        .split(/[\n,]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (levels.length > 0) {
+        factors.push({ name, levels });
+      }
+    });
+
+    factorList = factors;
+    if (factors.length === 0) return [];
+
+    let combinations: string[][] = [[]];
+    factors.forEach((factor) => {
+      const nextCombos: string[][] = [];
+      combinations.forEach((combo) => {
+        factor.levels.forEach((level) => {
+          nextCombos.push([...combo, level]);
+        });
+      });
+      combinations = nextCombos;
+    });
+
+    const comboStrings = combinations.map((c) => c.join(' / '));
+
+    const previewList = document.getElementById('factorial-combinations-list');
+    const previewBox = document.getElementById('factorial-preview-box');
+    if (previewList) {
+      previewList.innerHTML = comboStrings
+        .map((str) => `<span class="combination-tag">${str}</span>`)
+        .join('');
+    }
+    if (previewBox) {
+      const titleElem = previewBox.querySelector('.preview-title');
+      if (titleElem) {
+        titleElem.textContent = `Generated Combinations Preview (${comboStrings.length} Conditions):`;
+      }
+    }
+
+    return comboStrings;
+  }
+
+  factorsContainer?.addEventListener('input', () => {
+    updateFactorialCombinations();
+    const plan = createPlan();
+    if (plan) renderPlan(plan);
+  });
+
+  addFactorBtn?.addEventListener('click', () => {
+    const nextIdx = document.querySelectorAll('.factor-row').length;
+    if (nextIdx >= 4) return;
+    const newRow = document.createElement('div');
+    newRow.className = 'factor-row';
+    newRow.dataset.factorIdx = String(nextIdx);
+    newRow.innerHTML = `
+      <div class="factor-field-row">
+        <input type="text" class="factor-name-input form-input" placeholder="Factor ${nextIdx + 1} Name" value="Factor ${nextIdx + 1}" />
+        <textarea class="factor-levels-input form-input" rows="2" placeholder="Levels (comma separated)">Level A, Level B</textarea>
+      </div>
+    `;
+    factorsContainer?.appendChild(newRow);
+    updateFactorialCombinations();
+    const plan = createPlan();
+    if (plan) renderPlan(plan);
+  });
+
   const getConditions = () =>
     (conditionInput?.value || '')
       .split('\n')
       .map((condition) => condition.trim())
       .filter(Boolean);
 
+  const parseConditions = () => {
+    if (inputMode === 'factorial') {
+      return updateFactorialCombinations();
+    }
+    return getConditions();
+  };
+
   const validateInputs = () => {
     clearValidation();
-    const conditions = getConditions();
+    const conditions = parseConditions();
     const uniqueConditions = new Set(
       conditions.map((condition) => condition.toLowerCase()),
     );
@@ -1508,6 +1792,58 @@ Hand tracking</textarea>
     );
 
     let baseSequences: number[][];
+    let assignments: Assignment[] = [];
+
+    if (inputMode === 'factorial' && factorList.length >= 2) {
+      const factorA = factorList[0];
+      const factorB = factorList[1];
+      const mA = factorA.levels.length;
+      const nB = factorB.levels.length;
+      const numCombos = mA * nB;
+
+      const allConditions: string[] = [];
+      for (let a = 0; a < mA; a++) {
+        for (let b = 0; b < nB; b++) {
+          allConditions.push(`${factorA.levels[a]} / ${factorB.levels[b]}`);
+        }
+      }
+
+      for (let p = 0; p < values.participantCount; p++) {
+        const pId = participantIds[p];
+        const outerGroup = Math.floor((p % (mA * nB)) / nB) % mA;
+        const outerBlocks = outerGroup === 0 ? [0, 1] : [1, 0];
+
+        const innerShift = p % nB;
+        const condSeq: string[] = [];
+
+        for (const outerAIdx of outerBlocks) {
+          for (let b = 0; b < nB; b++) {
+            const innerBIdx = (innerShift + b) % nB;
+            const comboIdx = outerAIdx * nB + innerBIdx;
+            condSeq.push(String(comboIdx));
+          }
+        }
+
+        assignments.push({
+          participant: pId,
+          sequenceNumber: (p % numCombos) + 1,
+          conditions: condSeq,
+        });
+      }
+
+      return {
+        method,
+        conditions: allConditions,
+        assignments,
+        baseSequences: Array.from({ length: numCombos }, (_, i) => [i]),
+        positionCounts: Array.from({ length: allConditions.length }, () =>
+          Array.from({ length: allConditions.length }, () => Math.floor(values.participantCount / allConditions.length)),
+        ),
+        completeCycles: values.participantCount % numCombos === 0,
+        seed,
+      };
+    }
+
     if (method === 'between') {
       baseSequences = conditionOrder.map((condition) => [condition]);
     } else {
@@ -1521,7 +1857,7 @@ Hand tracking</textarea>
     }
 
     const rawAssignments = assignSequences(participantIds, baseSequences, random);
-    const assignments: Assignment[] = rawAssignments.map((assignment) => ({
+    assignments = rawAssignments.map((assignment) => ({
       participant: assignment.participant,
       sequenceNumber: assignment.sequenceNumber,
       conditions: assignment.sequence.map(String),
@@ -1811,19 +2147,55 @@ Hand tracking</textarea>
         .join('');
     }
     if (scheduleBody) {
-      scheduleBody.innerHTML = plan.assignments
-        .map(
-          (assignment) =>
-            `<tr><th scope="row">${escapeHtml(assignment.participant)}</th><td>${
-              plan.method === 'between'
-                ? 'Block assignment'
-                : `Sequence ${assignment.sequenceNumber}`
-            }</td><td><div class="condition-sequence">${renderSequence(
-              assignment.conditions,
-              plan.conditions,
-            )}</div></td></tr>`,
-        )
-        .join('');
+      const scheduleHead = document.querySelector<HTMLElement>('#schedule-table-head');
+      if (inputMode === 'factorial' && factorList.length >= 2) {
+        const factorHeaderTitle = factorList.map(f => f.name).join(' / ');
+        const colCount = plan.conditions.length;
+        if (scheduleHead) {
+          scheduleHead.innerHTML = `
+            <tr>
+              <th rowspan="2" class="participant-col-hdr">Participant</th>
+              <th colspan="${colCount}" class="factor-super-hdr">${escapeHtml(factorHeaderTitle)}</th>
+            </tr>
+            <tr>
+              ${plan.conditions.map((_, i) => `<th class="pos-num-hdr">${i + 1}</th>`).join('')}
+            </tr>
+          `;
+        }
+        scheduleBody.innerHTML = plan.assignments
+          .map(
+            (assignment) =>
+              `<tr><th scope="row" class="participant-cell">${escapeHtml(assignment.participant)}</th>${
+                assignment.conditions
+                  .map((condIdx) => `<td class="factorial-cell">${escapeHtml(plan.conditions[Number(condIdx)])}</td>`)
+                  .join('')
+              }</tr>`,
+          )
+          .join('');
+      } else {
+        if (scheduleHead) {
+          scheduleHead.innerHTML = `
+            <tr>
+              <th scope="col">Participant</th>
+              <th scope="col">Sequence</th>
+              <th scope="col">Condition Order / Assignment</th>
+            </tr>
+          `;
+        }
+        scheduleBody.innerHTML = plan.assignments
+          .map(
+            (assignment) =>
+              `<tr><th scope="row">${escapeHtml(assignment.participant)}</th><td>${
+                plan.method === 'between'
+                  ? 'Block assignment'
+                  : `Sequence ${assignment.sequenceNumber}`
+              }</td><td><div class="condition-sequence">${renderSequence(
+                assignment.conditions,
+                plan.conditions,
+              )}</div></td></tr>`,
+          )
+          .join('');
+      }
     }
     if (scheduleCount) {
       scheduleCount.textContent = `${plan.assignments.length} assignments`;
@@ -1833,20 +2205,32 @@ Hand tracking</textarea>
     }
   };
 
-  const planToRows = (plan: Plan) => [
-    ['Participant', 'Sequence', 'Condition order or assignment', 'Method', 'Seed'],
-    ...plan.assignments.map((assignment) => [
-      assignment.participant,
-      plan.method === 'between'
-        ? 'Block assignment'
-        : `Sequence ${assignment.sequenceNumber}`,
-      assignment.conditions
-        .map((condition) => plan.conditions[Number(condition)])
-        .join(' > '),
-      plan.method,
-      plan.seed,
-    ]),
-  ];
+  const planToRows = (plan: Plan) => {
+    if (inputMode === 'factorial' && factorList.length >= 2) {
+      const posCols = plan.conditions.map((_, i) => String(i + 1));
+      return [
+        ['Participant', ...posCols],
+        ...plan.assignments.map((assignment) => [
+          assignment.participant,
+          ...assignment.conditions.map((c) => plan.conditions[Number(c)]),
+        ]),
+      ];
+    }
+    return [
+      ['Participant', 'Sequence', 'Condition order or assignment', 'Method', 'Seed'],
+      ...plan.assignments.map((assignment) => [
+        assignment.participant,
+        plan.method === 'between'
+          ? 'Block assignment'
+          : `Sequence ${assignment.sequenceNumber}`,
+        assignment.conditions
+          .map((condition) => plan.conditions[Number(condition)])
+          .join(' > '),
+        plan.method,
+        plan.seed,
+      ]),
+    ];
+  };
 
   const safeSpreadsheetValue = (value: string) =>
     /^[=+\-@]/.test(value) ? `'${value}` : value;

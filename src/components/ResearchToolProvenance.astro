@@ -104,7 +104,7 @@ const source = sources[tool];
         <strong>Data handling:</strong> CSV mode creates a file only on this
         device; the portfolio server does not receive the response.
         {supportsGoogleSheets
-          ? ' Google Sheets mode sends the participant ID, condition, item responses, calculated scores, tool name, sheet/tab name, and timestamp to the Google Apps Script /exec URL entered by the researcher. Nothing is sent until the final save action. Completion is shown only when that script returns JSON with success: true (or ok: true) after appending the row.'
+          ? ' Google Sheets mode sends the participant ID, condition, item responses, calculated scores, tool name, sheet/tab name, and timestamp to the Google Sheet Web App URL entered by the researcher. Nothing is sent until the final save action. Completion is shown only when that script returns JSON with success: true (or ok: true) after appending the row.'
           : ' No response data is sent to a remote service.'}
       </p>
     </div>

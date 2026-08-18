@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ResearchToolProvenance from '../../components/ResearchToolProvenance.astro';
 import ResearchSaveOptions from '../../components/ResearchSaveOptions.astro';
+import ToolReferences from '../../components/ToolReferences.astro';
 import { 
   ArrowLeft, Github, CheckCircle2, AlertCircle,
   RotateCcw, Sparkles, HelpCircle 
@@ -203,6 +204,9 @@ const scaleOptions = [
         </button>
       </div>
     </div>
+
+    <!-- Academic References -->
+    <ToolReferences tool="sus" />
   </div>
 </BaseLayout>
 
@@ -841,10 +845,10 @@ const scaleOptions = [
 <script>
   import {
     clearToolAlert,
+    formatParticipantId,
     initializeResearchSaveOptions,
     markQuestionGroupInvalid,
     showRemoteSaveFailure,
-    showToolAlert,
     submitResearchData,
     validateRequiredFields,
   } from '../../scripts/researchToolSupport';
@@ -927,31 +931,17 @@ const scaleOptions = [
     return 'Awful';
   }
 
-  // CSV Export Utility
+  // CSV Export Utility (Exact 5-column format: ParticipantID, Condition, Question, Response, Grade)
   function downloadCSV(susData: any) {
-    const timestamp = new Date().toISOString();
-    const date = timestamp.split('T')[0];
-    const time = timestamp.split('T')[1].split('.')[0];
-
-    const headers = [
-      'Participant_ID', 'Condition', 'Question', 'Response',
-      'SUS_Score', 'SUS_Grade', 'SUS_Adjective',
-      'Submission_Date', 'Submission_Time', 'Timestamp'
-    ];
-
+    const headers = ['ParticipantID', 'Condition', 'Question', 'Response', 'Grade'];
     let csv = headers.join(',') + '\n';
-    Object.entries(susData.responses).forEach(([index, response]) => {
+    susData.rows.forEach((rowObj: any) => {
       csv += [
-        susData.participantId,
-        susData.condition,
-        `Q${parseInt(index) + 1}`,
-        response,
-        susData.susScore,
-        susData.susGrade,
-        susData.susAdjective,
-        date,
-        time,
-        timestamp
+        rowObj.ParticipantID,
+        rowObj.Condition,
+        rowObj.Question,
+        rowObj.Response,
+        rowObj.Grade || ''
       ].join(',') + '\n';
     });
 
@@ -1004,7 +994,9 @@ const scaleOptions = [
         endpoint: sheetUrl,
         sheetName,
         tool: 'SUS',
-        payload: susData,
+        payload: {
+          rows: susData.rows,
+        },
       });
       clearToolAlert(alertBox);
       showResults(susData);
@@ -1026,7 +1018,7 @@ const scaleOptions = [
   }
 
   submitBtn?.addEventListener('click', async () => {
-    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const rawPId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
     const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
 
     if (!validateRequiredFields([
@@ -1051,24 +1043,45 @@ const scaleOptions = [
     }
 
     if (saveOptions.currentOption === 'googlesheets' && !validateRequiredFields([
-      { id: 'sheet-url', label: 'Google Apps Script URL', errorId: 'sheet-url-error' },
+      { id: 'sheet-url', label: 'Google Sheet Web App URL', errorId: 'sheet-url-error' },
     ], alertBox)) {
       return;
     }
 
     clearToolAlert(alertBox);
 
+    const normPId = formatParticipantId(rawPId);
     const score = calculateSUSScore(responses);
     const grade = getSUSGrade(score);
     const adj = getSUSAdjective(score);
 
+    // Build exact 5-column rows: ParticipantID, Condition, Question, Response, Grade
+    const rows = [];
+    for (let i = 0; i < 10; i++) {
+      rows.push({
+        ParticipantID: normPId,
+        Condition: cond,
+        Question: `Q${i + 1}`,
+        Response: responses[i],
+        Grade: '',
+      });
+    }
+    rows.push({
+      ParticipantID: normPId,
+      Condition: cond,
+      Question: 'Overall',
+      Response: score,
+      Grade: grade,
+    });
+
     const susData = {
-      participantId: pId,
+      participantId: normPId,
       condition: cond,
       responses,
       susScore: score,
       susGrade: grade,
-      susAdjective: adj
+      susAdjective: adj,
+      rows,
     };
 
     await saveResponse(susData);

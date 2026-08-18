@@ -2,7 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ResearchToolProvenance from '../../components/ResearchToolProvenance.astro';
 import ResearchSaveOptions from '../../components/ResearchSaveOptions.astro';
-import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles, Scale, Sliders } from 'lucide-astro';
+import ToolReferences from '../../components/ToolReferences.astro';
+import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles, Scale, Sliders, ExternalLink } from 'lucide-astro';
 
 const dimensions = [
   { key: 'Mental', title: 'Mental Demand', desc: 'How much mental and perceptual activity was required? (e.g. thinking, deciding, calculating, remembering, looking, searching)' },
@@ -60,21 +61,46 @@ for (let i = 0; i < dimensionKeys.length; i++) {
     <ResearchToolProvenance tool="nasa-tlx" supportsGoogleSheets />
 
     <div id="nasa-app-card" class="app-card">
-      <!-- Mode Selector -->
+      <!-- Mode & Scale Range Selector -->
       <section class="mode-select-section">
-        <h2 class="section-heading">Select Evaluation Method</h2>
-        <div class="mode-cards-grid">
-          <button id="btn-mode-raw" class="mode-card active" type="button" aria-pressed="true">
-            <Sliders size={22} class="card-icon" />
-            <div class="card-title">Raw NASA-TLX (R-TLX)</div>
-            <div class="card-desc">Unweighted average of 6 workload dimensions (fast & standard for most HCI studies).</div>
-          </button>
+        <h2 class="section-heading">Evaluation Method & Scale Range</h2>
+        
+        <div class="options-subgroup">
+          <label class="options-group-title">1. Evaluation Method</label>
+          <div class="mode-cards-grid">
+            <button id="btn-mode-raw" class="mode-card active" type="button" aria-pressed="true">
+              <Sliders size={22} class="card-icon" />
+              <div class="card-title">Raw NASA-TLX (R-TLX)</div>
+              <div class="card-desc">Unweighted average of 6 workload dimensions (standard for most HCI studies).</div>
+            </button>
 
-          <button id="btn-mode-weighted" class="mode-card" type="button" aria-pressed="false">
-            <Scale size={22} class="card-icon" />
-            <div class="card-title">Weighted NASA-TLX</div>
-            <div class="card-desc">Includes 15 pairwise comparisons to determine personal dimension weights.</div>
-          </button>
+            <button id="btn-mode-weighted" class="mode-card" type="button" aria-pressed="false">
+              <Scale size={22} class="card-icon" />
+              <div class="card-title">Weighted NASA-TLX</div>
+              <div class="card-desc">Includes 15 pairwise comparisons to determine personal dimension weights.</div>
+            </button>
+
+            <button id="btn-mode-stlx" class="mode-card" type="button" aria-pressed="false">
+              <Sparkles size={22} class="card-icon" />
+              <div class="card-title">Shortened NASA-TLX (S-TLX)</div>
+              <div class="card-desc">Streamlined 3-dimension evaluation (Mental, Physical, & Performance).</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="options-subgroup">
+          <label class="options-group-title">2. Scale Range</label>
+          <div class="scale-range-grid">
+            <button id="btn-scale-100" class="scale-card active" type="button" aria-pressed="true">
+              <div class="card-title">0 – 100 Scale (Continuous / 100-Point)</div>
+              <div class="card-desc">Standard digital 100-point rating scale (default).</div>
+            </button>
+
+            <button id="btn-scale-20" class="scale-card" type="button" aria-pressed="false">
+              <div class="card-title">0 – 20 Scale (21-Point Scale)</div>
+              <div class="card-desc">21-point scale with 5-point increment ticks (Hart & Staveland 1988 paper).</div>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -112,8 +138,8 @@ for (let i = 0; i < dimensionKeys.length; i++) {
 
       <!-- Subscales Rating Section -->
       <section class="ratings-section">
-        <h2 class="section-heading">Workload Subscale Ratings (0 - 100)</h2>
-        <p class="section-subtext">Move each slider to rate the workload experienced for each dimension.</p>
+        <h2 id="ratings-heading" class="section-heading">Workload Subscale Ratings (0 - 100)</h2>
+        <p id="ratings-subtext" class="section-subtext">Move each slider to rate the workload experienced for each dimension.</p>
 
         <div class="sliders-list">
           {dimensions.map((dim) => (
@@ -127,7 +153,7 @@ for (let i = 0; i < dimensionKeys.length; i++) {
               </div>
 
               <div class="slider-input-row">
-                <span class="range-anchor">Low (0)</span>
+                <span class="range-anchor range-anchor-min">Low (0)</span>
                 <input 
                   type="range" 
                   id={`slider-${dim.key}`}
@@ -140,7 +166,7 @@ for (let i = 0; i < dimensionKeys.length; i++) {
                   aria-labelledby={`label-${dim.key}`}
                   aria-describedby={`description-${dim.key}`}
                 />
-                <span class="range-anchor">High (100)</span>
+                <span class="range-anchor range-anchor-max">High (100)</span>
               </div>
             </fieldset>
           ))}
@@ -186,6 +212,14 @@ for (let i = 0; i < dimensionKeys.length; i++) {
         </button>
       </div>
     </div>
+
+    <!-- Academic References -->
+    <div id="tlx-refs-raw">
+      <ToolReferences tool="nasa-tlx" />
+    </div>
+    <div id="tlx-refs-stlx" class="hidden">
+      <ToolReferences tool="nasa-tlx" variant="stlx" />
+    </div>
   </div>
 </BaseLayout>
 
@@ -206,12 +240,58 @@ for (let i = 0; i < dimensionKeys.length; i++) {
   .section-heading { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
   .section-subtext { font-size: 0.9rem; color: var(--text-subtle); margin-top: -0.5rem; margin-bottom: 1.5rem; }
 
-  .mode-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
-  .mode-card { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+  .options-subgroup { margin-bottom: 1.25rem; }
+  .options-group-title { font-size: 0.9rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.65rem; }
+
+  .mode-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .mode-card { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 1.15rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
   .mode-card.active { border-color: var(--accent-blue); background-color: rgba(37, 99, 235, 0.06); box-shadow: 0 0 0 1px var(--accent-blue), 0 0 16px rgba(37, 99, 235, 0.25); }
   .mode-card .card-icon { color: var(--accent-blue); margin-bottom: 0.5rem; }
-  .mode-card .card-title { font-size: 0.98rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem; }
-  .mode-card .card-desc { font-size: 0.8rem; color: var(--text-subtle); line-height: 1.4; }
+  .mode-card .card-title { font-size: 0.94rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem; }
+  .mode-card .card-desc { font-size: 0.78rem; color: var(--text-subtle); line-height: 1.4; }
+
+  .stlx-paper-ref {
+    margin-top: 0.75rem;
+    padding: 0.85rem 1.1rem;
+    background-color: rgba(37, 99, 235, 0.08);
+    border: 1px solid var(--accent-blue);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .stlx-ref-badge {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+  }
+
+  .stlx-ref-link {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .stlx-ref-link:hover {
+    color: var(--accent-blue);
+  }
+
+  .scale-range-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .scale-card { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 1rem 1.15rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-pill); cursor: pointer; transition: all 0.25s; }
+  .scale-card.active { border-color: var(--accent-blue); background-color: rgba(37, 99, 235, 0.06); box-shadow: 0 0 0 1px var(--accent-blue), 0 0 14px rgba(37, 99, 235, 0.25); }
+  .scale-card .card-title { font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.2rem; }
+  .scale-card .card-desc { font-size: 0.78rem; color: var(--text-subtle); line-height: 1.35; }
+
+  @media (max-width: 720px) {
+    .mode-cards-grid { grid-template-columns: 1fr; }
+    .scale-range-grid { grid-template-columns: 1fr; }
+  }
 
   .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
   .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
@@ -272,6 +352,7 @@ for (let i = 0; i < dimensionKeys.length; i++) {
 <script>
   import {
     clearToolAlert,
+    formatParticipantId,
     initializeResearchSaveOptions,
     markQuestionGroupInvalid,
     showRemoteSaveFailure,
@@ -280,6 +361,8 @@ for (let i = 0; i < dimensionKeys.length; i++) {
   } from '../../scripts/researchToolSupport';
 
   let activeMode = 'raw';
+  let activeScaleMax = 100;
+
   const pairwiseCombos = [
     ['Mental', 'Physical'], ['Mental', 'Temporal'], ['Mental', 'Performance'], ['Mental', 'Effort'], ['Mental', 'Frustration'],
     ['Physical', 'Temporal'], ['Physical', 'Performance'], ['Physical', 'Effort'], ['Physical', 'Frustration'],
@@ -292,6 +375,11 @@ for (let i = 0; i < dimensionKeys.length; i++) {
 
   const btnRaw = document.getElementById('btn-mode-raw');
   const btnWeighted = document.getElementById('btn-mode-weighted');
+  const btnStlx = document.getElementById('btn-mode-stlx');
+
+  const btnScale100 = document.getElementById('btn-scale-100');
+  const btnScale20 = document.getElementById('btn-scale-20');
+
   const pairwiseSection = document.getElementById('pairwise-section');
   const pairProgress = document.getElementById('pairwise-progress');
   const pairBtnA = document.getElementById('pair-btn-a');
@@ -299,26 +387,86 @@ for (let i = 0; i < dimensionKeys.length; i++) {
   const alertBox = document.getElementById('alert-box');
   const saveOptions = initializeResearchSaveOptions();
 
-  btnRaw?.addEventListener('click', () => {
-    btnRaw.classList.add('active');
-    btnWeighted?.classList.remove('active');
-    btnRaw.setAttribute('aria-pressed', 'true');
-    btnWeighted?.setAttribute('aria-pressed', 'false');
-    pairwiseSection?.classList.add('hidden');
-    activeMode = 'raw';
+  function updateScaleRange(maxVal: number) {
+    activeScaleMax = maxVal;
+    const slidersList = document.querySelectorAll<HTMLInputElement>('.tlx-slider');
+    const rangeHeader = document.getElementById('ratings-heading');
+    const subtext = document.getElementById('ratings-subtext');
+
+    if (rangeHeader) rangeHeader.textContent = `Workload Subscale Ratings (0 - ${activeScaleMax})`;
+    if (subtext) subtext.textContent = `Move each slider to rate the workload experienced for each dimension (0 to ${activeScaleMax}).`;
+
+    slidersList.forEach((slider) => {
+      const key = slider.getAttribute('data-key');
+      slider.max = String(activeScaleMax);
+      slider.step = activeScaleMax === 20 ? '1' : '5';
+      const defaultVal = activeScaleMax === 20 ? 10 : 50;
+      slider.value = String(defaultVal);
+
+      const badge = document.getElementById(`val-badge-${key}`);
+      if (badge) badge.textContent = String(defaultVal);
+
+      const minAnchor = slider.parentElement?.querySelector('.range-anchor-min');
+      const maxAnchor = slider.parentElement?.querySelector('.range-anchor-max');
+      if (minAnchor) minAnchor.textContent = 'Low (0)';
+      if (maxAnchor) maxAnchor.textContent = `High (${activeScaleMax})`;
+    });
+  }
+
+  btnScale100?.addEventListener('click', () => {
+    btnScale100.classList.add('active');
+    btnScale20?.classList.remove('active');
+    btnScale100.setAttribute('aria-pressed', 'true');
+    btnScale20?.setAttribute('aria-pressed', 'false');
+    updateScaleRange(100);
   });
 
-  btnWeighted?.addEventListener('click', () => {
-    btnWeighted.classList.add('active');
-    btnRaw?.classList.remove('active');
-    btnWeighted.setAttribute('aria-pressed', 'true');
-    btnRaw?.setAttribute('aria-pressed', 'false');
-    pairwiseSection?.classList.remove('hidden');
-    activeMode = 'weighted';
-    pairIdx = 0;
-    Object.keys(weights).forEach(k => weights[k] = 0);
-    renderPair();
+  btnScale20?.addEventListener('click', () => {
+    btnScale20.classList.add('active');
+    btnScale100?.classList.remove('active');
+    btnScale20.setAttribute('aria-pressed', 'true');
+    btnScale100?.setAttribute('aria-pressed', 'false');
+    updateScaleRange(20);
   });
+
+  function setEvaluationMode(mode: string) {
+    activeMode = mode;
+    btnRaw?.classList.toggle('active', mode === 'raw');
+    btnWeighted?.classList.toggle('active', mode === 'weighted');
+    btnStlx?.classList.toggle('active', mode === 'stlx');
+
+    btnRaw?.setAttribute('aria-pressed', mode === 'raw' ? 'true' : 'false');
+    btnWeighted?.setAttribute('aria-pressed', mode === 'weighted' ? 'true' : 'false');
+    btnStlx?.setAttribute('aria-pressed', mode === 'stlx' ? 'true' : 'false');
+
+    pairwiseSection?.classList.toggle('hidden', mode !== 'weighted');
+
+    const sliderCards = document.querySelectorAll<HTMLElement>('.slider-card');
+    sliderCards.forEach((card) => {
+      const key = card.getAttribute('data-key');
+      if (mode === 'stlx') {
+        const isStlxDim = key === 'Mental' || key === 'Physical' || key === 'Performance';
+        card.classList.toggle('hidden', !isStlxDim);
+      } else {
+        card.classList.remove('hidden');
+      }
+    });
+
+    const refsRaw = document.getElementById('tlx-refs-raw');
+    const refsStlx = document.getElementById('tlx-refs-stlx');
+    if (refsRaw) refsRaw.classList.toggle('hidden', mode === 'stlx');
+    if (refsStlx) refsStlx.classList.toggle('hidden', mode !== 'stlx');
+
+    if (mode === 'weighted') {
+      pairIdx = 0;
+      Object.keys(weights).forEach(k => weights[k] = 0);
+      renderPair();
+    }
+  }
+
+  btnRaw?.addEventListener('click', () => setEvaluationMode('raw'));
+  btnWeighted?.addEventListener('click', () => setEvaluationMode('weighted'));
+  btnStlx?.addEventListener('click', () => setEvaluationMode('stlx'));
 
   function renderPair() {
     if (pairIdx < pairwiseCombos.length) {
@@ -362,11 +510,11 @@ for (let i = 0; i < dimensionKeys.length; i++) {
   const submitBtn = document.getElementById('submit-tlx-btn');
 
   function downloadTLXCSV(data: any) {
-    let csv = `Participant_ID,Condition,Mode,Dimension,Score,Weight\n`;
-    Object.keys(data.ratings).forEach((key) => {
-      csv += `${data.participantId},${data.condition},${data.mode},${key},${data.ratings[key]},${data.weights[key] || 0}\n`;
+    const headers = ['ParticipantID', 'Condition', 'Factors', 'Response'];
+    let csv = headers.join(',') + '\n';
+    data.rows.forEach((r: any) => {
+      csv += `${r.ParticipantID},${r.Condition},${r.Factors},${r.Response}\n`;
     });
-    csv += `${data.participantId},${data.condition},${data.mode},Overall_Workload,${data.overallScore.toFixed(2)},${data.mode === 'weighted' ? 15 : 0}\n`;
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -381,13 +529,17 @@ for (let i = 0; i < dimensionKeys.length; i++) {
     document.getElementById('nasa-app-card')!.classList.add('hidden');
     const resultCard = document.getElementById('result-card')!;
     resultCard.classList.remove('hidden');
-    document.getElementById('res-mode-label')!.textContent = `${data.mode.toUpperCase()} TLX Workload Score`;
+    
+    const modeTitle = data.mode === 'stlx' ? 'S-TLX' : data.mode === 'weighted' ? 'WEIGHTED TLX' : 'RAW TLX';
+    document.getElementById('res-mode-label')!.textContent = `${modeTitle} Workload Score (${data.scaleRange})`;
     document.getElementById('res-overall-score')!.textContent = data.overallScore.toFixed(1);
+    const scoreMaxElem = resultCard.querySelector('.score-max');
+    if (scoreMaxElem) scoreMaxElem.textContent = `out of ${data.scaleMax}`;
 
     const dimList = document.getElementById('dim-scores-list')!;
     dimList.innerHTML = Object.keys(data.ratings).map((key) => `
       <div class="dim-score-row">
-        <span><strong>${key}:</strong> ${data.ratings[key]} / 100</span>
+        <span><strong>${key}:</strong> ${data.ratings[key]} / ${data.scaleMax}</span>
         ${data.mode === 'weighted' ? `<span>(Weight: ${data.weights[key]}/15)</span>` : ''}
       </div>
     `).join('');
@@ -410,7 +562,14 @@ for (let i = 0; i < dimensionKeys.length; i++) {
     submitBtn?.setAttribute('disabled', '');
     submitBtn?.setAttribute('aria-busy', 'true');
     try {
-      await submitResearchData({ endpoint, sheetName, tool: 'NASA-TLX', payload: data });
+      await submitResearchData({
+        endpoint,
+        sheetName,
+        tool: 'NASA-TLX',
+        payload: {
+          rows: data.rows,
+        },
+      });
       clearToolAlert(alertBox);
       showResults(data);
     } catch (error) {
@@ -430,7 +589,7 @@ for (let i = 0; i < dimensionKeys.length; i++) {
   }
 
   submitBtn?.addEventListener('click', async () => {
-    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const rawPId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
     const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
 
     if (!validateRequiredFields([
@@ -450,20 +609,28 @@ for (let i = 0; i < dimensionKeys.length; i++) {
     }
 
     if (saveOptions.currentOption === 'googlesheets' && !validateRequiredFields([
-      { id: 'sheet-url', label: 'Google Apps Script URL', errorId: 'sheet-url-error' },
+      { id: 'sheet-url', label: 'Google Sheet Web App URL', errorId: 'sheet-url-error' },
     ], alertBox)) {
       return;
     }
 
     clearToolAlert(alertBox);
 
+    const normPId = formatParticipantId(rawPId);
     const ratings: Record<string, number> = {};
     sliders.forEach(slider => {
-      ratings[slider.getAttribute('data-key') || ''] = parseInt(slider.value, 10);
+      const key = slider.getAttribute('data-key') || '';
+      if (activeMode === 'stlx' && !(key === 'Mental' || key === 'Physical' || key === 'Performance')) {
+        return;
+      }
+      ratings[key] = parseInt(slider.value, 10);
     });
 
     let overallScore = 0;
-    if (activeMode === 'raw') {
+    if (activeMode === 'stlx') {
+      const sum = (ratings['Mental'] || 0) + (ratings['Physical'] || 0) + (ratings['Performance'] || 0);
+      overallScore = sum / 3;
+    } else if (activeMode === 'raw') {
       const sum = Object.values(ratings).reduce((a, b) => a + b, 0);
       overallScore = sum / 6;
     } else {
@@ -474,13 +641,38 @@ for (let i = 0; i < dimensionKeys.length; i++) {
       overallScore = weightedSum / 15;
     }
 
+    // Build exact 4-column rows: ParticipantID, Condition, Factors, Response in fixed order
+    const orderedFactors = activeMode === 'stlx'
+      ? ['Mental', 'Physical', 'Performance']
+      : ['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', 'Frustration'];
+
+    const rows = [];
+    orderedFactors.forEach((factor) => {
+      rows.push({
+        ParticipantID: normPId,
+        Condition: cond,
+        Factors: factor,
+        Response: ratings[factor] !== undefined ? ratings[factor] : 0,
+      });
+    });
+
+    rows.push({
+      ParticipantID: normPId,
+      Condition: cond,
+      Factors: 'Overall',
+      Response: Number(overallScore.toFixed(2)),
+    });
+
     await saveResponse({
-      participantId: pId,
+      participantId: normPId,
       condition: cond,
       mode: activeMode,
+      scaleRange: `0-${activeScaleMax}`,
+      scaleMax: activeScaleMax,
       ratings,
       weights: { ...weights },
       overallScore,
+      rows,
     });
   });
 

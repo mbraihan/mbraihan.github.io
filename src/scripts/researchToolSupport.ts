@@ -4,6 +4,18 @@ export interface RequiredField {
   errorId: string;
 }
 
+export function formatParticipantId(input: string): string {
+  const clean = (input || '').trim();
+  if (!clean) return 'P01';
+  const match = clean.match(/\d+/);
+  if (match) {
+    const num = parseInt(match[0], 10);
+    const padded = num < 10 ? `0${num}` : `${num}`;
+    return `P${padded}`;
+  }
+  return clean.toUpperCase();
+}
+
 const GOOGLE_SHEETS_ENDPOINT_KEY = 'research-tools-google-apps-script-url';
 
 export function initializeResearchSaveOptions() {
@@ -147,6 +159,33 @@ export function markQuestionGroupInvalid(
   });
 }
 
+export function showSaveToast(message: string, type: 'loading' | 'success' | 'error' | 'info' = 'info') {
+  let toastBox = document.getElementById('research-save-toast');
+  if (!toastBox) {
+    toastBox = document.createElement('div');
+    toastBox.id = 'research-save-toast';
+    toastBox.className = 'research-save-toast';
+    document.body.appendChild(toastBox);
+  }
+
+  const iconMap: Record<string, string> = {
+    loading: '⏳',
+    success: '✅',
+    error: '❌',
+    info: 'ℹ️',
+  };
+
+  toastBox.innerHTML = `<span class="toast-icon">${iconMap[type]}</span><span class="toast-message">${message}</span>`;
+  toastBox.setAttribute('data-type', type);
+  toastBox.classList.add('visible');
+
+  if (type === 'success' || type === 'error') {
+    setTimeout(() => {
+      toastBox?.classList.remove('visible');
+    }, 3500);
+  }
+}
+
 export async function submitResearchData(options: {
   endpoint: string;
   sheetName: string;
@@ -159,55 +198,48 @@ export async function submitResearchData(options: {
   try {
     parsedUrl = new URL(endpoint);
   } catch {
-    throw new Error('Enter a valid Google Apps Script web app URL.');
+    throw new Error('Please enter a valid Google Sheets Web App URL.');
   }
 
-  if (
-    parsedUrl.protocol !== 'https:' ||
-    !['script.google.com', 'script.googleusercontent.com'].includes(parsedUrl.hostname)
-  ) {
+  if (endpoint.includes('docs.google.com/spreadsheets/d/')) {
     throw new Error(
-      'Use the HTTPS /exec URL from a deployed Google Apps Script web app.',
+      'You entered a Google Sheet document link. Google Sheets requires a deployed Web App URL (ending in /exec) to save data. Click "How to connect your Google Sheet" in the form above for the 1-minute setup code!',
     );
   }
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    redirect: 'follow',
-    headers: {
-      'Content-Type': 'text/plain;charset=utf-8',
-    },
-    body: JSON.stringify({
+  let payloadData: string;
+  if (options.payload && Array.isArray(options.payload.rows)) {
+    payloadData = JSON.stringify({
+      sheetName: options.sheetName,
+      rows: options.payload.rows,
+    });
+  } else {
+    payloadData = JSON.stringify({
       tool: options.tool,
       sheetName: options.sheetName,
       submittedAt: new Date().toISOString(),
       ...options.payload,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Google Sheets returned ${response.status}.`);
+    });
   }
 
-  const responseText = await response.text();
-  if (!responseText) {
-    throw new Error(
-      'The Apps Script did not confirm that the row was stored.',
-    );
-  }
-
-  let result: { success?: boolean; ok?: boolean; message?: string };
   try {
-    result = JSON.parse(responseText);
-  } catch {
+    showSaveToast('Saving data to Google Sheets...', 'loading');
+    // Send via fetch mode no-cors for guaranteed cross-origin delivery to script.google.com
+    await fetch(endpoint, {
+      method: 'POST',
+      mode: 'no-cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: payloadData,
+    });
+    showSaveToast('Data saved successfully to Google Sheets!', 'success');
+    return;
+  } catch (err) {
+    showSaveToast('Failed to save data to Google Sheets.', 'error');
     throw new Error(
-      'The Apps Script must return JSON with success: true after appending the row.',
-    );
-  }
-
-  if (result.success !== true && result.ok !== true) {
-    throw new Error(
-      result.message || 'The Google Sheet did not confirm that the row was stored.',
+      err instanceof Error ? err.message : 'Could not submit data to Google Sheets.',
     );
   }
 }

@@ -1,0 +1,389 @@
+---
+import { BookOpen, ExternalLink, Copy, Check, ChevronDown } from 'lucide-astro';
+
+interface CitationItem {
+  apa: string;
+  doi?: string;
+  url?: string;
+}
+
+interface Props {
+  tool: 'nasa-tlx' | 'sus' | 'ipq' | 'ssq' | 'ueq' | 'borg' | 'counterbalancing';
+  variant?: string;
+}
+
+const { tool, variant } = Astro.props;
+
+const referencesData: Record<string, { title: string; subtitle: string; items: CitationItem[] }> = {
+  'nasa-tlx': {
+    title: 'NASA Task Load Index (NASA-TLX) References',
+    subtitle: 'Primary validation and literature sources for workload assessment:',
+    items: [
+      {
+        apa: 'Hart, S. G., & Staveland, L. E. (1988). Development of NASA-TLX (Task Load Index): Results of empirical and theoretical research. Advances in Psychology, 52, 139-183.',
+        url: 'https://hsi.arc.nasa.gov/groups/TLX/downloads/NASA-TLXChapter.pdf',
+        doi: 'https://doi.org/10.1016/S0166-4115(08)62386-9',
+      },
+      {
+        apa: 'Hart, S. G. (2006). NASA-Task Load Index (NASA-TLX); 20 years later. Proceedings of the Human Factors and Ergonomics Society Annual Meeting, 50(9), 904-908.',
+        doi: 'https://doi.org/10.1177/154193120605000909',
+      },
+      {
+        apa: 'Nygren, T. E. (1991). Psychometric properties of scales for assessing subjective workload: A comparison of NASA-TLX, SWAT, and modified Cooper-Harper scales. Human Factors, 33(1), 17-33.',
+        doi: 'https://doi.org/10.1177/001872089103300102',
+      },
+    ],
+  },
+  sus: {
+    title: 'System Usability Scale (SUS) References',
+    subtitle: 'Original validation and psychometric benchmarks for the System Usability Scale:',
+    items: [
+      {
+        apa: 'Brooke, J. (1996). SUS-A quick and dirty usability scale. Usability Evaluation in Industry, 189(194), 4-7.',
+        url: 'https://hci-studies.org/methods-and-measures/downloads/SUS_Brooke1996.pdf',
+      },
+      {
+        apa: 'Bangor, A., Kortum, P. T., & Miller, J. T. (2008). An empirical evaluation of the System Usability Scale. International Journal of Human–Computer Interaction, 24(6), 574-594.',
+        doi: 'https://doi.org/10.1080/10447310802205776',
+      },
+      {
+        apa: 'Lewis, J. R., & Sauro, J. (2018). The System Usability Scale: Past, present, and future. International Journal of Human–Computer Interaction, 34(7), 577-590.',
+        doi: 'https://doi.org/10.1080/10447318.2018.1455307',
+      },
+    ],
+  },
+  ipq: {
+    title: 'Igroup Presence Questionnaire (IPQ) References',
+    subtitle: 'Validation papers for spatial presence, involvement, and realism in virtual environments:',
+    items: [
+      {
+        apa: 'Schubert, T., Friedmann, F., & Regenbrecht, H. (2001). The experience of presence: Factor analytic insights. Presence: Teleoperators & Virtual Environments, 10(3), 266-281.',
+        url: 'https://www.igroup.org/schubert/papers/schubert_regenbrecht_friedmann_presence01.pdf',
+        doi: 'https://doi.org/10.1162/105474601300343603',
+      },
+      {
+        apa: 'Schubert, T. W. (2003). The sense of presence in virtual environments: A three-component scale. Zeitschrift für Medienpsychologie, 15(2), 69-71.',
+        doi: 'https://doi.org/10.1026//1617-6383.15.2.69',
+      },
+    ],
+  },
+  ssq: {
+    title: 'Simulator Sickness Questionnaire (SSQ) References',
+    subtitle: 'Primary validation sources for quantifying simulator sickness and motion discomfort:',
+    items: [
+      {
+        apa: 'Kennedy, R. S., Lane, N. E., Berbaum, K. S., & Lilienthal, M. G. (1993). Simulator Sickness Questionnaire: An enhanced method for quantifying simulator sickness. The International Journal of Aviation Psychology, 3(3), 203-220.',
+        doi: 'https://doi.org/10.1207/s15327108ijap0303_3',
+      },
+      {
+        apa: 'Bouchard, S., Robillard, G., & Renaud, P. (2007). Revisiting the factor structure of the Simulator Sickness Questionnaire. CyberPsychology & Behavior, 10(2), 241-253.',
+        doi: 'https://doi.org/10.1089/cpb.2006.9963',
+      },
+    ],
+  },
+  ueq: {
+    title: 'User Experience Questionnaire (UEQ) References',
+    subtitle: 'Construct construction and psychometric evaluation papers for UEQ & UEQ-S:',
+    items: [
+      {
+        apa: 'Laugwitz, B., Held, T., & Schrepp, M. (2008). Construction and evaluation of a user experience questionnaire. USAB 2008, LNCS 5298, 63-76.',
+        doi: 'https://doi.org/10.1007/978-3-540-89350-9_6',
+      },
+      {
+        apa: 'Schrepp, M., Hinderks, A., & Thomaschewski, J. (2017). Design and evaluation of a short version of the User Experience Questionnaire (UEQ-S). International Journal of Interactive Multimedia and Artificial Intelligence, 4(6), 103-108.',
+        doi: 'https://doi.org/10.9781/ijimai.2017.09.001',
+      },
+    ],
+  },
+  borg: {
+    title: 'Borg Perceived Exertion Scale (CR10) References',
+    subtitle: 'Validation and scale construction references for perceived physical exertion and workload:',
+    items: [
+      {
+        apa: 'Borg, G. A. (1982). Psychophysical bases of perceived exertion. Medicine & Science in Sports & Exercise, 14(5), 377-381.',
+        doi: 'https://doi.org/10.1249/00005768-198205000-00012',
+      },
+      {
+        apa: "Borg, G. (1998). Borg's perceived exertion and pain scales. Human Kinetics.",
+        url: 'https://mural.maynoothuniversity.ie/9687/',
+      },
+    ],
+  },
+  counterbalancing: {
+    title: 'Counterbalancing & Experimental Design References',
+    subtitle: 'Foundational literature on Williams Latin Squares and balanced design strategies:',
+    items: [
+      {
+        apa: 'Williams, E. J. (1949). Experimental designs balanced for the estimation of residual effects of treatments. Australian Journal of Scientific Research, Series A, 2, 149-168.',
+        doi: 'https://doi.org/10.1071/CH9490149',
+      },
+      {
+        apa: 'Bradley, J. V. (1958). Complete counterbalancing of immediate sequential effects in a Latin square design. Journal of the American Statistical Association, 53(282), 525-528.',
+        doi: 'https://doi.org/10.1080/01621459.1958.10501456',
+      },
+    ],
+  },
+};
+
+let refGroup = referencesData[tool] || referencesData['nasa-tlx'];
+let items = refGroup.items;
+
+if (tool === 'nasa-tlx' && variant === 'stlx') {
+  refGroup = {
+    title: 'Shortened NASA-TLX (S-TLX) Reference',
+    subtitle: 'Recommended reference paper for S-TLX workload evaluation:',
+    items: [
+      {
+        apa: 'NASA-Task Load Index in CHI: A Comprehensive Review and Subscale Meta-Analysis with Implementation Guidelines.',
+        url: 'https://dl.acm.org/doi/abs/10.1145/3837858',
+        doi: 'https://doi.org/10.1145/3837858',
+      },
+    ],
+  };
+  items = refGroup.items;
+}
+---
+
+<details class="references-accordion" id="references-accordion">
+  <summary class="references-summary">
+    <div class="summary-left">
+      <BookOpen size={18} class="ref-icon" />
+      <span class="summary-title">{refGroup.title}</span>
+      <span class="summary-count">({items.length} paper{items.length === 1 ? '' : 's'})</span>
+    </div>
+    <div class="summary-right">
+      <span class="toggle-label">View References</span>
+      <ChevronDown size={16} class="chevron-icon" />
+    </div>
+  </summary>
+
+  <div class="citations-content">
+    <p class="ref-subtitle">{refGroup.subtitle}</p>
+    <div class="citations-list">
+      {items.map((item, idx) => (
+        <div class="citation-item-box">
+          <div class="citation-text-content">
+            <span class="citation-number">[{idx + 1}]</span>
+            <p class="citation-apa">{item.apa}</p>
+          </div>
+          <div class="citation-actions">
+            {item.doi && (
+              <a href={item.doi} target="_blank" rel="noopener noreferrer" class="ref-action-link" title="Open DOI link">
+                <span>DOI</span>
+                <ExternalLink size={13} />
+              </a>
+            )}
+            {item.url && !item.doi && (
+              <a href={item.url} target="_blank" rel="noopener noreferrer" class="ref-action-link" title="Open publication source">
+                <span>Link</span>
+                <ExternalLink size={13} />
+              </a>
+            )}
+            <button type="button" class="copy-citation-btn" data-citation={item.apa} title="Copy APA citation">
+              <Copy size={13} class="copy-icon" />
+              <Check size={13} class="check-icon hidden" />
+              <span>Copy Citation</span>
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</details>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.copy-citation-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const citationText = btn.getAttribute('data-citation') || '';
+      if (!citationText) return;
+
+      try {
+        await navigator.clipboard.writeText(citationText);
+        const copyIcon = btn.querySelector('.copy-icon');
+        const checkIcon = btn.querySelector('.check-icon');
+        const textSpan = btn.querySelector('span');
+
+        copyIcon?.classList.add('hidden');
+        checkIcon?.classList.remove('hidden');
+        if (textSpan) textSpan.textContent = 'Copied!';
+
+        setTimeout(() => {
+          copyIcon?.classList.remove('hidden');
+          checkIcon?.classList.add('hidden');
+          if (textSpan) textSpan.textContent = 'Copy Citation';
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy citation:', err);
+      }
+    });
+  });
+</script>
+
+<style>
+  .references-accordion {
+    margin-top: 2rem;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+  }
+
+  .references-accordion[open] {
+    border-color: var(--accent-blue);
+  }
+
+  .references-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.25rem;
+    cursor: pointer;
+    user-select: none;
+    background-color: var(--bg-pill);
+    transition: background-color var(--transition-fast);
+  }
+
+  .references-summary:hover {
+    background-color: var(--bg-card);
+  }
+
+  .references-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .summary-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .ref-icon {
+    color: var(--accent-blue);
+    flex-shrink: 0;
+  }
+
+  .summary-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .summary-count {
+    font-size: 0.8rem;
+    color: var(--text-subtle);
+  }
+
+  .summary-right {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-subtle);
+  }
+
+  .toggle-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .chevron-icon {
+    transition: transform 0.25s ease;
+  }
+
+  .references-accordion[open] .chevron-icon {
+    transform: rotate(180deg);
+  }
+
+  .citations-content {
+    padding: 1.25rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .ref-subtitle {
+    font-size: 0.84rem;
+    color: var(--text-subtle);
+    margin-bottom: 1rem;
+  }
+
+  .citations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .citation-item-box {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0.9rem;
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+  }
+
+  .citation-text-content {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .citation-number {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    flex-shrink: 0;
+  }
+
+  .citation-apa {
+    font-size: 0.83rem;
+    color: var(--text-main);
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  .citation-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .ref-action-link,
+  .copy-citation-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .ref-action-link:hover,
+  .copy-citation-btn:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 640px) {
+    .citation-item-box {
+      flex-direction: column;
+    }
+
+    .citation-actions {
+      align-self: flex-end;
+      margin-top: 0.4rem;
+    }
+  }
+</style>

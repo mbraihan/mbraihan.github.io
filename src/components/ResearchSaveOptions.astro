@@ -16,7 +16,7 @@ const { sheetName } = Astro.props;
       <span class="card-icon-box"><FileSpreadsheet size={20} aria-hidden="true" /></span>
       <span class="card-text-content">
         <span class="card-title">Google Sheets</span>
-        <span class="card-desc">Append data using your saved Apps Script URL</span>
+        <span class="card-desc">Append data directly to your Google Sheet</span>
       </span>
     </label>
 
@@ -41,7 +41,7 @@ const { sheetName } = Astro.props;
       />
     </div>
     <div class="field-group flex-2">
-      <label for="sheet-url">Google Apps Script Web App URL</label>
+      <label for="sheet-url">Google Sheet Web App URL</label>
       <input
         type="url"
         id="sheet-url"
@@ -52,10 +52,123 @@ const { sheetName } = Astro.props;
       <span id="sheet-url-error" class="field-error"></span>
     </div>
   </div>
+
+  <details class="sheets-setup-guide">
+    <summary class="guide-summary">
+      <span>💡 How to connect your Google Sheet (1-minute setup)</span>
+    </summary>
+    <div class="guide-content">
+      <ol class="guide-steps">
+        <li>Open your Google Sheet $\rightarrow$ Click <strong>Extensions</strong> $\rightarrow$ <strong>Apps Script</strong>.</li>
+        <li>
+          Paste the following code into the editor:
+          <div class="script-code-box">
+            <button type="button" id="copy-apps-script-btn" class="copy-script-btn">Copy Script</button>
+            <pre><code>function doPost(e) &#123;
+  var lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+  try &#123;
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var data = JSON.parse(e.postData.contents);
+    var rowsToAppend = [];
+    var sheetName = "Sheet1";
+
+    if (Array.isArray(data)) &#123;
+      rowsToAppend = data;
+    &#125; else if (data && Array.isArray(data.rows)) &#123;
+      sheetName = data.sheetName || "Sheet1";
+      rowsToAppend = data.rows;
+    &#125; else if (data) &#123;
+      sheetName = data.sheetName || "Sheet1";
+      var obj = &#123;&#125;;
+      for (var k in data) &#123; if (k !== 'sheetName') obj[k] = data[k]; &#125;
+      rowsToAppend = [obj];
+    &#125;
+
+    if (rowsToAppend.length === 0) return ContentService.createTextOutput(JSON.stringify(&#123; success: false &#125;)).setMimeType(ContentService.MimeType.JSON);
+
+    var sheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
+    var keys = Object.keys(rowsToAppend[0]);
+    if (sheet.getLastRow() === 0) sheet.appendRow(keys);
+
+    rowsToAppend.forEach(function(r) &#123;
+      sheet.appendRow(keys.map(function(k) &#123; return (r[k] !== undefined && r[k] !== null) ? r[k] : ""; &#125;));
+    &#125;);
+
+    return ContentService.createTextOutput(JSON.stringify(&#123; success: true &#125;)).setMimeType(ContentService.MimeType.JSON);
+  &#125; catch(err) &#123;
+    return ContentService.createTextOutput(JSON.stringify(&#123; success: false, error: err.toString() &#125;)).setMimeType(ContentService.MimeType.JSON);
+  &#125; finally &#123;
+    lock.releaseLock();
+  &#125;
+&#125;</code></pre>
+          </div>
+        </li>
+        <li>Click <strong>Deploy</strong> $\rightarrow$ <strong>New Deployment</strong>.</li>
+        <li>Select type: <strong>Web App</strong> $\rightarrow$ Set <em>Who has access</em> to <strong>Anyone</strong> (CRITICAL!).</li>
+        <li>Click <strong>Deploy</strong> $\rightarrow$ <strong>Grant Access</strong> (Advanced $\rightarrow$ Go to project $\rightarrow$ Allow).</li>
+        <li>Copy the generated <strong>Web App URL</strong> (ending in <code>/exec</code>) and paste it into the input box above!</li>
+      </ol>
+    </div>
+  </details>
+
   <p id="sheet-url-storage-note" class="storage-note">
     This URL is remembered only in this browser on this device.
   </p>
 </div>
+
+<script>
+  document.getElementById('copy-apps-script-btn')?.addEventListener('click', async () => {
+    const code = `function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var data = JSON.parse(e.postData.contents);
+    var rowsToAppend = [];
+    var sheetName = "Sheet1";
+
+    if (Array.isArray(data)) {
+      rowsToAppend = data;
+    } else if (data && Array.isArray(data.rows)) {
+      sheetName = data.sheetName || "Sheet1";
+      rowsToAppend = data.rows;
+    } else if (data) {
+      sheetName = data.sheetName || "Sheet1";
+      var obj = {};
+      for (var k in data) { if (k !== 'sheetName') obj[k] = data[k]; }
+      rowsToAppend = [obj];
+    }
+
+    if (rowsToAppend.length === 0) return ContentService.createTextOutput(JSON.stringify({ success: false })).setMimeType(ContentService.MimeType.JSON);
+
+    var sheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
+    var keys = Object.keys(rowsToAppend[0]);
+    if (sheet.getLastRow() === 0) sheet.appendRow(keys);
+
+    rowsToAppend.forEach(function(r) {
+      sheet.appendRow(keys.map(function(k) { return (r[k] !== undefined && r[k] !== null) ? r[k] : ""; }));
+    });
+
+    return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}`;
+    try {
+      await navigator.clipboard.writeText(code);
+      const btn = document.getElementById('copy-apps-script-btn');
+      if (btn) {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy Script'; }, 2000);
+      }
+    } catch (e) {
+      console.error('Failed to copy script:', e);
+    }
+  });
+</script>
 
 <style>
   .save-option-block {
@@ -179,6 +292,74 @@ const { sheetName } = Astro.props;
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     border: 0;
+  }
+
+  .sheets-setup-guide {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  .guide-summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    user-select: none;
+  }
+
+  .guide-content {
+    margin-top: 0.75rem;
+    font-size: 0.83rem;
+    color: var(--text-main);
+    line-height: 1.5;
+  }
+
+  .guide-steps {
+    padding-left: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .script-code-box {
+    position: relative;
+    margin-top: 0.4rem;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.85rem;
+    overflow-x: auto;
+  }
+
+  .script-code-box pre {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.76rem;
+    color: var(--text-main);
+    white-space: pre-wrap;
+  }
+
+  .copy-script-btn {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-pill);
+    color: var(--accent-blue);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .copy-script-btn:hover {
+    border-color: var(--accent-blue);
+    background-color: var(--accent-blue-light);
   }
 
   @media (max-width: 640px) {
