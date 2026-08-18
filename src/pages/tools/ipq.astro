@@ -208,6 +208,7 @@ const ipqQuestions = [
 <script>
   import {
     clearToolAlert,
+    formatParticipantId,
     initializeResearchSaveOptions,
     markQuestionGroupInvalid,
     showRemoteSaveFailure,
@@ -256,9 +257,10 @@ const ipqQuestions = [
   });
 
   function downloadIPQCSV(data: any) {
-    let csv = `Participant_ID,Condition,Subscale,Mean_Score_0_to_6\n`;
-    Object.keys(data.scaleAverages).forEach((scale) => {
-      csv += `${data.participantId},${data.condition},${scale},${data.scaleAverages[scale].toFixed(2)}\n`;
+    const headers = ['ParticipantID', 'Condition', 'Question', 'Response', 'Subscale'];
+    let csv = headers.join(',') + '\n';
+    data.rows.forEach((r: any) => {
+      csv += `"${r.ParticipantID}","${r.Condition}","${r.Question}",${r.Response},"${r.Subscale}"\n`;
     });
 
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -301,7 +303,14 @@ const ipqQuestions = [
     submitBtn?.setAttribute('disabled', '');
     submitBtn?.setAttribute('aria-busy', 'true');
     try {
-      await submitResearchData({ endpoint, sheetName, tool: 'IPQ', payload: data });
+      await submitResearchData({
+        endpoint,
+        sheetName,
+        tool: 'IPQ',
+        payload: {
+          rows: data.rows,
+        },
+      });
       clearToolAlert(alertBox);
       showResults(data);
     } catch (error) {
@@ -321,7 +330,7 @@ const ipqQuestions = [
   }
 
   submitBtn?.addEventListener('click', async () => {
-    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const rawPId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
     const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
 
     if (!validateRequiredFields([
@@ -351,6 +360,8 @@ const ipqQuestions = [
     }
 
     clearToolAlert(alertBox);
+
+    const normPId = formatParticipantId(rawPId);
     const scaleTotals: Record<string, number[]> = {};
     ipqQuestions.forEach((q, idx) => {
       let rawVal = answers[idx];
@@ -361,16 +372,54 @@ const ipqQuestions = [
     });
 
     const scaleAverages: Record<string, number> = {};
+    let grandSum = 0;
+    let totalQuestions = 0;
+
     Object.keys(scaleTotals).forEach(s => {
       const sum = scaleTotals[s].reduce((a, b) => a + b, 0);
       scaleAverages[s] = sum / scaleTotals[s].length;
+      grandSum += sum;
+      totalQuestions += scaleTotals[s].length;
+    });
+
+    const overallAverage = grandSum / totalQuestions;
+
+    // Build 5-column rows array: ParticipantID, Condition, Question, Response, Subscale
+    const rows: any[] = [];
+    ipqQuestions.forEach((q, idx) => {
+      rows.push({
+        ParticipantID: normPId,
+        Condition: cond,
+        Question: `Q${q.id}`,
+        Response: answers[idx],
+        Subscale: q.scale,
+      });
+    });
+
+    Object.keys(scaleAverages).forEach((scale) => {
+      rows.push({
+        ParticipantID: normPId,
+        Condition: cond,
+        Question: scale,
+        Response: Number(scaleAverages[scale].toFixed(2)),
+        Subscale: scale,
+      });
+    });
+
+    rows.push({
+      ParticipantID: normPId,
+      Condition: cond,
+      Question: 'Overall',
+      Response: Number(overallAverage.toFixed(2)),
+      Subscale: 'Overall',
     });
 
     await saveResponse({
-      participantId: pId,
+      participantId: normPId,
       condition: cond,
       responses: { ...answers },
       scaleAverages,
+      rows,
     });
   });
 
