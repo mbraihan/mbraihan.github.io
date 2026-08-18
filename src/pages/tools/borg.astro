@@ -228,6 +228,7 @@ const borgCR10Scale = [
 <script>
   import {
     clearToolAlert,
+    formatParticipantId,
     initializeResearchSaveOptions,
     markQuestionGroupInvalid,
     showRemoteSaveFailure,
@@ -259,10 +260,11 @@ const borgCR10Scale = [
   });
 
   function downloadBorgCSV(data: any) {
-    let csv = `Participant_ID,Condition,Timepoint,Borg_CR10_Rating\n`;
-    csv += `${data.participantId},${data.condition},Before_Task,${data.before}\n`;
-    csv += `${data.participantId},${data.condition},During_Task,${data.during}\n`;
-    csv += `${data.participantId},${data.condition},After_Task,${data.after}\n`;
+    const headers = ['ParticipantID', 'Condition', 'Timepoint', 'Rating', 'Descriptor'];
+    let csv = headers.join(',') + '\n';
+    data.rows.forEach((r: any) => {
+      csv += `"${r.ParticipantID}","${r.Condition}","${r.Timepoint}",${r.Rating},"${r.Descriptor}"\n`;
+    });
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -301,7 +303,14 @@ const borgCR10Scale = [
     submitBtn?.setAttribute('disabled', '');
     submitBtn?.setAttribute('aria-busy', 'true');
     try {
-      await submitResearchData({ endpoint, sheetName, tool: 'Borg CR-10', payload: data });
+      await submitResearchData({
+        endpoint,
+        sheetName,
+        tool: 'Borg CR-10',
+        payload: {
+          rows: data.rows,
+        },
+      });
       clearToolAlert(alertBox);
       showResults(data);
     } catch (error) {
@@ -321,7 +330,7 @@ const borgCR10Scale = [
   }
 
   submitBtn?.addEventListener('click', async () => {
-    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const rawPId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
     const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
 
     if (!validateRequiredFields([
@@ -351,19 +360,59 @@ const borgCR10Scale = [
     }
 
     clearToolAlert(alertBox);
+
+    const normPId = formatParticipantId(rawPId);
     const before = ratings[0] || 0;
     const during = ratings[1] || 0;
     const after = ratings[2] || 0;
     const peak = Math.max(before, during, after);
 
+    const getBorgLabel = (val: number) => {
+      const item = borgCR10Scale.find(b => b.val === val);
+      return item ? item.label : '';
+    };
+
+    // Build 5-column rows array: ParticipantID, Condition, Timepoint, Rating, Descriptor
+    const rows = [
+      {
+        ParticipantID: normPId,
+        Condition: cond,
+        Timepoint: 'Before Task',
+        Rating: before,
+        Descriptor: getBorgLabel(before),
+      },
+      {
+        ParticipantID: normPId,
+        Condition: cond,
+        Timepoint: 'During Task',
+        Rating: during,
+        Descriptor: getBorgLabel(during),
+      },
+      {
+        ParticipantID: normPId,
+        Condition: cond,
+        Timepoint: 'After Task',
+        Rating: after,
+        Descriptor: getBorgLabel(after),
+      },
+      {
+        ParticipantID: normPId,
+        Condition: cond,
+        Timepoint: 'Peak Exertion',
+        Rating: peak,
+        Descriptor: getBorgLabel(peak),
+      },
+    ];
+
     await saveResponse({
-      participantId: pId,
+      participantId: normPId,
       condition: cond,
       ratings: { ...ratings },
       before,
       during,
       after,
       peak,
+      rows,
     });
   });
 
