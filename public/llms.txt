@@ -1,0 +1,40 @@
+# Mohammad Raihanul Bashar - Research & Academic Portfolio
+
+> Human-Computer Interaction (HCI), Extended Reality (XR/VR/AR), Eye-Tracking, Biosignals (EEG/EMG), and Biorobotics Researcher.
+
+## Overview & Bio
+Mohammad Raihanul Bashar is a Ph.D. researcher at Concordia University specializing in Human-Computer Interaction (HCI), Spatial User Interfaces (SUI), Extended Reality (XR/VR/AR), Eye-Tracking, Biosignal Processing (EEG/EMG), and Biorobotics. His work bridges empirical user research, 3D interaction techniques, and computational models for virtual task environments. He is the author of several interactive evaluation tools used by researchers worldwide (e.g., NASA-TLX, System Usability Scale, UEQ, IPQ, SSQ, Borg CR-10, Counterbalancing Tools).
+
+## Core Research Focus Areas
+- **Human-Computer Interaction (HCI)**: Spatial User Interfaces, 3D interaction techniques, multimodal feedback, gaze/dwell interaction models.
+- **Extended Reality (XR / VR / AR)**: Vergence-Accommodation Conflict (VAC) models, virtual task environments, depth perception, 3D sketching (Depth3DSketch).
+- **Eye-Tracking & Gaze Interaction**: Multi-threshold dwell selection, spontaneous blinking authentication, gaze-contingent interfaces.
+- **Biosignals & Neuromarketing**: EEG artifact removal, EMG artifact classification, computational intelligence for biosignal processing.
+- **Biorobotics & Computer Vision**: Stereo humanoid vision, surface mapping for autonomous landmine detection.
+
+## Web-Based Interactive Research Tools
+- [NASA Task Load Index (NASA-TLX & S-TLX)](https://mbraihan.github.io/tools/nasa-tlx): Multi-dimensional subjective workload assessment tool supporting Raw TLX, Weighted TLX, Shortened S-TLX, 0–20/0–100 scale range, and direct Google Sheets / CSV data logging.
+- [System Usability Scale (SUS)](https://mbraihan.github.io/tools/sus): 10-item usability evaluation tool with percentile benchmarking, grade calculation (A+ to F), normalized participant IDs, and Google Sheets integration.
+- [User Experience Questionnaire (UEQ / UEQ-S)](https://mbraihan.github.io/tools/ueq): Full 26-item and 8-item short version evaluating Attractiveness, Perspicuity, Efficiency, Dependability, Stimulation, and Novelty.
+- [Igroup Presence Questionnaire (IPQ)](https://mbraihan.github.io/tools/ipq): 14-item questionnaire assessing Spatial Presence, Involvement, Experienced Realism, and General Presence in VR/XR environments.
+- [Simulator Sickness Questionnaire (SSQ)](https://mbraihan.github.io/tools/ssq): 16-symptom assessment calculating Nausea, Oculomotor, Disorientation, and Total Sickness scores.
+- [Borg CR-10 Exertion Scale](https://mbraihan.github.io/tools/borg): 11-point Category-Ratio scale tracking physical effort and fatigue dynamics across task phases (Before, During, After).
+- [Experimental Counterbalancing Generator](https://mbraihan.github.io/tools/counterbalancing): Automated Latin Square, Williams Square, Blocked Nested Factorial, and Random Order generator for within-subjects experimental design.
+- [HCI & XR Conference Deadline Tracker](https://mbraihan.github.io/tools/conference-tracker): Real-time deadline and venue tracker for top HCI/XR conferences (CHI, IEEE VR, ISMAR, UIST, DIS, TEI, ETRA, VRST, ICMI, CSCW, UbiComp).
+
+## Key Publications & Papers
+- [Eyes on Many: Multi-Target Gaze Selection](https://mbraihan.github.io/publications/eyes-on-many) - ACM CHI / SUI research on multi-target gaze interaction.
+- [Effects of Visual Depth on Vergence-Accommodation Conflict](https://mbraihan.github.io/publications/effects-visual-depth-vac) - Empirical study on VAC in stereoscopic head-mounted displays.
+- [Depth3DSketch: Spatial 3D Sketching in Virtual Reality](https://mbraihan.github.io/publications/depth3dsketch) - 3D spatial drawing and manipulation in VR.
+- [Spontaneous Blinking Authentication](https://mbraihan.github.io/publications/spontaneous-blinking-authentication) - Ocular biometric authentication using spontaneous eyeblinks.
+- [EEG Artifact Removal in Biorobotics & Neuromarketing](https://mbraihan.github.io/publications/artefact-removal-eeg) - Computational signal processing for EEG noise reduction.
+
+## Links & Profiles
+- Website: https://mbraihan.github.io
+- Publications: https://mbraihan.github.io/publications
+- Tools: https://mbraihan.github.io/tools
+- Conference Tracker: https://mbraihan.github.io/tools/conference-tracker
+- GitHub: https://github.com/mbraihan
+- Google Scholar: https://scholar.google.com/citations?user=zDyfhn0AAAAJ&hl=en
+- LinkedIn: https://linkedin.com/in/mbraihan
+- ORCID: https://orcid.org/0000-0002-5271-457X

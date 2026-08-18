@@ -1,0 +1,83 @@
+# Mohammad Raihanul Bashar - Comprehensive Research & Academic Portfolio
+
+> Human-Computer Interaction (HCI), Extended Reality (XR/VR/AR), Eye-Tracking, Biosignal Processing (EEG/EMG), and Biorobotics Ph.D. Researcher at Concordia University.
+
+---
+
+## Biography & Academic Profile
+Mohammad Raihanul Bashar is a Ph.D. researcher at Concordia University, Montreal, Canada. His research spans Human-Computer Interaction (HCI), Spatial User Interfaces (SUI), Extended Reality (XR/VR/AR), Eye-Tracking, Biosignal Processing (EEG/EMG), and Biorobotics. He focuses on designing, modeling, and evaluating 3D interaction techniques, gaze-contingent interfaces, vergence-accommodation conflict dynamics, and biosignal noise reduction for virtual environments.
+
+### Core Research Areas:
+1. **Spatial User Interfaces & XR**: 3D selection, spatial sketching in VR (Depth3DSketch), vergence-accommodation conflict (VAC) modeling, and virtual task environment design.
+2. **Eye-Tracking & Gaze Interaction**: Multi-threshold dwell time selection, spontaneous blinking ocular biometric authentication, and gaze-contingent rendering.
+3. **Biosignals & Neuromarketing**: EEG artifact removal algorithms, EMG video classification, and computational intelligence for physiological sensing.
+4. **Biorobotics & Computer Vision**: Stereo humanoid vision systems and autonomous landmine detection via surface mapping.
+
+---
+
+## Interactive Research Evaluation Tools
+Mohammad Raihanul Bashar has authored a suite of web-based empirical evaluation tools designed for HCI, XR, and ergonomics researchers:
+
+### 1. NASA Task Load Index (NASA-TLX & S-TLX)
+- URL: https://mbraihan.github.io/tools/nasa-tlx
+- Description: Subjective workload assessment instrument. Supports Raw NASA-TLX (R-TLX), Weighted NASA-TLX (15 pairwise comparisons), and Shortened NASA-TLX (S-TLX: Mental, Physical, Performance). Supports 0–100 continuous and 0–20 discrete scale ranges, normalized Participant IDs (P01), and multi-row Google Sheets / CSV data logging.
+
+### 2. System Usability Scale (SUS)
+- URL: https://mbraihan.github.io/tools/sus
+- Description: 10-item usability evaluation questionnaire. Provides instant overall SUS score calculation (0–100), percentile ranking, Sauro-Lewis letter grading (A+ to F), normalized Participant IDs (P01), and multi-row Google Sheets / CSV data logging.
+
+### 3. User Experience Questionnaire (UEQ & UEQ-S)
+- URL: https://mbraihan.github.io/tools/ueq
+- Description: Bipolar rating scale evaluating 6 UX dimensions (Attractiveness, Perspicuity, Efficiency, Dependability, Stimulation, Novelty) in full 26-item version and 8-item UEQ-S version. Outputs -3 to +3 transformed scale averages and 5-column CSV / Google Sheets logs.
+
+### 4. Igroup Presence Questionnaire (IPQ)
+- URL: https://mbraihan.github.io/tools/ipq
+- Description: 14-item questionnaire assessing Spatial Presence (SP), Involvement (INV), Experienced Realism (REAL), and General Presence (G1) in Virtual Reality and Extended Reality environments.
+
+### 5. Simulator Sickness Questionnaire (SSQ)
+- URL: https://mbraihan.github.io/tools/ssq
+- Description: 16-symptom questionnaire calculating Kennedy et al. (1993) weighted subscores for Nausea, Oculomotor Discomfort, Disorientation, and Total Simulator Sickness.
+
+### 6. Borg CR-10 Perceived Exertion Scale
+- URL: https://mbraihan.github.io/tools/borg
+- Description: 11-point Category-Ratio scale evaluating physical effort and fatigue dynamics across task phases (Before Task, During Task, After Task) with peak exertion tracking.
+
+### 7. Experimental Counterbalancing Generator
+- URL: https://mbraihan.github.io/tools/counterbalancing
+- Description: Automated experimental design generator supporting Williams Latin Squares, Complete Latin Squares, Blocked Nested Factorial Counterbalancing, and Random Order matrices with wide table export.
+
+### 8. HCI & XR Conference Deadline Tracker
+- URL: https://mbraihan.github.io/tools/conference-tracker
+- Description: Real-time deadline, venue, location, ICORE ranking (A*, A, B), and countdown tracker for top HCI/XR conferences (CHI, IEEE VR, ISMAR, UIST, DIS, TEI, ETRA, VRST, ICMI, CSCW, UbiComp).
+
+---
+
+## Selected Publications
+1. **Eyes on Many: Multi-Target Gaze Selection**  
+   - Topic: Multi-target selection and dwell thresholds in gaze-controlled interfaces.  
+   - Link: https://mbraihan.github.io/publications/eyes-on-many
+
+2. **Effects of Visual Depth on Vergence-Accommodation Conflict**  
+   - Topic: Empirical analysis of visual depth cues and VAC in stereoscopic HMDs.  
+   - Link: https://mbraihan.github.io/publications/effects-visual-depth-vac
+
+3. **Depth3DSketch: Spatial 3D Sketching in Virtual Reality**  
+   - Topic: Spatial 3D input techniques and 3D curve manipulation in VR.  
+   - Link: https://mbraihan.github.io/publications/depth3dsketch
+
+4. **Spontaneous Blinking Authentication**  
+   - Topic: Ocular biometric authentication using spontaneous eyeblink dynamics.  
+   - Link: https://mbraihan.github.io/publications/spontaneous-blinking-authentication
+
+5. **EEG Artifact Removal in Biorobotics & Neuromarketing**  
+   - Topic: Signal processing algorithms for EEG noise reduction in physiological sensing.  
+   - Link: https://mbraihan.github.io/publications/artefact-removal-eeg
+
+---
+
+## Contact & External Profiles
+- Website: https://mbraihan.github.io
+- GitHub: https://github.com/mbraihan
+- Google Scholar: https://scholar.google.com/citations?user=zDyfhn0AAAAJ&hl=en
+- LinkedIn: https://linkedin.com/in/mbraihan
+- ORCID: https://orcid.org/0000-0002-5271-457X
