@@ -433,13 +433,10 @@ import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-ast
   renderPairs();
 
   function downloadUEQCSV(data: any) {
-    let csv = `UEQ_Version,Participant_ID,Condition,Item_Number,Item_Left,Item_Right,Response_Value\n`;
-    activePairs.forEach((p, idx) => {
-      csv += `${currentVer.toUpperCase()},${data.participantId},${data.condition},${idx + 1},"${p.left}","${p.right}",${userAnswers[idx]}\n`;
-    });
-    csv += `\n=== UEQ SCALE AVERAGES (-3 to +3) ===\n`;
-    Object.keys(data.scaleAverages).forEach((scale) => {
-      csv += `${scale},${data.scaleAverages[scale].toFixed(2)}\n`;
+    const headers = ['ParticipantID', 'Condition', 'Item', 'Response', 'Scale'];
+    let csv = headers.join(',') + '\n';
+    data.rows.forEach((r: any) => {
+      csv += `"${r.ParticipantID}","${r.Condition}","${r.Item}",${r.Response},"${r.Scale}"\n`;
     });
 
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -485,7 +482,14 @@ import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-ast
     submitBtn?.setAttribute('disabled', '');
     submitBtn?.setAttribute('aria-busy', 'true');
     try {
-      await submitResearchData({ endpoint, sheetName, tool: 'UEQ', payload: data });
+      await submitResearchData({
+        endpoint,
+        sheetName,
+        tool: 'UEQ',
+        payload: {
+          rows: data.rows,
+        },
+      });
       clearToolAlert(alertBox);
       showResults(data);
     } catch (error) {
@@ -556,12 +560,35 @@ import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-ast
       scaleAverages[s] = sum / scaleScores[s].length;
     });
 
+    // Build 5-column rows array: ParticipantID, Condition, Item, Response, Scale
+    const rows: any[] = [];
+    activePairs.forEach((p, idx) => {
+      rows.push({
+        ParticipantID: normPId,
+        Condition: cond,
+        Item: `Item ${idx + 1} (${p.left} vs ${p.right})`,
+        Response: userAnswers[idx],
+        Scale: p.scale,
+      });
+    });
+
+    Object.keys(scaleAverages).forEach((scale) => {
+      rows.push({
+        ParticipantID: normPId,
+        Condition: cond,
+        Item: `Scale: ${scale}`,
+        Response: Number(scaleAverages[scale].toFixed(2)),
+        Scale: scale,
+      });
+    });
+
     await saveResponse({
       version: currentVer,
       participantId: normPId,
       condition: cond,
       responses: { ...userAnswers },
       scaleAverages,
+      rows,
     });
   });
 
