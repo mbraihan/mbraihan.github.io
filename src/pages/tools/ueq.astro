@@ -194,18 +194,21 @@ import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-ast
   :global(.p-num) { color: var(--accent-blue); font-weight: 800; }
   :global(.bipolar-control) {
     display: grid;
-    grid-template-columns: minmax(7rem, 0.75fr) minmax(0, 2.5fr) minmax(7rem, 0.75fr);
+    grid-template-columns: minmax(10rem, 1.2fr) auto minmax(10rem, 1.2fr);
     grid-template-areas: "left scale right";
-    gap: 0.85rem;
+    gap: 1.2rem;
     align-items: center;
   }
   :global(.endpoint-term) {
     min-width: 0;
     color: var(--text-main);
-    font-size: 0.95rem;
-    font-weight: 750;
-    line-height: 1.3;
-    overflow-wrap: anywhere;
+    font-size: 0.93rem;
+    font-weight: 700;
+    line-height: 1.35;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
+    white-space: normal;
   }
   :global(.left-term) { grid-area: left; text-align: right; }
   :global(.right-term) { grid-area: right; text-align: left; }
@@ -274,6 +277,7 @@ import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-ast
 <script>
   import {
     clearToolAlert,
+    formatParticipantId,
     initializeResearchSaveOptions,
     markQuestionGroupInvalid,
     showRemoteSaveFailure,
@@ -490,9 +494,8 @@ import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-ast
     }
   }
 
-  // Submit Handler
   submitBtn?.addEventListener('click', async () => {
-    const pId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
+    const rawPId = (document.getElementById('participant-id') as HTMLInputElement)?.value.trim();
     const cond = (document.getElementById('condition-id') as HTMLInputElement)?.value.trim();
 
     if (!validateRequiredFields([
@@ -524,6 +527,8 @@ import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-ast
 
     clearToolAlert(alertBox);
 
+    const normPId = formatParticipantId(rawPId);
+
     // Scale calculation (-3 to +3 transformation)
     const scaleScores: Record<string, number[]> = {};
     activePairs.forEach((p, idx) => {
@@ -543,7 +548,7 @@ import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-ast
 
     await saveResponse({
       version: currentVer,
-      participantId: pId,
+      participantId: normPId,
       condition: cond,
       responses: { ...userAnswers },
       scaleAverages,
