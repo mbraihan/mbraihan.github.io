@@ -71,31 +71,46 @@ const currentYear = new Date().getFullYear();
 </style>
 
 <script>
-  // Fetch visitor count from GoatCounter API
   async function fetchVisitorCount() {
     const countEl = document.getElementById('visitor-count');
     if (!countEl) return;
 
-    try {
-      // GoatCounter provides a no-JS pixel endpoint that also returns JSON count data
-      // Replace 'YOUR_GOATCOUNTER_CODE' with the actual GoatCounter site code once set up
-      const gcCode = (window as any).__goatcounter_code;
-      if (!gcCode) {
-        countEl.textContent = '—';
-        return;
+    const gcCode = (window as any).__goatcounter_code;
+    if (gcCode) {
+      try {
+        const res = await fetch(`https://${gcCode}.goatcounter.com/counter/${encodeURIComponent('/')}.json`);
+        if (res.ok) {
+          const data = await res.json();
+          const count = data.count_unique ?? data.count ?? 0;
+          if (count > 0) {
+            countEl.textContent = Number(count).toLocaleString();
+            return;
+          }
+        }
+      } catch {
+        // Continue to fallback
       }
-      const res = await fetch(
-        `https://${gcCode}.goatcounter.com/counter/${encodeURIComponent('/')}.json`,
-      );
-      if (res.ok) {
-        const data = await res.json();
-        const count = data.count_unique ?? data.count ?? 0;
-        countEl.textContent = Number(count).toLocaleString();
-      }
-    } catch {
-      // Silently fail — just show dash
-      countEl.textContent = '—';
     }
+
+    try {
+      // Global real-time visitor API working across all devices and PCs
+      const res = await fetch('https://api.visitorbadge.io/api/visitors?path=mbraihan-portfolio');
+      if (res.ok) {
+        const svgText = await res.text();
+        const match = svgText.match(/VISITORS:\s*([\d,]+)/i) || svgText.match(/font-weight="bold">([\d,]+)</);
+        if (match && match[1]) {
+          const num = parseInt(match[1].replace(/,/g, ''), 10);
+          if (!isNaN(num) && num > 0) {
+            countEl.textContent = num.toLocaleString();
+            return;
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Visitor counter error:', err);
+    }
+
+    countEl.textContent = '1+';
   }
 
   fetchVisitorCount();
