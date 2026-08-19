@@ -9,7 +9,7 @@ authors:
   - "Mayra Donaji Barrera Machuca"
   - "Anil Ufuk Batmaz"
 venue: "CHI 2025 Late-Breaking Work"
-venueShort: "CHI LBW 25"
+venueShort: "ACM CHI LBW 25"
 year: 2025
 type: "Poster"
 tags: ["HCI", "Virtual Reality", "Eye Gaze", "3D Interaction", "3D Sketching", "Multimodal Interaction"]

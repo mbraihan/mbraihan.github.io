@@ -6,7 +6,7 @@ authors:
   - "Ken Pfeuffer"
   - "Anil Ufuk Batmaz"
 venue: "CHI 2026"
-venueShort: "CHI 26"
+venueShort: "ACM CHI 26"
 year: 2026
 type: "Conference"
 tags: ["HCI", "Extended Reality", "Eye Gaze", "Multimodal Interaction", "3D Interaction"]

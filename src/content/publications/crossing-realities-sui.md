@@ -7,7 +7,7 @@ authors:
   - "Vrushank Phadnis"
   - "Anil Ufuk Batmaz"
 venue: "ACM Symposium on Spatial User Interaction 2026"
-venueShort: "SUI 26"
+venueShort: "ACM SUI 26"
 year: 2026
 type: "Conference"
 tags: ["HCI", "Extended Reality", "Augmented Reality", "Human-AI Interaction", "Multi-Display Interaction"]

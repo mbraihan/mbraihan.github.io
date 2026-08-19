@@ -8,7 +8,7 @@ authors:
   - "Wolfgang Stuerzlinger"
   - "Anil Ufuk Batmaz"
 venue: "CHI 2026 Late-Breaking Work"
-venueShort: "CHI LBW 26"
+venueShort: "ACM CHI LBW 26"
 year: 2026
 type: "Poster"
 tags: ["HCI", "Virtual Reality", "Eye Gaze", "3D Interaction", "Vergence-Accommodation Conflict"]

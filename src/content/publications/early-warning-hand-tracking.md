@@ -4,7 +4,7 @@ authors:
   - "Mohammad Raihanul Bashar"
   - "Anil Ufuk Batmaz"
 venue: "IEEE Transactions on Visualization and Computer Graphics"
-venueShort: "IEEE VR TVCG 25"
+venueShort: "IEEE TVCG'25 (IEEE VR)"
 year: 2025
 type: "Journal"
 tags: ["Virtual Reality", "Hand Tracking", "Visual Feedback", "Usability"]

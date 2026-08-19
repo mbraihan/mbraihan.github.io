@@ -84,13 +84,7 @@ const affiliationEntries = uniqueAffiliations.map((name, idx) => ({
 }));
 const showInstitutionLogos = affiliationEntries.length > 0 && affiliationEntries.every((entry) => entry.logo);
 const venueUrl = data.website || data.doi;
-const venueDisplay = (() => {
-  if (id === 'vergence-accommodation-gaze-selection') return 'ISMAR, 2026';
-  if (!data.venueShort) return `${data.venue}, ${data.year}`;
-
-  const shortVenue = data.venueShort.replace(/\s+(19|20)\d{2}$|\s+\d{2}$/, '').trim();
-  return `${shortVenue}, ${data.year}`;
-})();
+const venueDisplay = data.venueShort || `${data.venue}, ${data.year}`;
 const publicationStructuredData = {
   '@context': 'https://schema.org',
   '@type': 'ScholarlyArticle',

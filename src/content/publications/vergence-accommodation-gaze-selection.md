@@ -8,7 +8,7 @@ authors:
   - "Wolfgang Stuerzlinger"
   - "Anil Ufuk Batmaz"
 venue: "IEEE Transactions on Visualization and Computer Graphics (IEEE ISMAR 2026)"
-venueShort: "ISMAR TVCG 26"
+venueShort: "IEEE TVCG'26 (IEEE ISMAR)"
 year: 2026
 type: "Journal"
 tags: ["HCI", "Extended Reality", "Eye Gaze", "3D Interaction", "Vergence-Accommodation Conflict", "Fitts' Law"]

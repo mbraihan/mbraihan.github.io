@@ -7,7 +7,7 @@ authors:
   - "Anil Ufuk Batmaz"
   - "Wolfgang Stuerzlinger"
 venue: "CHI 2025"
-venueShort: "CHI 25"
+venueShort: "ACM CHI 25"
 year: 2025
 type: "Conference"
 tags: ["HCI", "Eye Gaze", "Text Entry", "Dwell Interaction"]

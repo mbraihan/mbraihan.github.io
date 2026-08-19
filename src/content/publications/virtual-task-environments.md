@@ -4,7 +4,7 @@ authors:
   - "Mohammad Raihanul Bashar"
   - "Anil Ufuk Batmaz"
 venue: "Graphics Interface 2024"
-venueShort: "GI 24"
+venueShort: "ACM GI 24"
 year: 2024
 type: "Conference"
 tags: ["HCI", "Extended Reality", "3D Interaction", "Selection Techniques", "Literature Review"]
