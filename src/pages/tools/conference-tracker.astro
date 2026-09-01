@@ -90,6 +90,7 @@ const statuses = [
   'Rebuttal',
   'Notification',
   'Camera',
+  'Presentation-Video',
   'Registration',
   'In session',
   'TBA',
@@ -105,7 +106,7 @@ const statItems = [
   {
     label: 'Active deadlines',
     value: conferenceVenues.filter((venue) =>
-      ['Submission', 'Abstract', 'Paper', 'Rebuttal', 'Camera'].includes(
+      ['Submission', 'Abstract', 'Paper', 'Rebuttal', 'Camera', 'Presentation-Video'].includes(
         venue.status,
       ),
     ).length,
@@ -146,19 +147,14 @@ const getConferenceDate = (venue: (typeof conferenceVenues)[number]) =>
 
 const resubmissionRoutes = [
   {
-    sourceId: 'vrst-2026',
-    notificationLabel: 'Author notification',
-    targetIds: ['ieee-vr-2027', 'chi-2027'],
-  },
-  {
     sourceId: 'ieee-vr-2027',
     notificationLabel: 'Initial notification',
-    targetIds: ['dis-2027', 'mobilehci-2027'],
+    targetIds: ['etra-2027', 'dis-2027', 'mobilehci-2027'],
   },
   {
     sourceId: 'chi-2027',
     notificationLabel: 'Final notification',
-    targetIds: ['dis-2027', 'mobilehci-2027'],
+    targetIds: ['dis-2027', 'mobilehci-2027', 'autoui-2027'],
   },
 ];
 
@@ -367,17 +363,15 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
                   <strong>{milestone.venue}</strong>
                   <span class="upcoming-stage">
                     <span>
-                      {milestone.label.toLowerCase().includes('camera')
-                        ? 'Camera-ready'
-                        : milestone.label
-                              .toLowerCase()
-                              .includes('submission site')
-                          ? 'Submission site'
-                          : milestone.label
-                                .toLowerCase()
-                                .includes('presentation video')
-                            ? 'Presentation video'
-                            : milestone.kind}
+                      {milestone.label.toLowerCase().includes('presentation video')
+                        ? 'Presentation video'
+                        : milestone.label.toLowerCase().includes('registration')
+                          ? 'Registration'
+                          : milestone.label.toLowerCase().includes('camera')
+                            ? 'Camera-ready'
+                            : milestone.label.toLowerCase().includes('submission site')
+                              ? 'Submission site'
+                              : milestone.kind}
                     </span>
                     <small>{getCutoffLabel(milestone)}</small>
                   </span>
@@ -1655,6 +1649,10 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
     background: #fae8ff;
     color: #86198f;
   }
+  .status-presentation-video {
+    background: #f5f3ff;
+    color: #6d28d9;
+  }
   .status-registration {
     background: #ccfbf1;
     color: #115e59;
@@ -1702,6 +1700,11 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
     background: rgba(134, 25, 143, 0.38);
     color: #f0abfc;
     border: 1px solid rgba(240, 171, 252, 0.25);
+  }
+  :global([data-theme='dark']) .status-presentation-video {
+    background: rgba(109, 40, 217, 0.38);
+    color: #c4b5fd;
+    border: 1px solid rgba(196, 181, 253, 0.25);
   }
   :global([data-theme='dark']) .status-registration {
     background: rgba(17, 94, 89, 0.38);
@@ -2118,6 +2121,7 @@ const resubmissionRows = resubmissionRoutes.flatMap((route) => {
       Rebuttal: 4,
       Notification: 5,
       Camera: 6,
+      'Presentation-Video': 6,
       Registration: 7,
       'In session': 8,
       TBA: 9,

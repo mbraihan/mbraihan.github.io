@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ResearchToolProvenance from '../../components/ResearchToolProvenance.astro';
 import ResearchSaveOptions from '../../components/ResearchSaveOptions.astro';
 import ToolReferences from '../../components/ToolReferences.astro';
-import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles } from 'lucide-astro';
+import { ArrowLeft, CheckCircle2, RotateCcw, Sparkles, Settings } from 'lucide-astro';
 
 const ipqQuestions = [
   { id: 1, text: 'In the computer generated world I had a sense of "being there"', leftAnchor: 'Fully disagree', rightAnchor: 'Fully agree', scale: 'General Presence (G1)' },
@@ -41,16 +41,6 @@ const ipqQuestions = [
           <span class="tool-badge">XR & VR Presence Evaluation</span>
           <h1 class="page-title">Igroup Presence Questionnaire (IPQ)</h1>
         </div>
-        <a 
-          href="https://github.com/mbraihan/ipq-web-app" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          class="github-link-btn"
-        >
-          <Github size={18} />
-          <span>GitHub Repository</span>
-          <span class="sr-only">(opens in a new tab)</span>
-        </a>
       </div>
       <p class="page-subtitle">
         Assess Spatial Presence (SP), Involvement (INV), Experienced Realism (REAL), and General Presence (G1).
@@ -60,9 +50,31 @@ const ipqQuestions = [
     <ResearchToolProvenance tool="ipq" supportsGoogleSheets />
 
     <div id="ipq-app-card" class="app-card">
-      <section class="setup-section">
-        <h2 class="section-heading">Session Details</h2>
-        
+
+      <!-- Summary Bar -->
+      <div id="config-summary-bar" class="config-summary-bar hidden">
+        <div class="summary-pills">
+          <div id="summary-pill-save" class="summary-pill hidden">
+            <span class="pill-label">Save:</span>
+            <span id="summary-val-save" class="pill-value">Google Sheets</span>
+          </div>
+        </div>
+        <button id="btn-edit-config" class="btn-edit-config" type="button">
+          <Settings size={14} />
+          <span>Edit Setup</span>
+        </button>
+      </div>
+
+      <!-- STEP 1: Data Save Option -->
+      <section id="step-1-save" class="step-section">
+        <h2 class="step-title"><span class="step-badge">Step 1</span> Select Data Save Option</h2>
+        <ResearchSaveOptions sheetName="IPQ" />
+      </section>
+
+      <!-- STEP 2: Participant Setup & Questions -->
+      <section id="step-2-eval" class="step-section hidden">
+        <h2 class="step-title"><span class="step-badge">Step 2</span> Participant Details & Evaluation</h2>
+
         <div class="fields-grid">
           <div class="field-group">
             <label for="participant-id">Participant ID <span class="required">*</span></label>
@@ -77,47 +89,45 @@ const ipqQuestions = [
           </div>
         </div>
 
-        <ResearchSaveOptions sheetName="IPQ" />
-      </section>
+        <div class="questions-section">
+          <h3 class="section-heading">14 Presence Statements (0 to 6 Scale)</h3>
+          <p class="section-subtext">Rate your agreement or experience for each statement on a 7-point scale (0 = Minimum, 6 = Maximum).</p>
 
-      <section class="questions-section">
-        <h2 class="section-heading">14 Presence Statements (0 to 6 Scale)</h2>
-        <p class="section-subtext">Rate your agreement or experience for each statement on a 7-point scale (0 = Minimum, 6 = Maximum).</p>
+          <div class="questions-list">
+            {ipqQuestions.map((q, qIdx) => (
+              <fieldset class="q-card" data-qidx={qIdx}>
+                <legend class="q-title">
+                  <span class="q-num">{q.id}.</span>
+                  <span>{q.text}</span>
+                </legend>
 
-        <div class="questions-list">
-          {ipqQuestions.map((q, qIdx) => (
-            <fieldset class="q-card" data-qidx={qIdx}>
-              <legend class="q-title">
-                <span class="q-num">{q.id}.</span>
-                <span>{q.text}</span>
-              </legend>
+                <div class="anchor-labels">
+                  <span class="anchor-left">{q.leftAnchor}</span>
+                  <span class="anchor-right">{q.rightAnchor}</span>
+                </div>
 
-              <div class="anchor-labels">
-                <span class="anchor-left">{q.leftAnchor}</span>
-                <span class="anchor-right">{q.rightAnchor}</span>
-              </div>
+                <div class="radios-7-grid">
+                  {[0, 1, 2, 3, 4, 5, 6].map(v => (
+                    <label class="radio-pill-7" data-qidx={qIdx} data-val={v}>
+                      <input class="sr-only" type="radio" name={`ipq-${qIdx}`} value={v} />
+                      <span>{v}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ))}
+          </div>
+        </div>
 
-              <div class="radios-7-grid">
-                {[0, 1, 2, 3, 4, 5, 6].map(v => (
-                  <label class="radio-pill-7" data-qidx={qIdx} data-val={v}>
-                    <input class="sr-only" type="radio" name={`ipq-${qIdx}`} value={v} />
-                    <span>{v}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          ))}
+        <div id="alert-box" class="tool-alert hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+        <div class="submit-action-row">
+          <button id="submit-ipq-btn" class="submit-btn" type="button">
+            <Sparkles size={18} />
+            <span>Calculate Presence Scores & Export</span>
+          </button>
         </div>
       </section>
-
-      <div id="alert-box" class="tool-alert hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
-
-      <div class="submit-action-row">
-        <button id="submit-ipq-btn" class="submit-btn" type="button">
-          <Sparkles size={18} />
-          <span>Calculate Presence Scores & Export</span>
-        </button>
-      </div>
     </div>
 
     <!-- Result Card -->
@@ -161,6 +171,103 @@ const ipqQuestions = [
   .page-subtitle { font-size: 1.02rem; color: var(--text-muted); line-height: 1.55; }
 
   .app-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); }
+  
+  .config-summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+  }
+  .summary-pills {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .summary-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+  .pill-divider {
+    color: var(--border-color);
+    font-weight: 400;
+    margin-right: 0.25rem;
+  }
+  .pill-label {
+    color: var(--text-subtle);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+  }
+  .pill-value {
+    color: var(--accent-blue);
+    font-weight: 700;
+    background-color: rgba(37, 99, 235, 0.08);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+  }
+  .btn-edit-config {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-subtle);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.3rem 0.65rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-edit-config:hover {
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    background-color: var(--bg-card);
+  }
+
+  .step-section {
+    margin-bottom: 2.25rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 1px dashed var(--border-color);
+  }
+  .step-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .step-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1.15rem;
+  }
+  .step-badge {
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background-color: rgba(37, 99, 235, 0.1);
+    color: var(--accent-blue);
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(37, 99, 235, 0.25);
+  }
   .section-heading { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
   .section-subtext { font-size: 0.9rem; color: var(--text-subtle); margin-top: -0.5rem; margin-bottom: 1.5rem; }
 
@@ -236,6 +343,52 @@ const ipqQuestions = [
   const answers: Record<number, number> = {};
   const alertBox = document.getElementById('alert-box');
   const saveOptions = initializeResearchSaveOptions();
+
+  const configSummaryBar = document.getElementById('config-summary-bar');
+  const summaryPillSave = document.getElementById('summary-pill-save');
+  const summaryValSave = document.getElementById('summary-val-save');
+
+  const step1 = document.getElementById('step-1-save');
+  const step2 = document.getElementById('step-2-eval');
+  const btnEditConfig = document.getElementById('btn-edit-config');
+
+  function selectSaveOption(isSheets: boolean) {
+    if (summaryValSave) summaryValSave.textContent = isSheets ? 'Google Sheets' : 'Download CSV';
+    summaryPillSave?.classList.remove('hidden');
+    configSummaryBar?.classList.remove('hidden');
+
+    step1?.classList.add('hidden');
+    step2?.classList.remove('hidden');
+
+    const saveCardsGrid = document.querySelector('.save-cards-grid');
+    if (saveCardsGrid) saveCardsGrid.classList.add('hidden');
+
+    const sheetsInputsRow = document.getElementById('sheets-inputs-row');
+    if (sheetsInputsRow) {
+      sheetsInputsRow.classList.toggle('hidden', !isSheets);
+      step2?.prepend(sheetsInputsRow);
+    }
+
+    step2?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  const cardSheets = document.getElementById('card-option-sheets');
+  const cardCsv = document.getElementById('card-option-csv');
+  cardSheets?.addEventListener('click', () => selectSaveOption(true));
+  cardCsv?.addEventListener('click', () => selectSaveOption(false));
+
+  btnEditConfig?.addEventListener('click', () => {
+    step1?.classList.remove('hidden');
+    step2?.classList.add('hidden');
+
+    const saveCardsGrid = document.querySelector('.save-cards-grid');
+    if (saveCardsGrid) saveCardsGrid.classList.remove('hidden');
+
+    summaryPillSave?.classList.add('hidden');
+    configSummaryBar?.classList.add('hidden');
+
+    step1?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
   const submitBtn = document.getElementById('submit-ipq-btn');
 
   const pills = document.querySelectorAll('.radio-pill-7');

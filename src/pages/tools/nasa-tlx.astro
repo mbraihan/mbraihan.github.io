@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ResearchToolProvenance from '../../components/ResearchToolProvenance.astro';
 import ResearchSaveOptions from '../../components/ResearchSaveOptions.astro';
 import ToolReferences from '../../components/ToolReferences.astro';
-import { ArrowLeft, Github, CheckCircle2, RotateCcw, Sparkles, Scale, Sliders, ExternalLink } from 'lucide-astro';
+import { ArrowLeft, CheckCircle2, RotateCcw, Sparkles, Scale, Sliders, Settings } from 'lucide-astro';
 
 const dimensions = [
   { key: 'Mental', title: 'Mental Demand', desc: 'How much mental and perceptual activity was required? (e.g. thinking, deciding, calculating, remembering, looking, searching)' },
@@ -42,16 +42,6 @@ for (let i = 0; i < dimensionKeys.length; i++) {
           <span class="tool-badge">Workload Assessment Tool</span>
           <h1 class="page-title">NASA Task Load Index (NASA-TLX)</h1>
         </div>
-        <a 
-          href="https://github.com/mbraihan/nasa-tlx-web-app" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          class="github-link-btn"
-        >
-          <Github size={18} />
-          <span>GitHub Repository</span>
-          <span class="sr-only">(opens in a new tab)</span>
-        </a>
       </div>
       <p class="page-subtitle">
         Evaluate multidimensional workload across 6 subscales: Mental, Physical, Temporal, Performance, Effort, and Frustration.
@@ -61,51 +51,82 @@ for (let i = 0; i < dimensionKeys.length; i++) {
     <ResearchToolProvenance tool="nasa-tlx" supportsGoogleSheets />
 
     <div id="nasa-app-card" class="app-card">
-      <!-- Mode & Scale Range Selector -->
-      <section class="mode-select-section">
-        <h2 class="section-heading">Evaluation Method & Scale Range</h2>
-        
-        <div class="options-subgroup">
-          <label class="options-group-title">1. Evaluation Method</label>
-          <div class="mode-cards-grid">
-            <button id="btn-mode-raw" class="mode-card active" type="button" aria-pressed="true">
-              <Sliders size={22} class="card-icon" />
-              <div class="card-title">Raw NASA-TLX (R-TLX)</div>
-              <div class="card-desc">Unweighted average of 6 workload dimensions (standard for most HCI studies).</div>
-            </button>
 
-            <button id="btn-mode-weighted" class="mode-card" type="button" aria-pressed="false">
-              <Scale size={22} class="card-icon" />
-              <div class="card-title">Weighted NASA-TLX</div>
-              <div class="card-desc">Includes 15 pairwise comparisons to determine personal dimension weights.</div>
-            </button>
-
-            <button id="btn-mode-stlx" class="mode-card" type="button" aria-pressed="false">
-              <Sparkles size={22} class="card-icon" />
-              <div class="card-title">Shortened NASA-TLX (S-TLX)</div>
-              <div class="card-desc">Streamlined 3-dimension evaluation (Mental, Physical, & Performance).</div>
-            </button>
+      <!-- Summary Bar (Collapsed step state) -->
+      <div id="config-summary-bar" class="config-summary-bar hidden">
+        <div class="summary-pills">
+          <div id="summary-pill-method" class="summary-pill hidden">
+            <span class="pill-label">Type:</span>
+            <span id="summary-val-method" class="pill-value">Raw NASA-TLX</span>
+          </div>
+          <div id="summary-pill-scale" class="summary-pill hidden">
+            <span class="pill-divider">•</span>
+            <span class="pill-label">Scale:</span>
+            <span id="summary-val-scale" class="pill-value">0 – 100</span>
+          </div>
+          <div id="summary-pill-save" class="summary-pill hidden">
+            <span class="pill-divider">•</span>
+            <span class="pill-label">Save:</span>
+            <span id="summary-val-save" class="pill-value">Google Sheets</span>
           </div>
         </div>
+        <button id="btn-edit-config" class="btn-edit-config" type="button">
+          <Settings size={14} />
+          <span>Edit Setup</span>
+        </button>
+      </div>
 
-        <div class="options-subgroup">
-          <label class="options-group-title">2. Scale Range</label>
-          <div class="scale-range-grid">
-            <button id="btn-scale-100" class="scale-card active" type="button" aria-pressed="true">
-              <div class="card-title">0 – 100 Scale (Continuous / 100-Point)</div>
-              <div class="card-desc">Standard digital 100-point rating scale (default).</div>
-            </button>
+      <!-- STEP 1: Evaluation Method -->
+      <section id="step-1-method" class="step-section">
+        <h2 class="step-title"><span class="step-badge">Step 1</span> Select Evaluation Method</h2>
+        
+        <div class="mode-cards-grid">
+          <button id="btn-mode-raw" class="mode-card" type="button" aria-pressed="false">
+            <Sliders size={22} class="card-icon" />
+            <div class="card-title">Raw NASA-TLX (R-TLX)</div>
+            <div class="card-desc">Unweighted average of 6 workload dimensions (standard for most HCI studies).</div>
+          </button>
 
-            <button id="btn-scale-20" class="scale-card" type="button" aria-pressed="false">
-              <div class="card-title">0 – 20 Scale (21-Point Scale)</div>
-              <div class="card-desc">21-point scale with 5-point increment ticks (Hart & Staveland 1988 paper).</div>
-            </button>
-          </div>
+          <button id="btn-mode-weighted" class="mode-card" type="button" aria-pressed="false">
+            <Scale size={22} class="card-icon" />
+            <div class="card-title">Weighted NASA-TLX</div>
+            <div class="card-desc">Includes 15 pairwise comparisons to determine personal dimension weights.</div>
+          </button>
+
+          <button id="btn-mode-stlx" class="mode-card" type="button" aria-pressed="false">
+            <Sparkles size={22} class="card-icon" />
+            <div class="card-title">Shortened NASA-TLX (S-TLX)</div>
+            <div class="card-desc">Streamlined 3-dimension evaluation (Mental, Physical, & Performance).</div>
+          </button>
         </div>
       </section>
 
-      <!-- Session Meta Inputs -->
-      <section class="setup-section">
+      <!-- STEP 2: Scale Range -->
+      <section id="step-2-scale" class="step-section hidden">
+        <h2 class="step-title"><span class="step-badge">Step 2</span> Select Scale Range</h2>
+        <div class="scale-range-grid">
+          <button id="btn-scale-100" class="scale-card" type="button" aria-pressed="false">
+            <div class="card-title">0 – 100 Scale (Continuous / 100-Point)</div>
+            <div class="card-desc">Standard digital 100-point rating scale (default).</div>
+          </button>
+
+          <button id="btn-scale-20" class="scale-card" type="button" aria-pressed="false">
+            <div class="card-title">0 – 20 Scale (21-Point Scale)</div>
+            <div class="card-desc">21-point scale with 5-point increment ticks (Hart & Staveland 1988 paper).</div>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 3: Data Save Option -->
+      <section id="step-3-save" class="step-section hidden">
+        <h2 class="step-title"><span class="step-badge">Step 3</span> Select Data Save Option</h2>
+        <ResearchSaveOptions sheetName="NASA_TLX" />
+      </section>
+
+      <!-- STEP 4: Participant Setup & Questions -->
+      <section id="step-4-eval" class="step-section hidden">
+        <h2 class="step-title"><span class="step-badge">Step 4</span> Participant Details & Workload Rating</h2>
+
         <div class="fields-grid">
           <div class="field-group">
             <label for="participant-id">Participant ID <span class="required">*</span></label>
@@ -120,67 +141,65 @@ for (let i = 0; i < dimensionKeys.length; i++) {
           </div>
         </div>
 
-        <ResearchSaveOptions sheetName="NASA_TLX" />
-      </section>
-
-      <!-- Pairwise Section (Shown only in Weighted mode) -->
-      <section id="pairwise-section" class="pairwise-section hidden">
-        <h2 id="pairwise-heading" class="section-heading">Pairwise Dimension Comparison (Weights)</h2>
-        <p class="section-subtext">For each pair, click the factor that contributed MORE to the workload of the task.</p>
-        <div id="pairwise-progress" class="pairwise-progress-text" role="status" aria-live="polite" aria-atomic="true">Pair 1 of 15</div>
-        
-        <div class="pairwise-choice-box" role="group" aria-labelledby="pairwise-heading pairwise-progress">
-          <button id="pair-btn-a" class="pairwise-option-btn" type="button">Option A</button>
-          <span class="vs-span">VS</span>
-          <button id="pair-btn-b" class="pairwise-option-btn" type="button">Option B</button>
+        <!-- Pairwise Section (Shown only in Weighted mode) -->
+        <div id="pairwise-section" class="pairwise-section hidden">
+          <h3 id="pairwise-heading" class="section-heading">Pairwise Dimension Comparison (Weights)</h3>
+          <p class="section-subtext">For each pair, click the factor that contributed MORE to the workload of the task.</p>
+          <div id="pairwise-progress" class="pairwise-progress-text" role="status" aria-live="polite" aria-atomic="true">Pair 1 of 15</div>
+          
+          <div class="pairwise-choice-box" role="group" aria-labelledby="pairwise-heading pairwise-progress">
+            <button id="pair-btn-a" class="pairwise-option-btn" type="button">Option A</button>
+            <span class="vs-span">VS</span>
+            <button id="pair-btn-b" class="pairwise-option-btn" type="button">Option B</button>
+          </div>
         </div>
-      </section>
 
-      <!-- Subscales Rating Section -->
-      <section class="ratings-section">
-        <h2 id="ratings-heading" class="section-heading">Workload Subscale Ratings (0 - 100)</h2>
-        <p id="ratings-subtext" class="section-subtext">Move each slider to rate the workload experienced for each dimension.</p>
+        <!-- Subscales Rating Section -->
+        <div class="ratings-section">
+          <h3 id="ratings-heading" class="section-heading">Workload Subscale Ratings (0 - 100)</h3>
+          <p id="ratings-subtext" class="section-subtext">Move each slider to rate the workload experienced for each dimension.</p>
 
-        <div class="sliders-list">
-          {dimensions.map((dim) => (
-            <fieldset class="slider-card" data-key={dim.key}>
-              <div class="slider-header">
-                <div>
-                  <legend id={`label-${dim.key}`} class="dim-title">{dim.title}</legend>
-                  <p id={`description-${dim.key}`} class="dim-desc">{dim.desc}</p>
+          <div class="sliders-list">
+            {dimensions.map((dim) => (
+              <fieldset class="slider-card" data-key={dim.key}>
+                <div class="slider-header">
+                  <div>
+                    <legend id={`label-${dim.key}`} class="dim-title">{dim.title}</legend>
+                    <p id={`description-${dim.key}`} class="dim-desc">{dim.desc}</p>
+                  </div>
+                  <span class="slider-val-badge" id={`val-badge-${dim.key}`}>50</span>
                 </div>
-                <span class="slider-val-badge" id={`val-badge-${dim.key}`}>50</span>
-              </div>
 
-              <div class="slider-input-row">
-                <span class="range-anchor range-anchor-min">Low (0)</span>
-                <input 
-                  type="range" 
-                  id={`slider-${dim.key}`}
-                  min="0" 
-                  max="100" 
-                  step="5" 
-                  value="50" 
-                  class="tlx-slider" 
-                  data-key={dim.key} 
-                  aria-labelledby={`label-${dim.key}`}
-                  aria-describedby={`description-${dim.key}`}
-                />
-                <span class="range-anchor range-anchor-max">High (100)</span>
-              </div>
-            </fieldset>
-          ))}
+                <div class="slider-input-row">
+                  <span class="range-anchor range-anchor-min">Low (0)</span>
+                  <input 
+                    type="range" 
+                    id={`slider-${dim.key}`}
+                    min="0" 
+                    max="100" 
+                    step="5" 
+                    value="50" 
+                    class="tlx-slider" 
+                    data-key={dim.key} 
+                    aria-labelledby={`label-${dim.key}`}
+                    aria-describedby={`description-${dim.key}`}
+                  />
+                  <span class="range-anchor range-anchor-max">High (100)</span>
+                </div>
+              </fieldset>
+            ))}
+          </div>
+        </div>
+
+        <div id="alert-box" class="tool-alert hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+        <div class="submit-action-row">
+          <button id="submit-tlx-btn" class="submit-btn" type="button">
+            <Sparkles size={18} />
+            <span>Submit & View Workload Score</span>
+          </button>
         </div>
       </section>
-
-      <div id="alert-box" class="tool-alert hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
-
-      <div class="submit-action-row">
-        <button id="submit-tlx-btn" class="submit-btn" type="button">
-          <Sparkles size={18} />
-          <span>Calculate Workload & Save Response</span>
-        </button>
-      </div>
     </div>
 
     <!-- Results Card -->
@@ -237,6 +256,104 @@ for (let i = 0; i < dimensionKeys.length; i++) {
   .page-subtitle { font-size: 1.02rem; color: var(--text-muted); line-height: 1.55; }
 
   .app-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); }
+  
+  .config-summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    background-color: var(--bg-pill);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+  }
+  .summary-pills {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .summary-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+  .pill-divider {
+    color: var(--border-color);
+    font-weight: 400;
+    margin-right: 0.25rem;
+  }
+  .pill-label {
+    color: var(--text-subtle);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+  }
+  .pill-value {
+    color: var(--accent-blue);
+    font-weight: 700;
+    background-color: rgba(37, 99, 235, 0.08);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+  }
+  .btn-edit-config {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-subtle);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.3rem 0.65rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-edit-config:hover {
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    background-color: var(--bg-card);
+  }
+
+  .step-section {
+    margin-bottom: 2.25rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 1px dashed var(--border-color);
+  }
+  .step-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .step-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1.15rem;
+  }
+  .step-badge {
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background-color: rgba(37, 99, 235, 0.1);
+    color: var(--accent-blue);
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(37, 99, 235, 0.25);
+  }
+
   .section-heading { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
   .section-subtext { font-size: 0.9rem; color: var(--text-subtle); margin-top: -0.5rem; margin-bottom: 1.5rem; }
 
@@ -373,6 +490,21 @@ for (let i = 0; i < dimensionKeys.length; i++) {
   let pairIdx = 0;
   const weights: Record<string, number> = { Mental: 0, Physical: 0, Temporal: 0, Performance: 0, Effort: 0, Frustration: 0 };
 
+  const configSummaryBar = document.getElementById('config-summary-bar');
+  const summaryPillMethod = document.getElementById('summary-pill-method');
+  const summaryPillScale = document.getElementById('summary-pill-scale');
+  const summaryPillSave = document.getElementById('summary-pill-save');
+
+  const summaryValMethod = document.getElementById('summary-val-method');
+  const summaryValScale = document.getElementById('summary-val-scale');
+  const summaryValSave = document.getElementById('summary-val-save');
+
+  const step1 = document.getElementById('step-1-method');
+  const step2 = document.getElementById('step-2-scale');
+  const step3 = document.getElementById('step-3-save');
+  const step4 = document.getElementById('step-4-eval');
+  const btnEditConfig = document.getElementById('btn-edit-config');
+
   const btnRaw = document.getElementById('btn-mode-raw');
   const btnWeighted = document.getElementById('btn-mode-weighted');
   const btnStlx = document.getElementById('btn-mode-stlx');
@@ -386,6 +518,9 @@ for (let i = 0; i < dimensionKeys.length; i++) {
   const pairBtnB = document.getElementById('pair-btn-b');
   const alertBox = document.getElementById('alert-box');
   const saveOptions = initializeResearchSaveOptions();
+
+  const cardSheets = document.getElementById('card-option-sheets');
+  const cardCsv = document.getElementById('card-option-csv');
 
   function updateScaleRange(maxVal: number) {
     activeScaleMax = maxVal;
@@ -412,22 +547,6 @@ for (let i = 0; i < dimensionKeys.length; i++) {
       if (maxAnchor) maxAnchor.textContent = `High (${activeScaleMax})`;
     });
   }
-
-  btnScale100?.addEventListener('click', () => {
-    btnScale100.classList.add('active');
-    btnScale20?.classList.remove('active');
-    btnScale100.setAttribute('aria-pressed', 'true');
-    btnScale20?.setAttribute('aria-pressed', 'false');
-    updateScaleRange(100);
-  });
-
-  btnScale20?.addEventListener('click', () => {
-    btnScale20.classList.add('active');
-    btnScale100?.classList.remove('active');
-    btnScale20.setAttribute('aria-pressed', 'true');
-    btnScale100?.setAttribute('aria-pressed', 'false');
-    updateScaleRange(20);
-  });
 
   function setEvaluationMode(mode: string) {
     activeMode = mode;
@@ -464,9 +583,80 @@ for (let i = 0; i < dimensionKeys.length; i++) {
     }
   }
 
-  btnRaw?.addEventListener('click', () => setEvaluationMode('raw'));
-  btnWeighted?.addEventListener('click', () => setEvaluationMode('weighted'));
-  btnStlx?.addEventListener('click', () => setEvaluationMode('stlx'));
+  // Step 1: Select Method
+  function selectMethod(mode: string, labelText: string) {
+    setEvaluationMode(mode);
+
+    if (summaryValMethod) summaryValMethod.textContent = labelText;
+    summaryPillMethod?.classList.remove('hidden');
+    configSummaryBar?.classList.remove('hidden');
+
+    step1?.classList.add('hidden');
+    step2?.classList.remove('hidden');
+    step2?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  btnRaw?.addEventListener('click', () => selectMethod('raw', 'Raw NASA-TLX'));
+  btnWeighted?.addEventListener('click', () => selectMethod('weighted', 'Weighted NASA-TLX'));
+  btnStlx?.addEventListener('click', () => selectMethod('stlx', 'Shortened NASA-TLX'));
+
+  // Step 2: Select Scale Range
+  function selectScale(maxVal: number, labelText: string) {
+    updateScaleRange(maxVal);
+
+    btnScale100?.classList.toggle('active', maxVal === 100);
+    btnScale20?.classList.toggle('active', maxVal === 20);
+
+    if (summaryValScale) summaryValScale.textContent = labelText;
+    summaryPillScale?.classList.remove('hidden');
+
+    step2?.classList.add('hidden');
+    step3?.classList.remove('hidden');
+    step3?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  btnScale100?.addEventListener('click', () => selectScale(100, '0 – 100 Scale'));
+  btnScale20?.addEventListener('click', () => selectScale(20, '0 – 20 Scale'));
+
+  // Step 3: Select Save Option
+  function selectSaveOption(isSheets: boolean) {
+    if (summaryValSave) summaryValSave.textContent = isSheets ? 'Google Sheets' : 'Download CSV';
+    summaryPillSave?.classList.remove('hidden');
+
+    step3?.classList.add('hidden');
+    step4?.classList.remove('hidden');
+
+    const saveCardsGrid = document.querySelector('.save-cards-grid');
+    if (saveCardsGrid) saveCardsGrid.classList.add('hidden');
+
+    const sheetsInputsRow = document.getElementById('sheets-inputs-row');
+    if (sheetsInputsRow) {
+      sheetsInputsRow.classList.toggle('hidden', !isSheets);
+      step4?.prepend(sheetsInputsRow);
+    }
+
+    step4?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  cardSheets?.addEventListener('click', () => selectSaveOption(true));
+  cardCsv?.addEventListener('click', () => selectSaveOption(false));
+
+  btnEditConfig?.addEventListener('click', () => {
+    step1?.classList.remove('hidden');
+    step2?.classList.add('hidden');
+    step3?.classList.add('hidden');
+    step4?.classList.add('hidden');
+
+    const saveCardsGrid = document.querySelector('.save-cards-grid');
+    if (saveCardsGrid) saveCardsGrid.classList.remove('hidden');
+
+    summaryPillMethod?.classList.add('hidden');
+    summaryPillScale?.classList.add('hidden');
+    summaryPillSave?.classList.add('hidden');
+    configSummaryBar?.classList.add('hidden');
+
+    step1?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
 
   function renderPair() {
     if (pairIdx < pairwiseCombos.length) {

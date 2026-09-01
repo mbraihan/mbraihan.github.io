@@ -31,45 +31,47 @@ const { sheetName } = Astro.props;
   </div>
 
   <div id="sheets-inputs-row" class="sheets-inputs-row">
-    <div class="field-group">
-      <label for="sheet-name">Sheet / Tab Name</label>
-      <input
-        type="text"
-        id="sheet-name"
-        value={sheetName}
-        class="form-input"
-      />
+    <div class="fields-grid">
+      <div class="field-group">
+        <label for="sheet-name">Sheet / Tab Name <span class="required">*</span></label>
+        <input
+          type="text"
+          id="sheet-name"
+          value={sheetName}
+          class="form-input"
+          placeholder="e.g. Sheet1 or NASA_TLX"
+        />
+      </div>
+      <div class="field-group">
+        <label for="sheet-url">Google Sheet Link <span class="required">*</span></label>
+        <input
+          type="url"
+          id="sheet-url"
+          placeholder="https://docs.google.com/spreadsheets/d/.../edit"
+          class="form-input"
+          aria-describedby="sheet-url-storage-note sheet-url-error"
+        />
+        <span id="sheet-url-error" class="field-error"></span>
+      </div>
     </div>
-    <div class="field-group flex-2">
-      <label for="sheet-url">Google Sheet Link</label>
-      <input
-        type="url"
-        id="sheet-url"
-        placeholder="https://docs.google.com/spreadsheets/d/.../edit"
-        class="form-input"
-        aria-describedby="sheet-url-storage-note sheet-url-error"
-      />
-      <span id="sheet-url-error" class="field-error"></span>
-    </div>
-  </div>
 
-  <details class="sheets-setup-guide">
-    <summary class="guide-summary">
-      <span>💡 How to connect your Google Sheet (10-second setup)</span>
-    </summary>
-    <div class="guide-content">
-      <ol class="guide-steps">
-        <li>Create or open your target Google Sheet.</li>
-        <li>Click <strong>Share</strong> (top right) &rarr; under <em>General access</em>, change to <strong>Anyone with the link can edit</strong>.</li>
-        <li>Copy the Google Sheet link from your browser address bar and paste it into the input box above!</li>
-      </ol>
-      <details class="advanced-script-guide">
-        <summary class="advanced-summary">Advanced: Using a custom Google Apps Script deployment</summary>
-        <div class="advanced-content">
-          <p>If you prefer to deploy your own private script instead of sharing your sheet link, copy the script below, deploy it as a Web App (access: Anyone), and paste your <code>/exec</code> URL above:</p>
-          <div class="script-code-box">
-            <button type="button" id="copy-apps-script-btn" class="copy-script-btn">Copy Script</button>
-            <pre><code>function doPost(e) &#123;
+    <details class="sheets-setup-guide">
+      <summary class="guide-summary">
+        <span>💡 How to connect your Google Sheet (10-second setup)</span>
+      </summary>
+      <div class="guide-content">
+        <ol class="guide-steps">
+          <li>Create or open your target Google Sheet.</li>
+          <li>Click <strong>Share</strong> (top right) &rarr; under <em>General access</em>, change to <strong>Anyone with the link can edit</strong>.</li>
+          <li>Copy the Google Sheet link from your browser address bar and paste it into the input box above!</li>
+        </ol>
+        <details class="advanced-script-guide">
+          <summary class="advanced-summary">Advanced: Using a custom Google Apps Script deployment</summary>
+          <div class="advanced-content">
+            <p>If you prefer to deploy your own private script instead of sharing your sheet link, copy the script below, deploy it as a Web App (access: Anyone), and paste your <code>/exec</code> URL above:</p>
+            <div class="script-code-box">
+              <button type="button" id="copy-apps-script-btn" class="copy-script-btn">Copy Script</button>
+              <pre><code>function doPost(e) &#123;
   var lock = LockService.getScriptLock();
   lock.tryLock(10000);
   try &#123;
@@ -107,15 +109,16 @@ const { sheetName } = Astro.props;
     lock.releaseLock();
   &#125;
 &#125;</code></pre>
+            </div>
           </div>
-        </div>
-      </details>
-    </div>
-  </details>
+        </details>
+      </div>
+    </details>
 
-  <p id="sheet-url-storage-note" class="storage-note">
-    This URL is remembered only in this browser on this device.
-  </p>
+    <p id="sheet-url-storage-note" class="storage-note">
+      This URL is remembered only in this browser on this device.
+    </p>
+  </div>
 </div>
 
 <script>
@@ -243,12 +246,16 @@ const { sheetName } = Astro.props;
   }
 
   .sheets-inputs-row {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
-    margin-top: 0.5rem;
-    padding-top: 1rem;
-    border-top: 1px dashed var(--border-color);
+    margin-bottom: 1.5rem;
+  }
+
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
   }
 
   .field-group {
@@ -257,14 +264,14 @@ const { sheetName } = Astro.props;
     gap: 0.4rem;
   }
 
-  .field-group.flex-2 {
-    grid-column: span 1;
-  }
-
   label {
     color: var(--text-main);
     font-size: 0.88rem;
     font-weight: 600;
+  }
+
+  .required {
+    color: #ef4444;
   }
 
   .form-input {
@@ -277,11 +284,19 @@ const { sheetName } = Astro.props;
     color: var(--text-main);
     font: inherit;
     font-size: 0.92rem;
+    box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.06), inset -3px -3px 6px rgba(255, 255, 255, 0.7);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  :global([data-theme='dark']) .form-input {
+    box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.7), inset -4px -4px 10px rgba(255, 255, 255, 0.04);
   }
 
   .form-input:focus {
-    border-color: var(--accent-blue);
     outline: none;
+    border-color: var(--accent-blue);
+    background-color: var(--bg-card);
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(37, 99, 235, 0.25), 0 0 18px rgba(37, 99, 235, 0.45);
   }
 
   .sr-only {
