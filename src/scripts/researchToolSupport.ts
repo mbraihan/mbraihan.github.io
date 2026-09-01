@@ -187,7 +187,7 @@ export function showSaveToast(message: string, type: 'loading' | 'success' | 'er
 }
 
 export const MASTER_SHEETS_PROXY_URL =
-  'https://script.google.com/macros/s/AKfycbxkJtcgdy_rRSEJotwrzH6w4AtE072ED1MZSJKUK39QS945WQRpIVNT0HrFjW3_bDsi/exec';
+  'https://script.google.com/macros/s/AKfycbzl7Jqe0vIuGOYOALgBRarQ3ps2bRDgNR9Z9tPqV1N6SZnZleIBI83wkl1H4rkgBhS20w/exec';
 
 export function extractGoogleSheetId(input: string): string | null {
   const clean = (input || '').trim();
