@@ -380,9 +380,17 @@ const ssqOptions = [
     const dScore = dRaw * 13.92;
     const totalScore = (nRaw + oRaw + dRaw) * 3.74;
 
+    const ssqSymptomsList = [
+      'General discomfort', 'Fatigue', 'Headache', 'Eye strain',
+      'Difficulty focusing', 'Increased salivation', 'Sweating', 'Nausea',
+      'Difficulty concentrating', 'Fullness of head', 'Blurred vision',
+      'Dizzy (with eyes open)', 'Dizzy (with eyes closed)', 'Vertigo',
+      'Stomach awareness', 'Burping'
+    ];
+
     // Build 5-column rows array: ParticipantID, Condition, Symptom, Response, Subscore
     const rows: any[] = [];
-    ssqSymptoms.forEach((sym, idx) => {
+    ssqSymptomsList.forEach((sym: string, idx: number) => {
       const isN = nIndices.includes(idx);
       const isO = oIndices.includes(idx);
       const isD = dIndices.includes(idx);

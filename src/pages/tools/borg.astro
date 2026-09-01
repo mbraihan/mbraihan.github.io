@@ -367,9 +367,22 @@ const borgCR10Scale = [
     const after = ratings[2] || 0;
     const peak = Math.max(before, during, after);
 
+    const borgLabels: Record<number, string> = {
+      0: 'Nothing at all',
+      1: 'Very Weak',
+      2: 'Weak',
+      3: 'Moderate',
+      4: 'Somewhat Strong',
+      5: 'Strong',
+      6: 'Moderate/Strong',
+      7: 'Very Strong',
+      8: 'Very Very Strong',
+      9: 'Nearly Maximal',
+      10: 'Extremely Strong (Maximal)',
+    };
+
     const getBorgLabel = (val: number) => {
-      const item = borgCR10Scale.find(b => b.val === val);
-      return item ? item.label : '';
+      return borgLabels[val] || '';
     };
 
     // Build 5-column rows array: ParticipantID, Condition, Timepoint, Rating, Descriptor
