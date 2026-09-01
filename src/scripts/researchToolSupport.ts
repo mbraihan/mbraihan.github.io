@@ -186,6 +186,15 @@ export function showSaveToast(message: string, type: 'loading' | 'success' | 'er
   }
 }
 
+export const MASTER_SHEETS_PROXY_URL =
+  'https://script.google.com/macros/s/AKfycbxkJtcgdy_rRSEJotwrzH6w4AtE072ED1MZSJKUK39QS945WQRpIVNT0HrFjW3_bDsi/exec';
+
+export function extractGoogleSheetId(input: string): string | null {
+  const clean = (input || '').trim();
+  const match = clean.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : null;
+}
+
 export async function submitResearchData(options: {
   endpoint: string;
   sheetName: string;
@@ -193,22 +202,43 @@ export async function submitResearchData(options: {
   payload: Record<string, unknown>;
 }) {
   const endpoint = options.endpoint.trim();
-  let parsedUrl: URL;
-
-  try {
-    parsedUrl = new URL(endpoint);
-  } catch {
-    throw new Error('Please enter a valid Google Sheets Web App URL.');
+  if (!endpoint) {
+    throw new Error('Please enter a Google Sheet link or Web App URL.');
   }
 
-  if (endpoint.includes('docs.google.com/spreadsheets/d/')) {
-    throw new Error(
-      'You entered a Google Sheet document link. Google Sheets requires a deployed Web App URL (ending in /exec) to save data. Click "How to connect your Google Sheet" in the form above for the 1-minute setup code!',
-    );
+  let targetUrl = endpoint;
+  const spreadsheetId = extractGoogleSheetId(endpoint);
+
+  if (spreadsheetId) {
+    targetUrl = MASTER_SHEETS_PROXY_URL;
+  } else {
+    try {
+      new URL(endpoint);
+    } catch {
+      throw new Error(
+        'Please enter a valid Google Sheet link (e.g., https://docs.google.com/spreadsheets/d/...) or Apps Script URL.',
+      );
+    }
   }
+
+  const rows = Array.isArray(options.payload?.rows)
+    ? options.payload.rows
+    : [
+        {
+          tool: options.tool,
+          submittedAt: new Date().toISOString(),
+          ...options.payload,
+        },
+      ];
 
   let payloadData: string;
-  if (options.payload && Array.isArray(options.payload.rows)) {
+  if (spreadsheetId) {
+    payloadData = JSON.stringify({
+      spreadsheetId,
+      sheetName: options.sheetName,
+      rows,
+    });
+  } else if (options.payload && Array.isArray(options.payload.rows)) {
     payloadData = JSON.stringify({
       sheetName: options.sheetName,
       rows: options.payload.rows,
@@ -225,7 +255,7 @@ export async function submitResearchData(options: {
   try {
     showSaveToast('Saving data to Google Sheets...', 'loading');
     // Send via fetch mode no-cors for guaranteed cross-origin delivery to script.google.com
-    await fetch(endpoint, {
+    await fetch(targetUrl, {
       method: 'POST',
       mode: 'no-cors',
       cache: 'no-cache',
