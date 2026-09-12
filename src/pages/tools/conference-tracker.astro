@@ -145,19 +145,6 @@ const getNextDeadline = (venue: (typeof conferenceVenues)[number]) =>
 const getConferenceDate = (venue: (typeof conferenceVenues)[number]) =>
   venue.milestones.find((milestone) => milestone.kind === 'Conference');
 
-const resubmissionRoutes = [
-  {
-    sourceId: 'chi-2027',
-    notificationLabel: 'Reviews released',
-    targetIds: ['dis-2027', 'mobilehci-2027'],
-  },
-  {
-    sourceId: 'ieee-vr-2027',
-    notificationLabel: 'Initial notification',
-    targetIds: ['dis-2027', 'mobilehci-2027'],
-  },
-];
-
 const getDaysBetween = (start: string, end: string) =>
   Math.round(
     (Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) /
@@ -170,41 +157,59 @@ const getWindowRisk = (days: number) => {
   return { label: 'Workable', className: 'workable' };
 };
 
-const resubmissionRows = resubmissionRoutes.flatMap((route) => {
-  const source = conferenceVenues.find((venue) => venue.id === route.sourceId);
-  const notification = source?.milestones.find(
-    (milestone) =>
-      milestone.kind === 'Notification' &&
-      milestone.label === route.notificationLabel,
-  );
-  if (!source || !notification) return [];
+const recentDate = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-  const targets = route.targetIds.flatMap((targetId) => {
-    const venue = conferenceVenues.find((item) => item.id === targetId);
-    if (!venue) return [];
-    const deadline = venue.milestones
-      .filter(
-        (milestone) =>
-          (milestone.kind === 'Abstract' || milestone.kind === 'Paper') &&
-          milestone.date > notification.date &&
-          !milestone.label.toLowerCase().includes('revised'),
-      )
-      .sort((a, b) => a.date.localeCompare(b.date))[0];
-    const days = deadline
-      ? getDaysBetween(notification.date, deadline.date)
-      : null;
+const upcomingNotifications = conferenceVenues
+  .flatMap((venue) =>
+    venue.milestones
+      .filter((m) => m.kind === 'Notification' && m.date >= recentDate)
+      .map((m) => ({ venue, milestone: m })),
+  )
+  .sort((a, b) => a.milestone.date.localeCompare(b.milestone.date));
 
-    return [
-      {
-        venue: venue.name,
-        deadline,
-        days,
-        risk: days === null ? null : getWindowRisk(days),
-      },
-    ];
+const uniqueSources: typeof upcomingNotifications = [];
+const seenVenueIds = new Set();
+for (const item of upcomingNotifications) {
+  if (!seenVenueIds.has(item.venue.id)) {
+    uniqueSources.push(item);
+    seenVenueIds.add(item.venue.id);
+    if (uniqueSources.length >= 3) break;
+  }
+}
+
+const resubmissionRows = uniqueSources.map((sourceItem) => {
+  const sourceVenue = sourceItem.venue;
+  const notification = sourceItem.milestone;
+
+  const potentialTargets = conferenceVenues
+    .filter((v) => v.id !== sourceVenue.id)
+    .map((v) => {
+      const nextDeadline = v.milestones
+        .filter(
+          (m) =>
+            (m.kind === 'Abstract' || m.kind === 'Paper') &&
+            m.date > notification.date &&
+            !m.label.toLowerCase().includes('revised') &&
+            !m.label.toLowerCase().includes('resubmission'),
+        )
+        .sort((a, b) => a.date.localeCompare(b.date))[0];
+      return { venue: v, deadline: nextDeadline };
+    })
+    .filter((t) => t.deadline !== undefined)
+    .sort((a, b) => a.deadline.date.localeCompare(b.deadline.date))
+    .slice(0, 3);
+
+  const targets = potentialTargets.map((target) => {
+    const days = getDaysBetween(notification.date, target.deadline!.date);
+    return {
+      venue: target.venue.name,
+      deadline: target.deadline,
+      days,
+      risk: getWindowRisk(days),
+    };
   });
 
-  return [{ source: source.name, notification, targets }];
+  return { source: sourceVenue.name, notification, targets };
 });
 ---
 
