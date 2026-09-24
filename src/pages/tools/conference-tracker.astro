@@ -50,6 +50,39 @@ const getCutoffLabel = (milestone: ConferenceMilestone) =>
     ? `${milestone.cutoffTime || '23:59'} ${milestone.timeZone}`
     : '';
 
+const getMilestoneStageLabel = (milestone: ConferenceMilestone) => {
+  const label = milestone.label.toLowerCase();
+  if (
+    label.includes('revis') ||
+    label.includes('resubmission') ||
+    label.includes('updated submission')
+  ) {
+    return 'Revision';
+  }
+  if (label.includes('rebuttal')) {
+    return 'Rebuttal';
+  }
+  if (label.includes('camera')) {
+    return 'Camera-ready';
+  }
+  if (label.includes('presentation video')) {
+    return 'Presentation video';
+  }
+  if (label.includes('registration')) {
+    return 'Registration';
+  }
+  if (label.includes('abstract')) {
+    return 'Abstract';
+  }
+  if (label.includes('submission site')) {
+    return 'Submission site';
+  }
+  return milestone.kind;
+};
+
+const getMilestoneStageSlug = (milestone: ConferenceMilestone) =>
+  getMilestoneStageLabel(milestone).toLowerCase().replace(/\s+/g, '-');
+
 const upcomingMilestones = conferenceVenues
   .flatMap((venue) =>
     venue.milestones
@@ -70,9 +103,7 @@ const maxUpcomingDate = new Date(Date.now() + 45 * 24 * 60 * 60 * 1000)
 const deadlineMilestones = upcomingMilestones.filter(
   (milestone) =>
     (milestone.kind === 'Abstract' || milestone.kind === 'Paper') &&
-    milestone.date <= maxUpcomingDate &&
-    !milestone.label.toLowerCase().includes('revised') &&
-    !milestone.label.toLowerCase().includes('resubmission'),
+    milestone.date <= maxUpcomingDate,
 );
 
 const timelineMilestones = upcomingMilestones;
@@ -106,9 +137,14 @@ const statItems = [
   {
     label: 'Active deadlines',
     value: conferenceVenues.filter((venue) =>
-      ['Submission', 'Abstract', 'Paper', 'Rebuttal', 'Camera', 'Presentation-Video'].includes(
-        venue.status,
-      ),
+      [
+        'Submission',
+        'Abstract',
+        'Paper',
+        'Rebuttal',
+        'Camera',
+        'Presentation-Video',
+      ].includes(venue.status),
     ).length,
     icon: CheckCircle2,
     color: 'green',
@@ -157,12 +193,10 @@ const getWindowRisk = (days: number) => {
   return { label: 'Workable', className: 'workable' };
 };
 
-const recentDate = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-
 const upcomingNotifications = conferenceVenues
   .flatMap((venue) =>
     venue.milestones
-      .filter((m) => m.kind === 'Notification' && m.date >= recentDate)
+      .filter((m) => m.kind === 'Notification' && m.date >= today)
       .map((m) => ({ venue, milestone: m })),
   )
   .sort((a, b) => a.milestone.date.localeCompare(b.milestone.date));
@@ -173,9 +207,22 @@ for (const item of upcomingNotifications) {
   if (!seenVenueIds.has(item.venue.id)) {
     uniqueSources.push(item);
     seenVenueIds.add(item.venue.id);
-    if (uniqueSources.length >= 3) break;
+    if (uniqueSources.length >= 5) break;
   }
 }
+
+const isResubmissionTargetDeadline = (milestone: ConferenceMilestone) => {
+  if (milestone.kind !== 'Abstract' && milestone.kind !== 'Paper') return false;
+  const label = milestone.label.toLowerCase();
+  return (
+    !label.includes('camera') &&
+    !label.includes('rebuttal') &&
+    !label.includes('revised') &&
+    !label.includes('revision') &&
+    !label.includes('resubmission') &&
+    !label.includes('updated')
+  );
+};
 
 const resubmissionRows = uniqueSources.map((sourceItem) => {
   const sourceVenue = sourceItem.venue;
@@ -187,10 +234,9 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
       const nextDeadline = v.milestones
         .filter(
           (m) =>
-            (m.kind === 'Abstract' || m.kind === 'Paper') &&
-            m.date > notification.date &&
-            !m.label.toLowerCase().includes('revised') &&
-            !m.label.toLowerCase().includes('resubmission'),
+            isResubmissionTargetDeadline(m) &&
+            m.date >= today &&
+            m.date > notification.date,
         )
         .sort((a, b) => a.date.localeCompare(b.date))[0];
       return { venue: v, deadline: nextDeadline };
@@ -307,7 +353,7 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
                   <tr
                     class="timeline-item"
                     data-timeline-date={milestone.date}
-                    data-kind={milestone.kind.toLowerCase()}
+                    data-kind={getMilestoneStageSlug(milestone)}
                   >
                     <td>
                       <time datetime={milestone.date}>
@@ -344,6 +390,9 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
         <div class="timeline-legend" aria-label="Timeline legend">
           <span><i class="dot-abstract"></i>Abstract</span>
           <span><i class="dot-paper"></i>Paper</span>
+          <span><i class="dot-revision"></i>Revision</span>
+          <span><i class="dot-rebuttal"></i>Rebuttal</span>
+          <span><i class="dot-camera-ready"></i>Camera-ready</span>
           <span><i class="dot-notification"></i>Notification</span>
           <span><i class="dot-conference"></i>Conference</span>
           <span class="timezone-key">AoE = Anywhere on Earth (UTC−12)</span>
@@ -362,22 +411,12 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
               deadlineMilestones.slice(0, 6).map((milestone) => (
                 <li>
                   <span
-                    class={`deadline-dot kind-${milestone.kind.toLowerCase()}`}
+                    class={`deadline-dot kind-${getMilestoneStageSlug(milestone)}`}
                     aria-hidden="true"
                   />
                   <strong>{milestone.venue}</strong>
                   <span class="upcoming-stage">
-                    <span>
-                      {milestone.label.toLowerCase().includes('presentation video')
-                        ? 'Presentation video'
-                        : milestone.label.toLowerCase().includes('registration')
-                          ? 'Registration'
-                          : milestone.label.toLowerCase().includes('camera')
-                            ? 'Camera-ready'
-                            : milestone.label.toLowerCase().includes('submission site')
-                              ? 'Submission site'
-                              : milestone.kind}
-                    </span>
+                    <span>{getMilestoneStageLabel(milestone)}</span>
                     <small>{getCutoffLabel(milestone)}</small>
                   </span>
                   <time datetime={milestone.date}>
@@ -386,8 +425,8 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
                   <button
                     class="deadline-calendar-button"
                     type="button"
-                    title={`Add ${milestone.venue} ${milestone.kind.toLowerCase()} deadline to calendar`}
-                    aria-label={`Add ${milestone.venue} ${milestone.kind.toLowerCase()} deadline to calendar`}
+                    title={`Add ${milestone.venue} ${getMilestoneStageLabel(milestone).toLowerCase()} deadline to calendar`}
+                    aria-label={`Add ${milestone.venue} ${getMilestoneStageLabel(milestone).toLowerCase()} deadline to calendar`}
                     data-calendar
                     data-calendar-mode="deadline"
                     data-calendar-title={`Deadline: ${milestone.venue} — ${milestone.label}`}
@@ -691,7 +730,7 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
                             target="_blank"
                             rel="noreferrer"
                           >
-                            Official source
+                            Official Website
                             <ExternalLink size={15} aria-hidden="true" />
                             <span class="sr-only">(opens in a new tab)</span>
                           </a>
@@ -1104,9 +1143,28 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
     background: #7c3aed !important;
   }
   .timeline-item[data-kind='abstract'] .timeline-dot,
+  .timeline-item[data-kind='submission-site'] .timeline-dot,
   .dot-abstract,
-  .kind-abstract {
+  .kind-abstract,
+  .kind-submission-site {
     background: #2563eb !important;
+  }
+  .timeline-item[data-kind='revision'] .timeline-dot,
+  .dot-revision,
+  .kind-revision {
+    background: #d97706 !important;
+  }
+  .timeline-item[data-kind='rebuttal'] .timeline-dot,
+  .dot-rebuttal,
+  .kind-rebuttal {
+    background: #db2777 !important;
+  }
+  .timeline-item[data-kind='camera-ready'] .timeline-dot,
+  .timeline-item[data-kind='camera'] .timeline-dot,
+  .dot-camera-ready,
+  .kind-camera,
+  .kind-camera-ready {
+    background: #0d9488 !important;
   }
 
   .timeline-event {
