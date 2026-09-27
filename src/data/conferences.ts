@@ -279,7 +279,7 @@ export const conferenceVenues: ConferenceVenue[] = [
     name: 'ISS 2026',
     fullName: 'ACM International Conference on Interactive Surfaces and Spaces',
     category: 'Design / UbiComp',
-    status: 'Rebuttal',
+    status: 'Review',
     location: 'Turin, Italy',
     sourceUrl: 'https://iss.acm.org/2026/',
     verified: true,

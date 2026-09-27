@@ -647,7 +647,7 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
                             </span>
                             <div class="conference-title-copy">
                               <div class="title-line">
-                                <h4>{venue.name}</h4>
+                                <h4 title={venue.fullName}>{venue.name}</h4>
                                 <a
                                   class="rank-badge"
                                   href={venue.rankUrl}
@@ -661,7 +661,6 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
                                   </span>
                                 </a>
                               </div>
-                              <p>{venue.fullName}</p>
                             </div>
                           </div>
                           <span
@@ -683,14 +682,31 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
                                   <time datetime={nextDeadline.date}>
                                     {formatDate(nextDeadline.date)}
                                   </time>
-                                  <span>
+                                  <span
+                                    title={`${nextDeadline.label}${nextDeadline.timeZone ? ` · ${getCutoffLabel(nextDeadline)}` : ''}`}
+                                  >
                                     {nextDeadline.label}
                                     {nextDeadline.timeZone &&
                                       ` · ${getCutoffLabel(nextDeadline)}`}
                                   </span>
                                 </>
                               ) : (
-                                <span>To be announced</span>
+                                <>
+                                  <span class="no-deadline">None</span>
+                                  <span
+                                    title={
+                                      venue.status === 'Registration' ||
+                                      venue.status === 'In session'
+                                        ? 'Submissions closed'
+                                        : 'To be announced'
+                                    }
+                                  >
+                                    {venue.status === 'Registration' ||
+                                    venue.status === 'In session'
+                                      ? 'Submissions closed'
+                                      : 'To be announced'}
+                                  </span>
+                                </>
                               )}
                             </dd>
                           </div>
@@ -1600,17 +1616,17 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
 
   .conference-card-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 0.55rem;
-    min-height: 88px;
+    min-height: 48px;
   }
 
   .conference-brand {
     min-width: 0;
     display: grid;
     grid-template-columns: 56px minmax(0, 1fr);
-    align-items: start;
+    align-items: center;
     gap: 0.65rem;
   }
 
@@ -1641,18 +1657,15 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
     flex-wrap: wrap;
     align-items: center;
     gap: 0.4rem;
-    margin-bottom: 0.15rem;
+    margin-bottom: 0;
   }
 
   .title-line h4 {
     color: var(--accent-blue);
     font-size: 1rem;
-  }
-
-  .conference-card-header p {
-    color: var(--text-muted);
-    font-size: 0.72rem;
-    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .rank-badge,
@@ -1816,19 +1829,36 @@ const resubmissionRows = uniqueSources.map((sourceItem) => {
     line-height: 1.35;
   }
 
+  .conference-facts dd time,
+  .conference-facts dd .no-deadline {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .conference-facts dd .no-deadline {
+    color: var(--text-muted);
+  }
+
   .conference-facts dd span {
     display: block;
     margin-top: 0.05rem;
     color: var(--text-subtle);
     font-size: 0.67rem;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .conference-tags {
     display: flex;
     flex-wrap: wrap;
+    align-content: flex-start;
     gap: 0.3rem;
     margin-bottom: 0.8rem;
+    min-height: 48px;
   }
 
   .conference-tags span {
