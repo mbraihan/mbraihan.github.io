@@ -26,6 +26,8 @@ const publicationsCollection = defineCollection({
     venueShort: z.string().optional(),
     year: z.number(),
     type: z.enum(['Journal', 'Conference', 'Workshop', 'Book Chapter', 'Poster']).default('Conference'),
+    award: z.string().optional(),
+    awardBadgeUrl: z.string().optional(),
     tags: z.array(z.string()).default([]),
     selected: z.boolean().default(false),
     image: z.string().optional(),

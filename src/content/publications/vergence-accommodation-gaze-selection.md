@@ -11,6 +11,7 @@ venue: "IEEE Transactions on Visualization and Computer Graphics (IEEE ISMAR 202
 venueShort: "IEEE TVCG'26 (IEEE ISMAR)"
 year: 2026
 type: "Journal"
+award: "Best Paper Honorable Mention"
 tags: ["HCI", "Extended Reality", "Eye Gaze", "3D Interaction", "Vergence-Accommodation Conflict", "Fitts' Law"]
 selected: true
 acceptanceNewsId: "ismar-2026-tvcg"

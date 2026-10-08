@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { FileText, Plane, GraduationCap, Trophy, Users, ChevronDown, ChevronUp, BookOpen } from 'lucide-astro';
+import { FileText, Plane, GraduationCap, Trophy, Users, ChevronDown, ChevronUp, BookOpen, Award } from 'lucide-astro';
 import { compareNewsDatesNewestFirst, formatNewsDate } from '../utils/newsDate';
 
 const allNews = await getCollection('news');
@@ -27,6 +27,7 @@ const iconMap = {
   'graduation-cap': GraduationCap,
   trophy: Trophy,
   users: Users,
+  award: Award,
 };
 ---
 
@@ -319,6 +320,19 @@ const iconMap = {
 
   .details-box :global(p:last-child) {
     margin-bottom: 0;
+  }
+
+  .details-box :global(a) {
+    color: var(--accent-blue);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 600;
+    transition: color var(--transition-fast);
+  }
+
+  .details-box :global(a:hover) {
+    color: var(--accent-blue-hover);
+    text-decoration-thickness: 2px;
   }
 
   .news-pub-link-wrapper {

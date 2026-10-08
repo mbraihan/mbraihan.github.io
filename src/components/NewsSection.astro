@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { FileText, Plane, GraduationCap, Trophy, Users, ArrowRight, BookOpen } from 'lucide-astro';
+import { FileText, Plane, GraduationCap, Trophy, Users, ArrowRight, BookOpen, Award } from 'lucide-astro';
 import { compareNewsDatesNewestFirst, formatNewsDate } from '../utils/newsDate';
 
 const allNews = await getCollection('news');
@@ -22,6 +22,7 @@ const iconMap = {
   'graduation-cap': GraduationCap,
   trophy: Trophy,
   users: Users,
+  award: Award,
 };
 ---
 
