@@ -18,7 +18,7 @@
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lucide-astro": "^0.556.0",
-    "maplibre-gl": "^5.24.0"
+    "maplibre-gl": "^6.4.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
